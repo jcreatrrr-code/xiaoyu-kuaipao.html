@@ -1,0 +1,1249 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>小鱼快跑</title>
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Yusei+Magic&family=Comfortaa:wght@600;700&family=Baloo+Bhaijaan+2:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sea:#0b6fb0;--ink:#0d3b5c;--muted:#56788f;--card:#fffdf4;
+  --sun:#ffd23f;--sun-d:#d99400;--coral:#ff7a6b;--coral-d:#cf4a40;--mint:#4fe0b5;--mint-d:#1c9c7a;--sky:#7fd8ff;--sky-d:#2a8fc4;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--sea:#06304f;--card:#fff8e2}}
+:root[data-theme="dark"]{--sea:#06304f;--card:#fff8e2}
+*,*::before,*::after{box-sizing:border-box}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{height:100%;margin:0;background:var(--sea);color:var(--ink);overflow:hidden;
+  font-family:"ZCOOL KuaiLe","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+[hidden]{display:none!important}
+html[lang=ja] body{font-family:"Yusei Magic","Hiragino Maru Gothic ProN","ZCOOL KuaiLe","PingFang SC",system-ui,sans-serif}
+html[lang=ru] body{font-family:"Comfortaa","ZCOOL KuaiLe",system-ui,sans-serif;font-weight:600}
+html[lang=ar] body{font-family:"Baloo Bhaijaan 2","Geeza Pro","Noto Sans Arabic","ZCOOL KuaiLe",system-ui,sans-serif}
+html[lang=ar] *{letter-spacing:0!important}
+h1.long{font-size:clamp(34px,11vw,66px);gap:.22em;flex-wrap:wrap;justify-content:center;letter-spacing:0}
+#app{position:relative;height:100%;overflow:hidden}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+
+/* HUD */
+#hud{position:absolute;left:0;right:0;top:0;padding:8px 10px 6px;pointer-events:none;display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px}
+#stars{display:flex;gap:3px}
+.st{width:26px;height:26px;background:rgba(255,255,255,.3);clip-path:polygon(50% 2%,62% 36%,98% 38%,70% 60%,80% 96%,50% 75%,20% 96%,30% 60%,2% 38%,38% 36%)}
+.st.f{background:var(--sun)}.st.h{background:linear-gradient(90deg,var(--sun) 50%,rgba(255,255,255,.3) 50%)}
+.chip{background:rgba(6,40,70,.5);color:#fff;border-radius:99px;padding:4px 11px;font-size:16px;line-height:1.3;white-space:nowrap}
+.chip.gold{background:var(--sun);color:#6a4500}.chip.hot{background:var(--coral);color:#fff}
+.sp{flex:1}.brk{flex-basis:100%;height:0}
+@media (orientation:landscape){.brk{display:none}#stars{order:1}.chip{order:2}.sp{order:3}#bPause{order:4}#prog{order:5}}
+#bPause{pointer-events:auto;width:44px;height:44px;border-radius:50%;border:0;background:#fff;color:var(--sky-d);font-size:16px;font-weight:900;box-shadow:0 4px 0 rgba(6,40,70,.35)}
+#bPause:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(6,40,70,.35)}
+#prog{flex-basis:100%;height:6px;border-radius:9px;background:rgba(255,255,255,.25);overflow:hidden}
+#prog i{display:block;height:100%;width:0;background:var(--mint);border-radius:9px}
+#toast{position:absolute;left:50%;top:110px;transform:translate(-50%,-8px);max-width:88%;background:var(--card);color:var(--ink);padding:9px 18px;border-radius:20px;font-size:19px;text-align:center;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;box-shadow:0 5px 0 rgba(6,40,70,.3)}
+#toast{z-index:5}
+.bask{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:min(100%,440px)}
+.bask span{background:var(--card);border-radius:99px;padding:4px 11px 4px 6px;font-size:16px;display:flex;align-items:center;gap:6px}
+.bask i,.need i{display:inline-block;width:16px;height:16px;border-radius:50%;vertical-align:-2px}
+.need{font-size:14px;color:var(--muted);grid-column:2}.need .no{color:var(--coral-d)}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#toast.warn{background:var(--coral);color:#fff}
+
+/* Screens */
+.scr{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:safe center;gap:14px;padding:18px;overflow-y:auto}
+.scr.on{display:flex}
+.scr.dim{background:rgba(6,40,70,.6)}
+h1{margin:0;font-weight:400;font-size:clamp(46px,15vw,84px);line-height:1;color:#fff;letter-spacing:.04em;text-shadow:0 5px 0 var(--sky-d),0 10px 0 rgba(6,40,70,.35);display:flex}
+h1 span{display:inline-block;animation:bob 1.8s ease-in-out infinite}
+h1 span:nth-child(2){animation-delay:.15s;color:var(--sun);text-shadow:0 5px 0 var(--sun-d),0 10px 0 rgba(6,40,70,.35)}
+h1 span:nth-child(3){animation-delay:.3s}h1 span:nth-child(4){animation-delay:.45s}
+@keyframes bob{50%{transform:translateY(-9px) rotate(-3deg)}}
+.tag{margin:0;color:#fff;font-size:18px;opacity:.92}
+h2{margin:0;font-weight:400;font-size:30px;color:#fff;text-shadow:0 3px 0 rgba(6,40,70,.4);text-align:center}
+.col{display:flex;flex-direction:column;gap:14px;width:min(100%,340px)}
+.rowb{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.btn{font:inherit;font-size:22px;border:0;border-radius:22px;padding:13px 20px;color:var(--ink);background:#fff;box-shadow:0 6px 0 #b9c9d6,0 12px 18px rgba(6,40,70,.25);text-align:center;cursor:pointer;min-height:52px}
+.btn small{display:block;font-size:14px;opacity:.8;margin-top:3px}
+.btn:active{transform:translateY(5px);box-shadow:0 1px 0 #b9c9d6}
+.btn.mint{background:var(--mint);box-shadow:0 6px 0 var(--mint-d),0 12px 18px rgba(6,40,70,.25)}
+.btn.coral{background:var(--coral);color:#fff;box-shadow:0 6px 0 var(--coral-d),0 12px 18px rgba(6,40,70,.25)}
+.btn.sun{background:var(--sun);box-shadow:0 6px 0 var(--sun-d),0 12px 18px rgba(6,40,70,.25)}
+.btn.sm{font-size:17px;padding:9px 16px;min-height:44px;border-radius:18px}
+.btn:focus-visible,#bPause:focus-visible{outline:4px solid var(--sun);outline-offset:3px}
+.card{background:var(--card);border-radius:26px;padding:18px 20px;width:min(100%,400px);box-shadow:0 8px 0 rgba(6,40,70,.3)}
+.card h3{margin:0 0 8px;font-weight:400;font-size:26px;text-align:center}
+.card p,.card li{font-size:17px;line-height:1.55;margin:0}
+.card ul{margin:0;padding:0;list-style:none;display:grid;gap:7px}
+.card li b{font-weight:400;color:var(--coral-d)}
+.stat{display:flex;justify-content:space-between;font-size:18px;padding:5px 0;border-bottom:2px dashed #e6dcc0}
+.stat:last-child{border:0}
+.big{display:flex;justify-content:center;gap:6px;margin:4px 0 10px}
+.big .st{width:46px;height:46px;background:#e3dcc6}
+.big .st.f{background:var(--sun);animation:pop .5s backwards}
+.big .st.x{background:none;clip-path:none;border:3px dashed #c9bfa0;border-radius:50%;width:40px;height:40px;margin:3px;display:grid;place-items:center;color:#b3a780;font-size:20px}
+.big .st:nth-child(2){animation-delay:.2s}.big .st:nth-child(3){animation-delay:.4s}.big .st:nth-child(4){animation-delay:.6s}
+@keyframes pop{0%{transform:scale(0) rotate(-90deg)}70%{transform:scale(1.25)}}
+.cond{font-size:15px;color:var(--muted);display:grid;gap:3px;margin-top:8px}
+.cond .ok{color:var(--mint-d)}
+#lvGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;width:min(100%,560px)}
+.lv{font:inherit;border:0;border-radius:22px;padding:12px 10px;background:var(--card);color:var(--ink);box-shadow:0 6px 0 rgba(6,40,70,.3);text-align:center;cursor:pointer}
+.lv:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(6,40,70,.3)}
+.lv b{display:block;font-weight:400;font-size:21px}
+.lv em{display:block;font-style:normal;font-size:13px;color:var(--muted);margin:3px 0}
+.lv .mini{display:flex;justify-content:center;gap:2px}
+.lv .mini .st{width:18px;height:18px;background:#e3dcc6}.lv .mini .st.f{background:var(--sun)}
+.lv[disabled]{opacity:.55;filter:grayscale(.6)}
+#sStory{justify-content:flex-end;padding-bottom:9vh;cursor:pointer}
+#sStory .card{position:relative;min-height:150px;padding-top:26px}
+#stWho{position:absolute;top:-16px;inset-inline-start:18px;background:var(--sun);color:#6a4500;border-radius:99px;padding:4px 16px;font-size:18px;box-shadow:0 3px 0 var(--sun-d)}
+#stText{font-size:20px;line-height:1.6}
+#sStory .hint{color:#fff;opacity:.8;font-size:15px;margin:0}
+@media (orientation:landscape){#sStory{padding-bottom:8px;gap:6px}#sStory .card{min-height:0;width:min(100%,640px);padding-bottom:10px}#sStory .hint{display:none}#stSkip{position:absolute;top:10px;inset-inline-end:10px}#stText{font-size:18px;margin:0}}
+#stSkip{position:relative;overflow:hidden}#stSkip::after{content:"";position:absolute;left:0;bottom:0;height:5px;width:0;background:var(--coral)}#stSkip.hold::after{width:100%;transition:width .65s linear}
+#prog2{height:10px;border-radius:9px;background:#e6dcc0;overflow:hidden;margin-top:6px}#prog2 i{display:block;height:100%;background:var(--mint);border-radius:9px}
+.it.lock{opacity:.55}.it.done{opacity:.6}
+.grid10{display:grid;gap:10px;width:min(100%,440px)}
+.scr .float{position:sticky;bottom:4px;z-index:4;flex-shrink:0;box-shadow:0 6px 0 #b9c9d6,0 10px 26px rgba(6,40,70,.55)}
+.btn.locked{opacity:.6;filter:grayscale(.5)}
+#shopList{display:grid;gap:10px;width:min(100%,440px)}
+.it{display:grid;grid-template-columns:44px 1fr auto;gap:4px 10px;align-items:center;background:var(--card);border-radius:20px;padding:10px 12px;box-shadow:0 5px 0 rgba(6,40,70,.3)}
+.it .ic{font-size:32px;text-align:center;grid-row:span 2}.it .ic i{display:block;width:34px;height:34px;border-radius:50%;margin:auto;border:3px solid #fff;box-shadow:0 0 0 2px rgba(6,40,70,.2)}
+.it b{font-weight:400;font-size:19px}.it b small{font-size:14px;color:var(--mint-d);margin-inline-start:6px;display:inline-block}
+.it em{font-style:normal;font-size:14px;color:var(--muted);grid-column:2}
+.it .act{grid-column:3;grid-row:1/span 2;display:grid;gap:6px;justify-items:stretch}
+.it .btn{font-size:16px;padding:7px 12px;min-height:44px;border-radius:16px;box-shadow:0 4px 0 var(--sun-d)}
+.it .btn.off{background:#e3dcc6;box-shadow:0 4px 0 #b9b092}.it .btn.mint{box-shadow:0 4px 0 var(--mint-d)}
+.it .btn[disabled]{opacity:.5}
+.wal{background:var(--sun);color:#6a4500;border-radius:99px;padding:6px 16px;font-size:20px;box-shadow:0 4px 0 var(--sun-d)}
+.sub{margin:6px 0 0;color:#fff;font-size:18px;width:min(100%,440px)}
+@media (prefers-reduced-motion:reduce){h1 span,.big .st.f{animation:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="c"></canvas>
+
+  <div id="hud" hidden>
+    <div id="stars"></div>
+    <span class="sp"></span>
+    <button id="bPause" aria-label="暂停">❚❚</button>
+    <span class="brk"></span>
+    <span class="chip" id="cGoal"></span>
+    <span class="chip" id="cDist"></span>
+    <span class="chip gold" id="cShield" hidden>结界已开启</span>
+    <span class="chip" id="cFish" hidden></span>
+    <span class="chip" id="cBuff" hidden></span>
+    <span class="chip" id="cWhale" hidden>🐋 鲸鱼结界</span>
+    <span class="chip hot" id="cCombo" hidden></span>
+    <div id="prog"><i></i></div>
+  </div>
+  <div id="toast" role="status"></div>
+
+  <section class="scr on" id="sMenu">
+    <h1 id="title"><span>小</span><span>鱼</span><span>快</span><span>跑</span></h1>
+    <p class="tag">按住屏幕向上游，松开慢慢下沉</p>
+    <div class="col">
+      <button class="btn mint" data-mode="simple">普通模式<small>轻松出发，快乐学游泳！</small></button>
+      <button class="btn coral" data-mode="hard">困难模式<small id="hardSub">挑战极限，成为海底高手！</small></button>
+      <button class="btn sun" data-mode="endless">无限模式<small id="bestTxt">不停向前，刷新你的纪录！</small></button>
+    </div>
+    <div class="rowb">
+      <button class="btn sm sun" id="bShop">商店 · 💎 <span id="menuWal">0</span></button>
+      <button class="btn sm mint" id="bKit">海边小馆</button>
+      <button class="btn sm" id="bStory">剧情回顾</button>
+      <button class="btn sm" id="bHelp">玩法说明</button>
+      <button class="btn sm" id="bSet">设置</button>
+    </div>
+  </section>
+
+  <section class="scr" id="sLevels">
+    <h2 id="lvTitle">选择关卡</h2>
+    <div id="lvGrid"></div>
+    <button class="btn sm float" data-go="sMenu">返回主菜单</button>
+  </section>
+
+  <section class="scr dim" id="sShop">
+    <h2>墨墨的杂货铺</h2>
+    <span class="wal">我的珍珠 💎 <span id="wallet">0</span></span>
+    <p class="sub">保护道具（每局用掉一个）</p>
+    <div id="shopList"></div>
+    <button class="btn sm float" data-go="sMenu">返回主菜单</button>
+  </section>
+
+  <section class="scr dim" id="sKit">
+    <h2 id="kitTitle">海边小馆</h2>
+    <div class="card" id="restCard" style="padding:12px 18px"></div>
+    <p class="sub">今日订单（上菜得双倍珍珠和声望）</p>
+    <div class="grid10" id="ordList"></div>
+    <p class="sub" style="text-align:center;margin:0">我的鱼篓</p>
+    <div class="bask" id="bask"></div>
+    <div id="kitList" style="display:grid;gap:10px;width:min(100%,440px)"></div>
+    <button class="btn sm float" data-go="sMenu">返回主菜单</button>
+  </section>
+
+  <section class="scr dim" id="sHelp">
+    <div class="card">
+      <h3>小鱼的海底守则</h3>
+      <ul id="helpList">
+        <li>按住屏幕向上游，松开就慢慢下沉。</li>
+        <li><b>章鱼</b>和<b>水母</b>碰一下，掉一颗星；章鱼触手发光时最危险。</li>
+        <li><b>礁石</b>和<b>冰块</b>撞一下，掉一颗星。</li>
+        <li><b>鲨鱼</b>会一口吃掉小鱼！看到红色警告，赶快游出红色水带。</li>
+        <li><b>渔网</b>罩住小鱼时别害怕，快速连点屏幕就能挣脱。</li>
+        <li><b>金鱼结界</b>能挡一次危险，但挡不住大鲨鱼。</li>
+        <li><b>黄色墙</b>不能乱撞，没有结界就要回到检查点。</li>
+        <li>关卡里游过带圆圈的鱼，<b>用手指点它</b>就能捕获；大鱼要多点几下。捕到的鱼可以去<b>海边小馆</b>做菜换珍珠。</li>
+        <li>每局收集的珍珠会存进钱包，可以去<b>商店</b>买鲸鱼结界、磁铁和新皮肤。</li>
+        <li>过关得星星，再次挑战还能拿隐藏的第 4 颗星！</li>
+      </ul>
+    </div>
+    <button class="btn sm" data-go="sMenu">知道啦</button>
+  </section>
+
+  <section class="scr dim" id="sSet">
+    <h2>设置</h2>
+    <div class="card">
+      <h3>语言</h3>
+      <div class="rowb" id="langRow"><button class="btn sm" data-lang="zh">中文</button><button class="btn sm" data-lang="en">English</button><button class="btn sm" data-lang="ja">日本語</button><button class="btn sm" data-lang="ru">Русский</button><button class="btn sm" data-lang="ar">العربية</button></div>
+      <h3 style="margin-top:16px">声音</h3>
+      <div class="rowb"><button class="btn sm" id="bMute">音效：开</button><button class="btn sm" id="bMusic">音乐：开</button></div>
+      <h3 style="margin-top:16px">剧情</h3>
+      <div class="rowb"><button class="btn sm" id="bAlways">进关剧情：只播一次</button></div>
+    </div>
+    <button class="btn sm float" data-go="sMenu">返回主菜单</button>
+  </section>
+
+  <section class="scr dim" id="sGal">
+    <h2>剧情回顾</h2>
+    <div class="grid10" id="galList"></div>
+    <button class="btn sm float" data-go="sMenu">返回主菜单</button>
+  </section>
+
+  <section class="scr" id="sStory">
+    <div class="card"><span id="stWho"></span><p id="stText"></p></div>
+    <p class="hint">点击屏幕继续</p>
+    <button class="btn sm" id="stSkip">长按跳过</button>
+  </section>
+
+  <section class="scr dim" id="sPause">
+    <h2>游戏暂停</h2>
+    <div class="col">
+      <button class="btn mint" id="bResume">继续游戏</button>
+      <button class="btn" id="bRestart">重新开始</button>
+      <button class="btn" id="bQuit">返回主菜单</button>
+    </div>
+  </section>
+
+  <section class="scr dim" id="sEnd">
+    <h2 id="endTitle"></h2>
+    <div class="card" id="endCard"></div>
+    <div class="rowb" id="endBtns"></div>
+  </section>
+</div>
+
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id);
+const cv=$('c'),ctx=cv.getContext('2d'),hud=$('hud');
+const clamp=(v,a,b)=>v<a?a:v>b?b:v,lerp=(a,b,t)=>a+(b-a)*t,TAU=Math.PI*2;
+let FONT='"ZCOOL KuaiLe","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+const hash=n=>{const x=Math.sin(n*127.1+3.7)*43758.5453;return x-Math.floor(x)};
+
+/* ---------- viewport ---------- */
+let W=390,H=780,S=1,U=1,VW=520,VT=720,PH=720,yMin=96,yMax=640,fishSX=120;
+function resize(){
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  W=cv.clientWidth||window.innerWidth||390;H=cv.clientHeight||window.innerHeight||780;
+  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+  S=Math.min(H/620,W/520);U=1/S;VW=W/S;VT=H/S;PH=Math.min(VT,1000);
+  yMin=((+hud.offsetHeight||0)+6)/S;yMax=PH-80;fishSX=Math.min(VW*.24,250);
+  ctx.setTransform(dpr*S,0,0,dpr*S,0,0);
+  $('toast').style.top=((+hud.offsetHeight||60)+14)+'px';
+}
+const fy=f=>yMin+f*(yMax-yMin);
+
+/* ---------- save ---------- */
+const KEY='xiaoyu_kuaipao_v1';
+let SAVE={simple:{st:[0,0,0,0,0],s4:[0,0,0,0,0]},hard:{st:[0,0,0,0,0],s4:[0,0,0,0,0]},end:{score:0,dist:0,combo:0},mute:0};
+try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.simple&&s.hard&&s.end)SAVE=s}catch(e){}
+SAVE=Object.assign({wallet:0,inv:{},use:{},skins:[0],skin:0},SAVE);
+const ITEMS=[
+ {id:'gold',ic:'🐠',n:'金鱼结界',d:'出发就带着结界，挡一次普通危险',p:30},
+ {id:'whale',ic:'🐋',n:'鲸鱼结界',d:'连大鲨鱼也能挡住一次！',p:80},
+ {id:'life',ic:'⭐',n:'生命星',d:'出发时多带一颗星',p:50},
+ {id:'revive',ic:'🌟',n:'复活海星',d:'失败时复活一次，恢复 2 颗星',p:120},
+ {id:'scissors',ic:'✂️',n:'渔网剪刀',d:'第一次被网住时自动剪开',p:35},
+ {id:'radar',ic:'📡',n:'鲨鱼雷达',d:'鲨鱼预警提前 1 秒',p:35},
+ {id:'magnet',ic:'🧲',n:'珍珠磁铁',d:'整局自动吸来附近的珍珠',p:40,h:'帮手道具（每局用掉一个）'},
+ {id:'double',ic:'💰',n:'双倍珍珠袋',d:'本局存入钱包的珍珠翻倍',p:50},
+ {id:'netbag',ic:'🥅',n:'捕鱼网兜',d:'本局所有鱼点一下就能捕获',p:45},
+ {id:'bait',ic:'🪱',n:'幸运鱼饵',d:'本局游来的鱼多一倍',p:40},
+ {id:'slow',ic:'🐢',n:'慢慢游海藻',d:'本局游得慢一点，更好躲',p:40}];
+const SKINS=[{n:'橙色小鱼',p:0,c:['#ffe08a','#ffa01f','#ff7f1f']},{n:'蓝色小鱼',p:120,c:['#d2f4ff','#56b8f0','#2f8fd0']},
+ {n:'粉色小鱼',p:120,c:['#ffe6f1','#ff8fc0','#f0589a']},{n:'翡翠小鱼',p:200,c:['#dcffee','#4fe0b5','#1c9c7a']},
+ {n:'紫罗兰小鱼',p:160,c:['#efe0ff','#b57af2','#7d45c9']},{n:'墨墨小鱼',p:160,c:['#c8d0dc','#56627a','#2c3446']},{n:'黄金小鱼',p:400,c:['#fffbe0','#ffcf2e','#d99400']}];
+SAVE=Object.assign({fish:{},dishes:{}},SAVE);
+const FISH={sard:{n:'沙丁鱼',c:['#eef7ff','#9cc4e8','#5f8fc0'],s:.72,hp:1,v:30},bream:{n:'鲷鱼',c:['#ffdcd4','#ff7a6b','#d94f45'],s:.88,hp:1,v:45},
+ salmon:{n:'三文鱼',c:['#ffe6d4','#ff9a6a','#e0683a'],s:1,hp:2,v:60},puffer:{n:'河豚',c:['#fff8c8','#f2d24a','#c9a21a'],s:1.05,hp:2,v:35},tuna:{n:'金枪鱼',c:['#d4e2ff','#4a6fc0','#2a4690'],s:1.3,hp:3,v:85},
+ yellow:{n:'小黄鱼',c:['#fffbd0','#ffe14a','#e0b400'],s:.7,hp:1,v:35},saury:{n:'秋刀鱼',c:['#f0f8ff','#8fb4d8','#4a6f9a'],s:.68,hp:1,v:75,lx:1.6},
+ mack:{n:'鲭鱼',c:['#e0fff4','#3fb89a','#1c7f6a'],s:.92,hp:2,v:60,stripe:1},cod:{n:'鳕鱼',c:['#ffffff','#c8d4dc','#8fa0ac'],s:1.05,hp:2,v:40},
+ eel:{n:'鳗鱼',c:['#e8dcc8','#9a7650','#5a4028'],s:.78,hp:2,v:55,lx:1.9},angler:{n:'鮟鱇鱼',c:['#d8c8f0','#7a5aa8','#4a3478'],s:1.15,hp:3,v:30,lamp:1},
+ sword:{n:'旗鱼',c:['#d8ecff','#3f7fd0','#1f4f9a'],s:1.2,hp:3,v:95,bill:1,lx:1.25},gold:{n:'黄金鱼',c:['#fffbe0','#ffcf2e','#d99400'],s:.95,hp:3,v:80,glow:1,stripe:1}};
+const DISH=[
+ {id:'d1',ic:'🍢',n:'烤沙丁鱼',need:{sard:2},p:20},{id:'d2',ic:'🍜',n:'鱼丸汤',need:{sard:1,bream:1},p:25},
+ {id:'d3',ic:'🍽️',n:'清蒸鲷鱼',need:{bream:2},p:30},{id:'d4',ic:'🍳',n:'香煎三文鱼',need:{salmon:1,sard:1},p:35},
+ {id:'d5',ic:'🍣',n:'三文鱼寿司',need:{salmon:2},p:50},{id:'d6',ic:'🍲',n:'河豚火锅',need:{puffer:2},p:60},
+ {id:'d7',ic:'🍱',n:'金枪鱼刺身',need:{tuna:1},p:50},{id:'d8',ic:'🍙',n:'金枪鱼饭团',need:{tuna:1,bream:1},p:65},
+ {id:'d9',ic:'🥘',n:'海鲜大拼盘',need:{sard:1,bream:1,salmon:1,puffer:1,tuna:1},p:220},
+ {id:'d10',ic:'🥫',n:'沙丁鱼罐头',need:{sard:3},p:32},{id:'d11',ic:'🍕',n:'沙丁鱼披萨',need:{sard:2,bream:1},p:38},
+ {id:'d12',ic:'🍛',n:'红烧鲷鱼',need:{bream:3},p:48},{id:'d13',ic:'🍚',n:'鲷鱼茶泡饭',need:{bream:1,salmon:1},p:42},
+ {id:'d14',ic:'🥗',n:'三文鱼沙拉',need:{salmon:1},p:25},{id:'d15',ic:'🍔',n:'三文鱼汉堡',need:{salmon:1,bream:1},p:42},
+ {id:'d16',ic:'🍥',n:'三文鱼咖喱饭',need:{salmon:2,sard:1},p:62},{id:'d17',ic:'🍤',n:'炸河豚块',need:{puffer:1},p:30},
+ {id:'d18',ic:'🥟',n:'河豚饺子',need:{puffer:1,sard:2},p:52},{id:'d19',ic:'🥣',n:'海鲜粥',need:{puffer:1,sard:1},p:42},
+ {id:'d20',ic:'🥪',n:'金枪鱼三明治',need:{tuna:1,sard:1},p:62},{id:'d21',ic:'🌮',n:'金枪鱼卷饼',need:{tuna:1,salmon:1},p:78},
+ {id:'d22',ic:'🍝',n:'金枪鱼意面',need:{tuna:2},p:105},{id:'d23',ic:'🥙',n:'三鲜鱼糕',need:{bream:1,salmon:1,puffer:1},p:75},
+ {id:'d24',ic:'👑',n:'深海皇家宴',need:{sard:2,bream:2,salmon:2,puffer:2,tuna:2},p:500},
+ {id:'d25',ic:'🍘',n:'香酥小黄鱼',need:{yellow:2},p:24},{id:'d26',ic:'🍡',n:'三色鱼丸串',need:{yellow:1,saury:1,sard:1},p:40},
+ {id:'d27',ic:'🔥',n:'盐烤秋刀鱼',need:{saury:2},p:30},{id:'d28',ic:'🫕',n:'味噌鲭鱼',need:{mack:2},p:50},
+ {id:'d29',ic:'🍟',n:'炸鳕鱼薯条',need:{cod:2},p:56},{id:'d30',ic:'🌯',n:'鳕鱼卷',need:{cod:1,mack:1},p:55},
+ {id:'d31',ic:'🧊',n:'冰海双拼',need:{cod:1,salmon:1},p:55},{id:'d32',ic:'🍘',n:'蒲烧鳗鱼饭',need:{eel:2},p:60},
+ {id:'d33',ic:'🍜',n:'鳗鱼拉面',need:{eel:1,yellow:1},p:45},{id:'d34',ic:'🏮',n:'鮟鱇鱼锅',need:{angler:1},p:55},
+ {id:'d35',ic:'🥩',n:'香煎旗鱼排',need:{sword:1},p:60},{id:'d36',ic:'🏆',n:'黄金鱼汤',need:{gold:1},p:90}];
+const skin=()=>{const c=(SKINS[SAVE.skin]||SKINS[0]).c;return{c0:c[0],c1:c[1],c2:c[2]}};
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(SAVE))}catch(e){}};
+
+/* ---------- audio ---------- */
+let AC=null;
+function snd(f,d,type,v,to){if(SAVE.mute)return;try{
+  AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();
+  const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime;o.type=type||'sine';o.frequency.setValueAtTime(f,t);
+  if(to)o.frequency.exponentialRampToValueAtTime(to,t+d);g.gain.setValueAtTime(v||.1,t);g.gain.exponentialRampToValueAtTime(.001,t+d);
+  o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d)}catch(e){}}
+const SFX={
+  pearl:c=>snd(700+Math.min(c,12)*55,.1,'triangle',.1),hit:()=>snd(220,.25,'sawtooth',.11,80),
+  shield:()=>snd(520,.18,'triangle',.12,1040),pop:()=>snd(900,.2,'square',.06,300),
+  alarm:()=>{snd(440,.16,'square',.07);setTimeout(()=>snd(330,.16,'square',.07),190)},
+  win:()=>[523,659,784,1047].forEach((f,i)=>setTimeout(()=>snd(f,.22,'triangle',.12),i*130)),
+  lose:()=>snd(300,.6,'sawtooth',.09,60),tap:()=>snd(520,.05,'sine',.06),free:()=>snd(400,.3,'triangle',.12,1200),
+  save:()=>snd(600,.25,'sine',.1,900)};
+
+/* ---------- levels ---------- */
+const TH=[
+ {n:'珊瑚湾',top:'#4fd6ea',bot:'#0d78b8',far:'#2fa9d2',mid:'#1a8cc0',sand:'#f5dca4',rock:'#ff8f80',rock2:'#e2635c',weed:'#35c492'},
+ {n:'沉船秘境',top:'#37b6c8',bot:'#0a4f78',far:'#1f84a2',mid:'#136383',sand:'#d9c391',rock:'#b07a44',rock2:'#7d5229',weed:'#3c9a6a'},
+ {n:'深海',top:'#1e56a6',bot:'#0a1444',far:'#183d82',mid:'#112a62',sand:'#34437e',rock:'#666cc0',rock2:'#3f4590',weed:'#4fd6c9'},
+ {n:'冰海',top:'#c4f1ff',bot:'#3f8fd0',far:'#a4def6',mid:'#79c4ea',sand:'#eef9ff',rock:'#e2f6ff',rock2:'#9fd2ee',weed:'#8fd9e8'},
+ {n:'黄金海沟',top:'#3cc4c0',bot:'#0c4a6a',far:'#c99a2e',mid:'#a87a1e',sand:'#f0c75a',rock:'#f4bb3a',rock2:'#c98a1a',weed:'#ffe066'}];
+const LV=[
+ {name:'珊瑚湾',fish:['sard','bream','yellow'],len:120,theme:0,pool:{pearls:3,rockB:3,rockT:2,octo:2,shield:1},goal:{k:'pearl',n:[10,16]},extra:[15,24]},
+ {name:'沉船秘境',fish:['sard','bream','salmon','mack','eel'],len:150,theme:1,pool:{pearls:2,gate:3,net:3,rockB:1,octo:1,shield:1},goal:{k:'pearl',n:[15,22]},extra:[20,30]},
+ {name:'深海追逐',fish:['puffer','tuna','angler','eel','saury'],len:180,theme:2,pool:{pearls:2,shark:3,vortex:2,jelly:2,rockB:1,shield:1},goal:{k:'dist'},extra:[20,30]},
+ {name:'冰海之旅',fish:['salmon','cod','saury','tuna','mack'],len:200,theme:3,spd:1.15,pool:{pearls:2,ice:3,net:2,gate:2,jelly:1,shield:1},goal:{k:'pearl',n:[25,34]},extra:[30,42]},
+ {name:'黄金海沟',fish:['gold','sword','puffer','tuna','bream','yellow'],len:220,theme:4,pool:{pearls:2,wall:3,shark:2,octo:2,gate:1,net:1,shield:2},goal:{k:'rescue',n:[3,4]},extra:[25,36]}];
+const goalText=(L,hi)=>L.goal.k==='pearl'?`收集 ${L.goal.n[hi]} 颗珍珠`:L.goal.k==='rescue'?`救出 ${L.goal.n[hi]} 只小伙伴`:`游到 ${L.len} 米，逃离鲨鱼`;
+
+function rng(seed){let a=seed>>>0;const f=()=>{a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+  return(lo,hi)=>lo===undefined?f():lo+f()*(hi-lo)}
+function arc(g,x,f0,f1,n){for(let i=0;i<n;i++){const k=n>1?i/(n-1):0;g.E.push({t:'pearl',x:x+i*50,f:clamp(lerp(f0,f1,k),.05,.95)})}}
+const PAT={
+ pearls(g,x){const a=g.r(.2,.8);arc(g,x-120,a,clamp(a+g.r(-.2,.2),.1,.9),6)},
+ rockB(g,x,d){const h=g.r(.22,.34+.1*d);g.E.push({t:'rock',x,w:g.r(90,130),h,top:0});arc(g,x-100,1-h-.17,1-h-.17,5)},
+ rockT(g,x,d){const h=g.r(.22,.34+.1*d);g.E.push({t:'rock',x,w:g.r(90,130),h,top:1});arc(g,x-100,h+.17,h+.17,5)},
+ gate(g,x,d){const gap=(g.mode==='simple'?.5:.4)-.06*d,c=g.r(.32,.68);g.E.push({t:'rock',x,w:100,h:c-gap/2,top:1},{t:'rock',x,w:100,h:1-c-gap/2,top:0});arc(g,x-100,c,c,5)},
+ octo(g,x){const f=g.r(.2,.8);g.E.push({t:'octo',x,f,ph:g.r(0,3)});const f2=f<.5?f+.38:f-.38;arc(g,x-100,f2,f2,5)},
+ jelly(g,x,d){const n=d>.5?3:2;for(let i=0;i<n;i++)g.E.push({t:'jelly',x:x-70+i*150,f:g.r(.35,.65),amp:g.r(.12,.22),ph:g.r(0,6),sp:g.r(.9,1.4)});arc(g,x-250,.5,.5,3)},
+ net(g,x){const f=g.r(.3,.7);g.E.push({t:'net',x:x+60,f,amp:.1,ph:g.r(0,6)});const f2=f<.5?.88:.12;arc(g,x-100,f2,f2,5)},
+ shark(g,x){g.E.push({t:'sharkT',x});const a=g.r(.3,.7);arc(g,x-100,a,a+g.r(-.15,.15),5)},
+ wall(g,x){const top=g.r()<.5?1:0;g.E.push({t:'wall',x,top,h:.6});if(g.r()<.65){g.E.push({t:'shield',x:x-300,f:top?.4:.6});arc(g,x+70,top?.3:.7,top?.3:.7,4)}const fs=top?.84:.16;arc(g,x-120,fs,fs,5)},
+ vortex(g,x){const top=g.r()<.5?1:0;g.E.push({t:'rock',x,w:110,h:.22,top},{t:'vortex',x,f:top?.3:.7,r:95});const f2=top?.86:.14;arc(g,x-100,f2,f2,5)},
+ ice(g,x,d){const n=d>.5?3:2;for(let i=0;i<n;i++)g.E.push({t:'ice',x:x-60+i*150,ph:g.r(0,1.3),sp:g.r(.09,.16)*(g.r()<.5?1:-1)});arc(g,x-260,.5,.5,3)},
+ shield(g,x){const f=g.r(.25,.75);g.E.push({t:'shield',x,f});arc(g,x-170,f,f,3)}};
+function genSlot(g){
+  const x=g.x,d=g.diff(x);let name='pearls';
+  if(g.i>=2){const ents=Object.entries(g.pool(x));let tot=0;
+    for(const[k,w]of ents)if(k!==g.last||k==='pearls')tot+=w;let q=g.r()*tot;
+    for(const[k,w]of ents){if(k===g.last&&k!=='pearls')continue;q-=w;if(q<=0){name=k;break}}
+    if(g.mode==='simple'&&g.r()<.22)name='pearls'}
+  PAT[name](g,x,d);g.last=name;
+  const gap=g.gap(d);
+  if(g.mode!=='simple'&&g.i>=4&&name!=='shark'&&name!=='pearls'&&name!=='jelly'&&name!=='ice'&&g.r()<.2+.25*d)
+    g.E.push({t:'jelly',x:x+gap*.5,f:g.r(.35,.65),amp:.14,ph:g.r(0,6),sp:1.1});
+  if(g.i>=2&&g.r()<.5){const ks=g.fish(x),k=ks[(g.wi=(g.wi||0)+1+0*g.r())%ks.length];const w={t:'wild',k,x:x+gap*.55,f:g.r(.15,.85),ph:g.r(0,6),hp:FISH[k].hp};g.E.push(w);if(g.bait)g.E.push({...w,x:w.x+150,f:clamp(1.05-w.f,.15,.85),ph:w.ph+2})}
+  g.i++;g.x+=gap*g.r(.95,1.1)}
+function buildLevel(li,mode){
+  const L=LV[li],hard=mode==='hard',len=L.len*60,pool={...L.pool};if(!hard&&pool.shield)pool.shield*=2;
+  if(hard){if(li>=1)pool.net=(pool.net||0)+li*.5;if(li>=3)pool.wall=(pool.wall||0)+(li-2)*.5}
+  const g={mode,r:rng(1000+li*77+(hard?13:0)),x:700,i:0,E:[],last:'',pool:()=>pool,fish:()=>L.fish,gap:()=>hard?350-li*8:450,diff:x=>x/len};
+  while(g.x<len-450)genSlot(g);
+  for(let x=2400;x<len-900;x+=2400)g.E.push({t:'cp',x});
+  if(L.goal.k==='rescue'){const n=L.goal.n[hard?1:0]+(hard?2:1);for(let k=0;k<n;k++)g.E.push({t:'friend',x:900+(len-1800)*(k+.5)/n+g.gap()*.5,f:g.r(.3,.7)})}
+  if(!hard&&(SAVE.simple.st[li]>0||SAVE.hard.st[li]>0)){let c=0;g.E=g.E.filter(e=>!((e.t==='net'||e.t==='wall')&&(c++%2===0)))}
+  g.E.push({t:'fin',x:len});return g}
+function buildEndless(){
+  const lv=x=>Math.floor(x/60/200);
+  return{mode:'endless',r:rng((Math.random()*1e9)|0),x:700,i:0,E:[],last:'',
+    pool:x=>{const l=lv(x),p={pearls:3,rockB:2,rockT:2,octo:2,shield:1};if(l>=1)Object.assign(p,{gate:2,jelly:2,net:2});if(l>=2)Object.assign(p,{shark:2,vortex:1});if(l>=3)Object.assign(p,{wall:2,ice:2});return p},
+    fish:x=>{const l=lv(x);return l<1?['sard','bream','yellow']:l<2?['sard','bream','yellow','salmon','mack','saury']:l<3?['salmon','mack','eel','cod','puffer','tuna']:Object.keys(FISH)},
+    gap:d=>430-130*d,diff:x=>clamp(lv(x)/6,0,1)}}
+
+/* ---------- game state ---------- */
+let G=null,state='menu',hold=false,menuT=0,lastArgs=null;
+const TIPS={octo:'章鱼触手发光时，离它远一点！',net:'渔网来了！绕开它游过去',wall:'黄色墙不能撞！跟着箭头走',shield:'吃掉金鱼泡泡，获得结界保护！',
+  jelly:'水母会电人，别碰它！',vortex:'旋涡会把小鱼吸过去！',ice:'小心漂动的冰块！',friend:'碰一碰泡泡，救出小伙伴！',rock:'绕开礁石，跟着珍珠游！',cp:'贝壳旗是检查点'};
+let toastTimer=0;
+function toast(msg,dur,warn){const el=$('toast');el.textContent=msg;el.className='on'+(warn?' warn':'');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.className=''},(dur||2.4)*1000)}
+
+function startGame(mode,li){
+  lastArgs=[mode,li];const endless=mode==='endless',L=endless?null:LV[li],gen=endless?buildEndless():buildLevel(li,mode);
+  const life=mode==='hard'?1:3;
+  G={mode,li,L,gen,E:gen.E,t:0,scroll:0,speed:0,life,maxLife:life,pearls:0,rescued:0,combo:0,comboT:0,maxCombo:0,bonus:0,
+     shield:false,shieldUsed:0,inv:0,slowT:0,trap:null,sharks:[],cp:0,noDmg:true,fish:{y:0,vy:0},parts:[],texts:[],shake:0,flash:0,
+     theme:endless?0:L.theme,lvl:0,whale:false,magnet:false,caught:{},nCaught:0,buff:{},tips:{},dead:0,cause:'',bubT:0,pruneT:0,hudKey:''};
+  G.faded=!endless&&!(SAVE.simple.st[li]>0||SAVE.hard.st[li]>0);
+  const used=[];for(const it of ITEMS)if(SAVE.inv[it.id]>0&&SAVE.use[it.id]!==0){SAVE.inv[it.id]--;used.push(it.n);
+    if(it.id==='gold')G.shield=true;else if(it.id==='whale')G.whale=true;else if(it.id==='magnet')G.magnet=true;else if(it.id==='life'){G.life++;G.maxLife++}else G.buff[it.id]=true}
+  if(G.buff.bait){gen.bait=true;for(const e of G.E.slice())if(e.t==='wild')G.E.push({...e,x:e.x+150,f:clamp(1.05-e.f,.15,.85),ph:e.ph+2})}
+  if(used.length)persist();
+  {const gone=lastUsed.filter(n=>!used.includes(n));lastUsed=used.slice();if(gone.length)setTimeout(()=>{if(G&&state==='play')toast('已用完：'+gone.join('、')+'（可去杂货铺再买）',3)},3600)}
+  hold=false;state='play';
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  hud.hidden=false;$('prog').hidden=endless;resize();G.fish.y=(yMin+yMax)/2;
+  toast((endless?'无限模式：能游多远就游多远！':'目标：'+goalText(L,mode==='hard'?1:0))+(used.length?' · 已带上：'+used.join('、'):''),3.4);
+  if(mode==='simple'&&li===0)setTimeout(()=>{if(G&&state==='play'&&G.t<6)toast('按住屏幕，让小鱼向上游！',3)},3100);
+}
+function burst(x,y,c,n,k){for(let i=0;i<n;i++){const a=Math.random()*TAU,v=60+Math.random()*180;G.parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:.5+Math.random()*.4,c,r:3+Math.random()*4,k})}}
+function ftext(s,x,y,c){s=tl(s);G.texts.push({s,x,y,t:1.1,c:c||'#fff'})}
+function useShield(){const g=G;g.shield=false;g.shieldUsed++;g.inv=1;SFX.pop();burst(fishSX,g.fish.y,'#ffd23f',16);ftext('结界挡住了！',fishSX,g.fish.y-50,'#ffe27a')}
+function useWhale(shark){const g=G;g.whale=false;g.shieldUsed++;g.inv=shark?1.6:1;SFX.pop();SFX.free();burst(fishSX,g.fish.y,'#7fd8ff',20);burst(fishSX,g.fish.y,'#fff',10,1);ftext(shark?'鲸鱼结界挡住了鲨鱼！':'鲸鱼结界挡住了！',fishSX,g.fish.y-60,'#bff0ff')}
+const absorb=()=>G.shield?useShield():useWhale();
+function hurt(n){const g=G;if(g.inv>0)return 0;if(g.shield||g.whale){absorb();return 0}
+  g.life=Math.max(0,g.life-n);g.noDmg=false;g.combo=0;g.inv=1.4;g.shake=.3;SFX.hit();burst(fishSX,g.fish.y,'#ff6b6b',10);
+  ftext(n>=1?'-1 星':'-半星',fishSX,g.fish.y-50,'#ffb3b3');if(g.life<=0)die('hp');return 1}
+function die(c){const g=G;if(state!=='play')return;
+  if(g.buff.revive){g.buff.revive=false;g.life=Math.max(1,Math.min(2,g.maxLife));g.inv=2.5;if(g.trap)g.trap.e.gone=1;g.trap=null;g.sharks=[];g.flash=.5;SFX.win();burst(fishSX,g.fish.y,'#ffd23f',24);toast('复活海星救了小鱼！',2.2);return}
+  g.life=0;g.cause=c;g.dead=1.2;g.trap=null;state='dying';g.shake=.4;SFX.lose()}
+function restoreCP(){const g=G;g.scroll=g.cp;g.noDmg=false;g.combo=0;g.sharks=[];g.inv=2;g.flash=.5;g.fish.y=(yMin+yMax)/2;g.fish.vy=0;SFX.hit();
+  for(const e of g.E){if(e.x<=g.cp+fishSX)continue;e.dx=0;e.trig=0;e.broken=0;e.hold=0;if(e.t==='net'||e.t==='shield')e.gone=0}
+  toast('撞到黄色墙，回到检查点！',2.2,1)}
+function freeNet(){const g=G,tr=g.trap;tr.e.gone=1;g.trap=null;g.inv=1.6;SFX.free();burst(fishSX,g.fish.y,'#ffd23f',22);burst(fishSX,g.fish.y,'#fff',10,1);ftext('挣脱啦！',fishSX,g.fish.y-50,'#ffe27a')}
+function press(){if(state!=='play')return;hold=true;G.started=true;const tr=G.trap;if(tr){tr.p++;SFX.tap();burst(fishSX,G.fish.y,'#fff',3,1);if(tr.p>=tr.need)freeNet()}}
+function tryCatch(ev){const g=G;if(state!=='play'||g.trap)return false;const r=cv.getBoundingClientRect(),ux=(ev.clientX-r.left)/S,uy=(ev.clientY-r.top)/S;
+  let best=null,bd=1e9;for(const e of g.E){if(e.gone||e.t!=='wild')continue;const sx=e.x+(e.dx||0)-g.scroll;if(sx<-40||sx>VW+40)continue;const d=Math.hypot(sx-ux,entY(e,g.t)-uy);if(d<Math.max(52,36*U)+22*FISH[e.k].s&&d<bd){bd=d;best=e}}
+  if(!best)return false;const e=best,sx=e.x+(e.dx||0)-g.scroll,y=entY(e,g.t),f=FISH[e.k];e.hp=g.buff.netbag?0:e.hp-1;burst(sx,y,'#fff',8,1);
+  if(e.hp<=0){e.gone=1;g.caught[e.k]=(g.caught[e.k]||0)+1;g.nCaught++;g.bonus+=30;SFX.save();burst(sx,y,f.c[1],12);ftext('捕获 '+f.n+'！',sx-40,y-40,'#fff')}
+  else{SFX.tap();e.f=clamp(e.f+(e.f>.5?-.18:.18),.12,.88);e.dx+=40;ftext('再点 '+e.hp+' 下！',sx-40,y-40,'#ffe27a')}
+  return true}
+function score(){const g=G;return Math.floor(g.scroll/60)*10+g.pearls*20+g.bonus}
+
+function entY(e,t){switch(e.t){
+  case'pearl':return fy(e.f)+Math.sin(t*3+e.x)*4;
+  case'octo':return fy(e.f)+Math.sin(t*1.2+e.ph)*14;
+  case'jelly':return fy(clamp(e.f+Math.sin(t*e.sp+e.ph)*e.amp,.07,.93));
+  case'net':return fy(e.f+Math.sin(t*.9+e.ph)*e.amp);
+  case'wild':return fy(clamp(e.f+Math.sin(t*1.3+e.ph)*.05,.06,.94));
+  case'ice':return fy(((e.ph+t*e.sp)%1.3+1.3)%1.3-.15);
+  default:return fy(e.f||.5)}}
+const octoR=(e,t)=>{const c=(t+e.ph)%3.4;return c<2.8?38:38+34*Math.sin((c-2.8)/.6*Math.PI)};
+const octoWarn=(e,t)=>{const c=(t+e.ph)%3.4;return c>=2&&c<2.8};
+
+function update(dt){
+  const g=G;g.t+=dt;const t=g.t,F=g.fish;
+  g.inv=Math.max(0,g.inv-dt);g.slowT=Math.max(0,g.slowT-dt);g.shake=Math.max(0,g.shake-dt);g.flash=Math.max(0,g.flash-dt);
+  for(const p of g.parts){p.x+=p.vx*dt;p.y+=p.vy*dt;p.l-=dt;if(p.k)p.vy-=200*dt;else p.vy+=260*dt}
+  if(g.parts.length>160)g.parts.splice(0,g.parts.length-160);
+  g.parts=g.parts.filter(p=>p.l>0);for(const x of g.texts){x.t-=dt;x.y-=40*dt}g.texts=g.texts.filter(x=>x.t>0);
+  if(state==='dying'){g.dead-=dt;F.y=Math.max(yMin+20,F.y-50*dt);if(g.dead<=0)showEnd(false);return}
+  const ph=yMax-yMin,k=clamp(ph/544,.85,1.45),endless=g.mode==='endless';
+  if(endless){
+    const lv=Math.floor(g.scroll/60/200);if(lv!==g.lvl){g.lvl=lv;g.theme=lv%5;g.flash=.4;toast(`难度提升！Lv.${lv+1} · ${TH[g.theme].n}`,2.2)}
+    g.speed=Math.min(290,165+16*g.lvl);while(g.gen.x<g.scroll+VW+1400)genSlot(g.gen);
+    g.pruneT+=dt;if(g.pruneT>2){g.pruneT=0;const lim=g.scroll-500;g.E=g.gen.E=g.E.filter(e=>!e.gone&&e.x+(e.dx||0)>lim)}
+  }else g.speed=(g.mode==='hard'?205:150)*(g.L.spd||1);
+  if(g.buff.slow)g.speed*=.85;
+  if(g.trap){const tr=g.trap;tr.t-=dt;if(g.mode!=='simple')tr.p=Math.max(0,tr.p-1.5*dt);F.vy=0;
+    if(tr.t<=0){if(g.mode==='simple'){tr.e.gone=1;g.trap=null;g.life=Math.max(0,g.life-1);g.noDmg=false;g.combo=0;g.inv=1.8;SFX.hit();
+        if(g.life<=0)die('net');else toast('渔网松开了，下次点快一点！',2)}else die('net')}
+  }else{
+    g.scroll+=g.speed*dt;
+    const up=(g.slowT>0?180:330)*k,dn=(g.mode==='simple'?165:215)*k,tv=hold?-up:g.started?dn:0;
+    F.vy+=(tv-F.vy)*Math.min(1,dt*7);F.y+=F.vy*dt;
+    if(F.y<yMin+22){F.y=yMin+22;F.vy=0}if(F.y>yMax-18){F.y=yMax-18;if(g.inv<=0){hurt(1);F.vy=-300*k;if(!g.tips.floor){g.tips.floor=1;toast('碰到海底也会掉星！',2.2,1)}}else if(F.vy>0)F.vy=0}
+    if(g.combo>0){g.comboT-=dt;if(g.comboT<=0)g.combo=0}
+    g.bubT-=dt;if(g.bubT<=0){g.bubT=.22;g.parts.push({x:fishSX-34,y:F.y,vx:-40,vy:-20,l:.9,c:'#fff',r:2+Math.random()*3,k:1})}
+  }
+  const fx=fishSX;
+  for(const e of g.E){
+    if(e.gone)continue;const sx=e.x+(e.dx||0)-g.scroll;if(sx<-200||sx>VW+320)continue;
+    if(g.mode==='simple'&&TIPS[e.t]&&!g.tips[e.t]&&sx<VW-20&&t>5){g.tips[e.t]=1;toast(TIPS[e.t],2.6)}
+    const y=entY(e,t),dx=sx-fx,dy=y-F.y,dist=Math.hypot(dx,dy);
+    switch(e.t){
+    case'pearl':if(dist<(g.magnet?115:38)&&!g.trap){e.gone=1;g.pearls++;g.combo++;g.comboT=3.5;g.maxCombo=Math.max(g.maxCombo,g.combo);SFX.pearl(g.combo);burst(sx,y,'#fff',4,1);
+        const b=g.combo===5?50:g.combo===10?150:g.combo%20===0?500:0;if(b){g.bonus+=b;ftext(`连击 ${g.combo}！+${b}`,fx+30,F.y-56,'#ffe27a')}}break;
+    case'rock':{const hw=e.w/2-12,ry=e.top?fy(e.h)-12:fy(1-e.h)+12;
+        if(Math.abs(dx)<hw+16&&(e.top?F.y-18<ry:F.y+18>ry))hurt(1)}break;
+    case'octo':if(dist<octoR(e,t)+16)hurt(1);break;
+    case'jelly':if(dist<46&&hurt(1))g.slowT=1.5;break;
+    case'ice':if(dist<48)hurt(1);break;
+    case'net':if(!g.trap)e.dx=(e.dx||0)-35*dt;
+        if(dist<66&&!g.trap&&g.inv<=0){if(g.shield||g.whale){absorb();e.gone=1;burst(sx,y,'#f5e6c0',14)}
+          else if(g.buff.scissors){g.buff.scissors=false;e.gone=1;g.inv=1.2;SFX.free();burst(sx,y,'#f5e6c0',16);ftext('剪刀剪开了渔网！',fx,F.y-56,'#ffe27a')}
+          else{const T=g.mode==='simple'?6:endless?Math.max(4,10-g.lvl):10;g.trap={t:T,T,p:0,need:g.mode==='simple'?8:14,e};e.hold=1;g.combo=0;SFX.hit();
+            toast(g.mode==='simple'?'最后机会！快速连点屏幕！':'被网住了！快速连点挣脱！',2,1)}}break;
+    case'sharkT':if(!e.trig&&sx<VW+150&&!g.trap&&!g.E.some(w=>w.t==='wall'&&!w.broken&&!w.gone&&w.x-g.scroll-fx>-60&&w.x-g.scroll-fx<620)){e.trig=1;const T=(g.mode==='simple'?2.3:1.6)+(g.buff.radar?1:0);
+        g.sharks.push({ph:0,t:0,T,y:F.y,sx:0,v:g.mode==='simple'?620:endless?Math.min(900,700+20*g.lvl):820,al:0});toast('注意！鲨鱼来了！',1.6,1)}break;
+    case'wall':if(!e.broken&&g.inv<=0&&Math.abs(dx)<34&&(e.top?F.y-16<fy(e.h):F.y+16>fy(1-e.h))){
+        if(g.shield||g.whale){absorb();e.broken=1;burst(sx,F.y,'#ffd23f',18)}
+        else if(endless){e.broken=1;hurt(1)}else restoreCP()}break;
+    case'vortex':{const R=e.r*1.7;if(dist<R&&!g.trap){const pull=190*k*(1-dist/R);F.y+=Math.sign(dy)*Math.min(Math.abs(dy),pull*dt)}}break;
+    case'shield':if(dist<46){e.gone=1;if(g.shield)g.bonus+=50;g.shield=true;SFX.shield();burst(sx,y,'#ffd23f',14);toast('金鱼结界已开启！',1.6)}break;
+    case'friend':if(dist<54){e.gone=1;g.rescued++;g.bonus+=100;SFX.save();burst(sx,y,'#fff',14,1);ftext('救出小伙伴！',fx+20,F.y-56,'#bff6ff')}break;
+    case'wild':if(!g.trap)e.dx=(e.dx||0)+FISH[e.k].v*dt;if(!g.tips.wild&&sx<VW-40&&t>4){g.tips.wild=1;toast('用手指点一下带圆圈的鱼，就能捕获它！',3)}break;
+    case'cp':if(!e.hit&&dx<0){e.hit=1;g.cp=e.x-fishSX;SFX.shield()}break;
+    case'fin':if(dx+fishSX<0){finish();return}break;
+    }
+    if(state!=='play')return;
+  }
+  for(const s of g.sharks){s.t+=dt;
+    if(s.ph===0){if(s.t<s.T*.6)s.y=lerp(s.y,F.y,Math.min(1,dt*5));s.al-=dt;if(s.al<=0){s.al=.5;SFX.alarm()}
+      if(s.t>=s.T){s.ph=1;s.sx=VW+260}}
+    else{s.sx-=s.v*dt;if(!g.trap&&!s.blk&&((fx-s.sx+10)/128)**2+((F.y-s.y)/60)**2<1){if(g.whale){s.blk=1;useWhale(1)}else{die('shark');return}}}}
+  g.sharks=g.sharks.filter(s=>s.ph===0||s.sx>-320);
+}
+function finish(){
+  const g=G,L=g.L,hi=g.mode==='hard'?1:0,ok=L.goal.k==='pearl'?g.pearls>=L.goal.n[hi]:L.goal.k==='rescue'?g.rescued>=L.goal.n[hi]:true;
+  if(!ok){g.cause='goal';showEnd(false);return}
+  const prev=SAVE[g.mode].st[g.li]>0,s2=g.pearls>=L.extra[hi],s3=g.life>=(hi?1:2),s4=prev&&g.noDmg&&s2;
+  const sv=SAVE[g.mode];sv.st[g.li]=Math.max(sv.st[g.li],1+s2+s3);if(s4)sv.s4[g.li]=1;persist();SFX.win();
+  const end=()=>showEnd(true,[1,s2,s3,s4],prev),k='post'+g.li;
+  if(!SAVE.story[k]||SAVE.always){state='over';hud.hidden=true;$('toast').className='';playStory(STORY[k],()=>{SAVE.story[k]=1;persist();end()})}else end()}
+
+/* ---------- drawing ---------- */
+const circ=(x,y,r)=>{ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.fill()};
+function hills(col,off,base,amp,a,b){ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(0,VT);for(let x=0;x<=VW+30;x+=30){const wx=x+off;ctx.lineTo(x,base-(Math.sin(wx*a)+Math.sin(wx*b+1.3))*amp*.5-amp)}ctx.lineTo(VW+30,VT);ctx.fill()}
+function drawBG(th,sc,t){
+  const T=TH[th],gr=ctx.createLinearGradient(0,0,0,PH);gr.addColorStop(0,T.top);gr.addColorStop(1,T.bot);ctx.fillStyle=gr;ctx.fillRect(0,0,VW,VT);
+  ctx.save();ctx.globalAlpha=.09;ctx.fillStyle='#fff';const span=VW+500;
+  for(let i=0;i<5;i++){const x=(((i*280-sc*.05)%span)+span)%span-250,w=60+(i*37)%50;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+w,0);ctx.lineTo(x+w-200,PH);ctx.lineTo(x-230,PH);ctx.fill()}ctx.restore();
+  if(th===3){ctx.fillStyle='rgba(255,255,255,.55)';const o=sc*.2;for(let n=Math.floor(o/220);n*220-o<VW+120;n++){const x=n*220-o,h=50+hash(n)*90;ctx.beginPath();ctx.moveTo(x-70,0);ctx.lineTo(x,h);ctx.lineTo(x+70,0);ctx.fill()}}
+  hills(T.far,sc*.15,PH-170,70,.004,.011);
+  if(th===1){const o=sc*.22,n=Math.floor((o+300)/1500),x=n*1500-o+400,b=PH-190;ctx.fillStyle=T.mid;ctx.beginPath();ctx.moveTo(x-170,b-70);ctx.lineTo(x+190,b-110);ctx.lineTo(x+150,b+40);ctx.lineTo(x-130,b+40);ctx.fill();ctx.fillRect(x-10,b-250,12,170);ctx.fillRect(x-70,b-200,130,9)}
+  hills(T.mid,sc*.4,PH-112,48,.006,.017);
+  ctx.strokeStyle=T.weed;ctx.lineCap='round';ctx.lineWidth=9;const wo=sc*.7;
+  for(let n=Math.floor(wo/150)-1;n*150-wo<VW+60;n++){const x=n*150-wo+hash(n)*60,h=50+hash(n+9)*100,sw=Math.sin(t*1.6+n)*14;ctx.beginPath();ctx.moveTo(x,yMax+30);ctx.quadraticCurveTo(x+sw*.5,yMax+30-h*.5,x+sw,yMax+30-h);ctx.stroke()}
+  ctx.fillStyle=T.sand;ctx.beginPath();ctx.moveTo(0,VT);for(let x=0;x<=VW+30;x+=30)ctx.lineTo(x,yMax+24+Math.sin((x+sc)*.012)*7);ctx.lineTo(VW+30,VT);ctx.fill();
+  for(let n=Math.floor(sc/210)-1;n*210-sc<VW+40;n++){const x=n*210-sc+hash(n+50)*80,y=yMax+50+hash(n+3)*20,k=hash(n+77);
+    if(k<.35){ctx.fillStyle='#ff9d8a';ctx.beginPath();for(let i=0;i<10;i++){const a=i*TAU/10-Math.PI/2,r=i%2?6:14;ctx.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r)}ctx.fill()}
+    else if(k<.7){ctx.fillStyle='#fff3f0';ctx.beginPath();ctx.arc(x,y+6,13,Math.PI,0);ctx.fill();ctx.strokeStyle='#f0b8a8';ctx.lineWidth=1.5;for(let i=-2;i<=2;i++){ctx.beginPath();ctx.moveTo(x,y+6);ctx.lineTo(x+i*5,y-5);ctx.stroke()}}
+    else{ctx.fillStyle=T.rock2;circ(x,y,9);circ(x+10,y-8,7);circ(x-9,y-9,6)}}
+  ctx.strokeStyle='rgba(255,255,255,.4)';ctx.lineWidth=1.5;
+  for(let i=0;i<12;i++){const x=(((i*131-sc*.55)%(VW+60))+VW+60)%(VW+60)-30,y=PH-((t*(26+i%4*9)+i*97)%PH),r=3+i%4*1.6;ctx.beginPath();ctx.arc(x+Math.sin(t+i)*6,y,r,0,TAU);ctx.stroke()}
+}
+function drawFish(x,y,ang,t,o){
+  o=o||{};ctx.save();ctx.translate(x,y);ctx.rotate(ang);const s=o.s||1;ctx.scale(s*(o.lx||1),s);
+  const wag=Math.sin(t*14)*.35,c2=o.c2||'#ff7f1f';
+  ctx.save();ctx.translate(-23,0);ctx.rotate(wag);ctx.fillStyle=c2;ctx.beginPath();ctx.moveTo(0,0);ctx.quadraticCurveTo(-16,-6,-27,-21);ctx.quadraticCurveTo(-19,0,-27,21);ctx.quadraticCurveTo(-16,6,0,0);ctx.fill();ctx.restore();
+  ctx.fillStyle=c2;ctx.beginPath();ctx.moveTo(-12,-19);ctx.quadraticCurveTo(-3,-37,11,-20);ctx.fill();
+  const g=ctx.createRadialGradient(-4,-8,4,0,0,30);g.addColorStop(0,o.c0||'#ffe08a');g.addColorStop(1,o.c1||'#ffa01f');if(o.glow){ctx.shadowColor='#fff27a';ctx.shadowBlur=18}ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(0,0,28,23,0,0,TAU);ctx.fill();ctx.shadowBlur=0;
+  if(o.stripe){ctx.strokeStyle='rgba(0,40,60,.28)';ctx.lineWidth=4;ctx.lineCap='round';for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(-34+i*10,0,30,-.55,.2);ctx.stroke()}}
+  if(o.bill){ctx.strokeStyle=c2;ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(26,1);ctx.lineTo(60,-3);ctx.stroke()}
+  if(o.lamp){ctx.strokeStyle=c2;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(4,-22);ctx.quadraticCurveTo(22,-44,34,-24);ctx.stroke();ctx.fillStyle='#fff27a';ctx.shadowColor='#fff27a';ctx.shadowBlur=14;circ(34,-22,5);ctx.shadowBlur=0}
+  ctx.fillStyle='rgba(255,255,255,.38)';ctx.beginPath();ctx.ellipse(2,10,17,9,0,0,TAU);ctx.fill();
+  ctx.fillStyle=c2;ctx.beginPath();ctx.ellipse(-5,8,8,5,.6+wag*.6,0,TAU);ctx.fill();
+  if(o.dead){ctx.strokeStyle='#1b2a41';ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(8,-10);ctx.lineTo(18,0);ctx.moveTo(18,-10);ctx.lineTo(8,0);ctx.stroke()}
+  else{ctx.fillStyle='#fff';circ(13,-5,o.scared?11:9.5);ctx.fillStyle='#1b2a41';circ(15,-5,o.scared?4:5.4);ctx.fillStyle='#fff';circ(16.8,-7.2,2)}
+  ctx.fillStyle='rgba(255,90,120,.45)';circ(7,8,4.5);
+  if(o.scared||o.dead){ctx.fillStyle='#8a3b00';circ(23,7,3.6)}else{ctx.strokeStyle='#8a3b00';ctx.lineWidth=2.2;ctx.lineCap='round';ctx.beginPath();ctx.arc(20,4,5.5,.25,1.5);ctx.stroke()}
+  ctx.restore()}
+function drawPal(x,y,t,turtle){ctx.save();ctx.translate(x,y);
+  if(turtle){const fl=Math.sin(t*5)*.35;ctx.fillStyle='#8fe09a';for(const d of[-1,1]){ctx.save();ctx.translate(4,d*11);ctx.rotate(d*(.5+fl));ctx.beginPath();ctx.ellipse(0,d*6,5,10,0,0,TAU);ctx.fill();ctx.restore();ctx.beginPath();ctx.ellipse(-12,d*11,4,6,d*-.6,0,TAU);ctx.fill()}
+    circ(-19,0,3.5);circ(18,0,8);ctx.fillStyle='#3f9a55';ctx.beginPath();ctx.ellipse(0,0,17,13,0,0,TAU);ctx.fill();
+    ctx.strokeStyle='#2c7440';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-7,-11);ctx.lineTo(-7,11);ctx.moveTo(5,-12);ctx.lineTo(5,12);ctx.moveTo(-16,0);ctx.lineTo(16,0);ctx.stroke();
+    ctx.fillStyle='#1b2a41';circ(21,-3,1.8);circ(21,3,1.8)}
+  else{ctx.strokeStyle='#ffb24d';ctx.lineCap='round';ctx.lineWidth=10;ctx.beginPath();ctx.moveTo(2,-8);ctx.quadraticCurveTo(-11,4,-1,14);ctx.stroke();
+    ctx.lineWidth=5;ctx.beginPath();ctx.arc(4,18,6,Math.PI*1.1,Math.PI*2.5);ctx.stroke();
+    ctx.fillStyle='#ffb24d';circ(4,-14,9);ctx.fillRect(10,-15,12,5);ctx.beginPath();ctx.moveTo(-3,-21);ctx.lineTo(1,-30);ctx.lineTo(6,-22);ctx.fill();
+    ctx.fillStyle='#ff8f2e';ctx.beginPath();ctx.ellipse(-8,2,3,6+Math.sin(t*12)*1.5,.3,0,TAU);ctx.fill();
+    ctx.fillStyle='#fff';circ(6,-16,3.5);ctx.fillStyle='#1b2a41';circ(7,-16,1.8)}
+  ctx.restore()}
+function drawShark(x,y,t){
+  ctx.save();ctx.translate(x,y);const wag=Math.sin(t*11)*.25;
+  ctx.fillStyle='#5f7fa3';ctx.save();ctx.translate(104,0);ctx.rotate(wag);ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(52,-46);ctx.lineTo(34,0);ctx.lineTo(50,40);ctx.closePath();ctx.fill();ctx.restore();
+  ctx.beginPath();ctx.moveTo(-14,-40);ctx.lineTo(30,-90);ctx.lineTo(50,-36);ctx.fill();
+  ctx.fillStyle='#7399c0';ctx.beginPath();ctx.moveTo(-122,-8);ctx.bezierCurveTo(-80,-64,60,-58,116,0);ctx.bezierCurveTo(60,54,-60,64,-122,24);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#eef6fb';ctx.beginPath();ctx.moveTo(-60,34);ctx.bezierCurveTo(-10,52,60,40,108,4);ctx.bezierCurveTo(50,26,-10,30,-60,34);ctx.fill();
+  ctx.fillStyle='#b3263a';ctx.beginPath();ctx.moveTo(-122,-6);ctx.quadraticCurveTo(-76,2,-58,20);ctx.quadraticCurveTo(-92,44,-122,24);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#fff';for(let i=0;i<5;i++){const tx=-116+i*11,ty=-4+i*3.2;ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx+10,ty+3);ctx.lineTo(tx+4,ty+12);ctx.fill()}
+  for(let i=0;i<4;i++){const tx=-114+i*11,ty=27+i*1.5;ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx+10,ty+1);ctx.lineTo(tx+5,ty-9);ctx.fill()}
+  ctx.fillStyle='#fff';circ(-58,-24,10);ctx.fillStyle='#1b2a41';circ(-61,-23,5);
+  ctx.strokeStyle='#33506e';ctx.lineWidth=5;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-76,-28);ctx.lineTo(-46,-38);ctx.stroke();
+  ctx.lineWidth=3;for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-22+i*11,-14);ctx.lineTo(-26+i*11,8);ctx.stroke()}
+  ctx.restore()}
+function drawRock(sx,e,T){
+  const hw=e.w/2;ctx.fillStyle=T.rock;ctx.beginPath();
+  if(e.top){const y=fy(e.h);ctx.moveTo(sx-hw-12,-10);ctx.bezierCurveTo(sx-hw,y*.6,sx-hw+4,y-10,sx,y);ctx.bezierCurveTo(sx+hw-4,y-10,sx+hw,y*.6,sx+hw+12,-10)}
+  else{const y=fy(1-e.h),b=yMax+46;ctx.moveTo(sx-hw-14,b);ctx.bezierCurveTo(sx-hw,lerp(b,y,.6),sx-hw+4,y+10,sx,y);ctx.bezierCurveTo(sx+hw-4,y+10,sx+hw,lerp(b,y,.6),sx+hw+14,b)}
+  ctx.fill();ctx.fillStyle=T.rock2;const y0=e.top?fy(e.h):fy(1-e.h),dir=e.top?-1:1;
+  for(let i=0;i<4;i++){const hx=hash(e.x+i*7),hy=hash(e.x+i*13);circ(sx+(hx-.5)*hw*1.1,y0+dir*(26+hy*Math.max(10,(yMax-yMin)*e.h-50)),5+hx*6)}}
+function drawOcto(x,y,r,warn,t,e){
+  const col=['#b57af2','#ff9a4d','#ff7fb0'][Math.floor(hash(e.x)*3)];ctx.save();ctx.translate(x,y);
+  ctx.lineCap='round';ctx.lineWidth=9;ctx.strokeStyle=warn?(Math.sin(t*26)>0?'#fff27a':col):col;if(warn){ctx.shadowColor='#fff27a';ctx.shadowBlur=22}
+  for(let i=0;i<8;i++){const a=i*TAU/8+Math.sin(t*2+i)*.15,l=r-6,mx=Math.cos(a+.35)*l*.6,my=Math.sin(a+.35)*l*.6;ctx.beginPath();ctx.moveTo(Math.cos(a)*14,Math.sin(a)*14);ctx.quadraticCurveTo(mx,my,Math.cos(a)*l,Math.sin(a)*l);ctx.stroke()}
+  ctx.shadowBlur=0;ctx.fillStyle=col;circ(0,-3,25);ctx.fillStyle='rgba(255,255,255,.25)';circ(-8,-13,8);
+  ctx.fillStyle='#fff';circ(-9,-3,7);circ(9,-3,7);ctx.fillStyle='#1b2a41';circ(-10,-2,3.5);circ(8,-2,3.5);
+  ctx.strokeStyle='#5a2a7a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,8,5,.2,Math.PI-.2);ctx.stroke();ctx.restore()}
+function drawJelly(x,y,t,e){
+  const col=hash(e.x)<.5?'#ff9fe0':'#8ff0ff';ctx.save();ctx.translate(x,y);ctx.shadowColor=col;ctx.shadowBlur=18;ctx.globalAlpha=.88;ctx.fillStyle=col;
+  ctx.beginPath();ctx.arc(0,0,26,Math.PI,0);ctx.quadraticCurveTo(0,12,-26,0);ctx.fill();ctx.shadowBlur=0;
+  ctx.strokeStyle=col;ctx.lineWidth=4;ctx.lineCap='round';for(let i=-2;i<=2;i++){ctx.beginPath();ctx.moveTo(i*9,4);ctx.quadraticCurveTo(i*9+Math.sin(t*4+i)*8,20,i*9+Math.sin(t*4+i+1)*5,34);ctx.stroke()}
+  ctx.globalAlpha=1;ctx.fillStyle='#1b2a41';circ(-8,-8,3);circ(8,-8,3);ctx.restore()}
+function drawNet(x,y,t){
+  ctx.save();ctx.translate(x,y);ctx.rotate(Math.sin(t*1.5)*.1);ctx.beginPath();ctx.arc(0,0,58,0,TAU);ctx.fillStyle='rgba(255,255,255,.14)';ctx.fill();ctx.save();ctx.clip();
+  ctx.strokeStyle='#f5e6c0';ctx.lineWidth=2;for(let i=-120;i<=120;i+=17){ctx.beginPath();ctx.moveTo(i-60,-60);ctx.lineTo(i+60,60);ctx.moveTo(i+60,-60);ctx.lineTo(i-60,60);ctx.stroke()}ctx.restore();
+  ctx.strokeStyle='#c79a4a';ctx.lineWidth=6;ctx.beginPath();ctx.arc(0,0,58,0,TAU);ctx.stroke();ctx.fillStyle='#ff6b5a';for(let i=0;i<6;i++)circ(Math.cos(i*TAU/6)*58,Math.sin(i*TAU/6)*58,6);ctx.restore()}
+function drawEntity(e,sx,y,g,T){const t=g.t;switch(e.t){
+  case'pearl':{const gr=ctx.createRadialGradient(sx-4,y-4,1,sx,y,14);gr.addColorStop(0,'#fff');gr.addColorStop(1,'#ffc9e6');ctx.fillStyle=gr;ctx.shadowColor='#fff';ctx.shadowBlur=10;circ(sx,y,13);ctx.shadowBlur=0;
+    const tw=(Math.sin(t*5+e.x)+1)/2;ctx.fillStyle=`rgba(255,255,255,${tw})`;ctx.fillRect(sx+7,y-14,2,8);ctx.fillRect(sx+4,y-11,8,2)}break;
+  case'rock':drawRock(sx,e,T);break;
+  case'octo':drawOcto(sx,y,octoR(e,t),octoWarn(e,t),t,e);break;
+  case'jelly':drawJelly(sx,y,t,e);break;
+  case'net':if(!e.hold)drawNet(sx,y,t);break;
+  case'ice':ctx.save();ctx.translate(sx,y);ctx.rotate(e.ph*5+t*.4);ctx.fillStyle='#eaf9ff';ctx.strokeStyle='#8cc8ea';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-30,-18);ctx.lineTo(-8,-34);ctx.lineTo(28,-22);ctx.lineTo(34,12);ctx.lineTo(8,34);ctx.lineTo(-28,22);ctx.closePath();ctx.fill();ctx.stroke();ctx.strokeStyle='#fff';ctx.beginPath();ctx.moveTo(-14,-12);ctx.lineTo(6,-20);ctx.stroke();ctx.restore();break;
+  case'wall':{const y0=e.top?0:fy(1-e.h),y1=e.top?fy(e.h):yMax+40;ctx.save();ctx.globalAlpha=e.broken?.25:1;ctx.shadowColor='#ffe45c';ctx.shadowBlur=e.broken?0:24;
+    const gr=ctx.createLinearGradient(sx-22,0,sx+22,0);gr.addColorStop(0,'#ffb300');gr.addColorStop(.5,'#fff27a');gr.addColorStop(1,'#ffb300');ctx.fillStyle=gr;ctx.fillRect(sx-22,y0,44,y1-y0);ctx.shadowBlur=0;
+    ctx.strokeStyle='#fff';ctx.lineWidth=3;ctx.beginPath();for(let yy=y0,i=0;yy<y1;yy+=22,i++)ctx.lineTo(sx+(i%2?9:-9)*Math.sin(t*8+i),yy);ctx.stroke();
+    if(!e.broken&&Math.sin(t*7)>-.3){ctx.fillStyle='#fff27a';const ay=e.top?fy(e.h)+26:fy(1-e.h)-26,d=e.top?1:-1;for(let i=0;i<3;i++){const ax=sx-70-i*46;ctx.beginPath();ctx.moveTo(ax-15,ay);ctx.lineTo(ax+15,ay);ctx.lineTo(ax,ay+d*20);ctx.fill()}}ctx.restore()}break;
+  case'vortex':ctx.save();ctx.translate(sx,y);ctx.rotate(-t*3.2);ctx.lineCap='round';for(let i=0;i<4;i++){ctx.strokeStyle=`rgba(190,235,255,${.75-i*.15})`;ctx.lineWidth=7-i;ctx.beginPath();ctx.arc(0,0,16+i*24,i*1.3,i*1.3+4.2);ctx.stroke()}ctx.restore();break;
+  case'shield':{const p=1+Math.sin(t*4)*.08;ctx.save();ctx.translate(sx,y+Math.sin(t*2+e.x)*6);ctx.scale(p,p);ctx.shadowColor='#ffd23f';ctx.shadowBlur=20;ctx.fillStyle='rgba(255,220,90,.35)';circ(0,0,27);ctx.shadowBlur=0;ctx.strokeStyle='#ffe27a';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,27,0,TAU);ctx.stroke();ctx.restore();
+    drawFish(sx,y+Math.sin(t*2+e.x)*6,0,t,{s:.5,c0:'#fff3a8',c1:'#ffc928',c2:'#f0a400'})}break;
+  case'friend':{const by=y+Math.sin(t*2+e.x)*5;drawPal(sx,by,t,hash(e.x)<.5);
+    ctx.fillStyle='rgba(255,255,255,.2)';circ(sx,by,32);ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(sx,by,32,0,TAU);ctx.stroke();
+    ctx.lineWidth=2;for(let i=-1;i<=1;i++){ctx.beginPath();ctx.moveTo(sx+i*14,by-28);ctx.lineTo(sx+i*14,by+28);ctx.stroke()}}break;
+  case'wild':{const f=FISH[e.k];drawFish(sx,y,Math.sin(t*3+e.ph)*.12,t+e.ph,{...f,c0:f.c[0],c1:f.c[1],c2:f.c[2]});
+    const R=34*f.s*(f.lx?1.25:1)+10;ctx.save();ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=2.5;ctx.setLineDash([8,7]);ctx.lineDashOffset=t*30;ctx.beginPath();ctx.arc(sx,y,R+Math.sin(t*5)*2,0,TAU);ctx.stroke();ctx.restore();
+    ctx.fillStyle='#fff';for(let i=0;i<e.hp;i++)circ(sx+(i-(e.hp-1)/2)*11,y-R-9,3.5)}break;
+  case'cp':{const b=yMax+36;ctx.strokeStyle='#fff';ctx.lineWidth=5;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(sx,b);ctx.lineTo(sx,b-110);ctx.stroke();ctx.fillStyle=e.hit?'#4fe0b5':'#fff';ctx.beginPath();ctx.moveTo(sx,b-110);ctx.lineTo(sx+44+Math.sin(t*5)*4,b-94);ctx.lineTo(sx,b-76);ctx.fill()}break;
+  case'fin':{sx+=fishSX;ctx.save();for(let yy=yMin,i=0;yy<yMax+30;yy+=22,i++){ctx.fillStyle=i%2?'#fff':'#ff7a6b';ctx.fillRect(sx,yy,11,22);ctx.fillStyle=i%2?'#ff7a6b':'#fff';ctx.fillRect(sx+11,yy,11,22)}
+    ctx.fillStyle='#fff';ctx.font=`${30*Math.max(1,U*.8)}px ${FONT}`;ctx.textAlign='center';ctx.fillText(tl('终点'),sx-44,yMin+44);ctx.restore()}break;
+}}
+function drawWorld(){
+  const g=G,t=g.t,T=TH[g.theme],F=g.fish;ctx.save();if(g.shake>0)ctx.translate((Math.random()-.5)*10,(Math.random()-.5)*10);
+  drawBG(g.theme,g.scroll,t);if(g.faded){ctx.fillStyle='rgba(140,150,160,.42)';ctx.fillRect(0,0,VW,VT)}
+  for(const s of g.sharks)if(s.ph===0){const a=.16+.14*Math.sin(t*14);ctx.fillStyle=`rgba(255,60,60,${a})`;ctx.fillRect(0,s.y-58,VW,116);
+    ctx.fillStyle='#5f7fa3';const fxx=VW-30-Math.sin(t*10)*8;ctx.beginPath();ctx.moveTo(fxx-34,s.y+26);ctx.lineTo(fxx+4,s.y-36);ctx.lineTo(fxx+26,s.y+26);ctx.fill()}
+  for(const e of g.E){if(e.gone)continue;const sx=e.x+(e.dx||0)-g.scroll;if(sx<-200||sx>VW+200)continue;drawEntity(e,sx,entY(e,t),g,T)}
+  const dead=state==='dying';
+  if(!(g.inv>0&&!g.trap&&Math.sin(t*30)>0)||dead){
+    drawFish(fishSX,F.y,dead?Math.PI:clamp(F.vy/520,-.5,.5)+(g.trap?Math.sin(t*30)*.2:0),dead?0:t,{dead,scared:g.sharks.length>0||!!g.trap,...skin()})}
+  if(g.shield){ctx.save();ctx.translate(fishSX,F.y);ctx.fillStyle='rgba(255,220,80,.2)';circ(0,0,44);ctx.strokeStyle='rgba(255,226,122,.95)';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,44,0,TAU);ctx.stroke();ctx.rotate(t*3);ctx.strokeStyle='#fff';ctx.beginPath();ctx.arc(0,0,44,0,.9);ctx.stroke();ctx.restore()}
+  if(g.whale){ctx.save();ctx.translate(fishSX,F.y);ctx.fillStyle='rgba(120,200,255,.16)';circ(0,0,54);ctx.strokeStyle='rgba(160,225,255,.95)';ctx.lineWidth=4;ctx.setLineDash([14,9]);ctx.lineDashOffset=-t*40;ctx.beginPath();ctx.arc(0,0,54,0,TAU);ctx.stroke();ctx.setLineDash([]);
+    ctx.translate(-8,-70+Math.sin(t*3)*3);ctx.fillStyle='#4a90d9';ctx.beginPath();ctx.ellipse(0,0,20,12,0,0,TAU);ctx.fill();ctx.beginPath();ctx.moveTo(-17,0);ctx.lineTo(-30,-10);ctx.lineTo(-27,0);ctx.lineTo(-30,9);ctx.fill();
+    ctx.fillStyle='#d9efff';ctx.beginPath();ctx.ellipse(3,6,13,5,0,0,TAU);ctx.fill();ctx.fillStyle='#1b2a41';circ(11,-2,2.2);ctx.strokeStyle='#d9efff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(2,-12);ctx.lineTo(-2,-20);ctx.moveTo(2,-12);ctx.lineTo(6,-20);ctx.stroke();ctx.restore()}
+  if(g.magnet&&!dead){ctx.strokeStyle=`rgba(255,255,255,${.18+.1*Math.sin(t*5)})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(fishSX,F.y,115,0,TAU);ctx.stroke()}
+  if(g.trap)drawNet(fishSX,F.y,t*6);
+  for(const s of g.sharks)if(s.ph===1)drawShark(s.sx,s.y,t);
+  for(const p of g.parts){ctx.globalAlpha=clamp(p.l*2,0,1);if(p.k){ctx.strokeStyle=p.c;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,TAU);ctx.stroke()}else{ctx.fillStyle=p.c;circ(p.x,p.y,p.r)}}
+  ctx.globalAlpha=1;ctx.textAlign='center';ctx.font=`${20*Math.max(1,U*.85)}px ${FONT}`;
+  for(const x of g.texts){ctx.globalAlpha=clamp(x.t*2,0,1);ctx.lineWidth=4;ctx.strokeStyle='rgba(6,40,70,.6)';ctx.strokeText(x.s,x.x+40,x.y);ctx.fillStyle=x.c;ctx.fillText(x.s,x.x+40,x.y)}
+  ctx.globalAlpha=1;ctx.restore();
+  if(g.sharks.length){const a=.25+.2*Math.sin(t*12),gr=ctx.createRadialGradient(VW/2,VT/2,Math.min(VW,VT)*.35,VW/2,VT/2,Math.max(VW,VT)*.75);gr.addColorStop(0,'rgba(255,0,0,0)');gr.addColorStop(1,`rgba(255,40,40,${a})`);ctx.fillStyle=gr;ctx.fillRect(0,0,VW,VT)}
+  if(g.trap){const tr=g.trap,R=62*U,cx=VW/2,cy=Math.min(VT*.62,yMax-R*.4),pu=1+Math.sin(t*12)*.05,red=tr.t<=3&&Math.sin(t*16)>0;
+    ctx.fillStyle='rgba(6,40,70,.35)';ctx.fillRect(0,0,VW,VT);
+    ctx.fillStyle='#ffd23f';ctx.shadowColor='#ffd23f';ctx.shadowBlur=24*U;circ(cx,cy,R*pu);ctx.shadowBlur=0;
+    ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=9*U;ctx.beginPath();ctx.arc(cx,cy,R+12*U,0,TAU);ctx.stroke();
+    ctx.strokeStyle='#4fe0b5';ctx.lineCap='round';ctx.beginPath();ctx.arc(cx,cy,R+12*U,-Math.PI/2,-Math.PI/2+TAU*clamp(tr.p/tr.need,0,1));ctx.stroke();
+    ctx.fillStyle='#6a4500';ctx.textAlign='center';ctx.font=`${(SAVE.lang==='zh'?23:SAVE.lang==='ru'?14:18)*U}px ${FONT}`;ctx.fillText(tl(g.mode==='simple'?'最后机会！':'快点我！'),cx,cy-2*U);ctx.font=`${15*U}px ${FONT}`;ctx.fillText(tl('连续点击'),cx,cy+22*U);
+    ctx.font=`${44*U}px ${FONT}`;ctx.fillStyle=red?'#ff4d4d':'#fff';ctx.lineWidth=5*U;ctx.strokeStyle='rgba(6,40,70,.6)';const s=tl(Math.ceil(tr.t)+' 秒');ctx.strokeText(s,cx,cy-R-34*U);ctx.fillText(s,cx,cy-R-34*U)}
+  if(g.flash>0){ctx.fillStyle=`rgba(255,255,255,${g.flash})`;ctx.fillRect(0,0,VW,VT)}
+}
+function updateHUD(){
+  const g=G,hi=g.mode==='hard'?1:0,m=Math.floor(g.scroll/60),endless=g.mode==='endless';
+  const key=[g.life,g.pearls,g.rescued,m,g.shield,g.combo,g.lvl,g.whale,g.nCaught,g.magnet,Object.keys(g.buff).filter(k=>g.buff[k]).join('')].join();if(key===g.hudKey)return;g.hudKey=key;
+  let s='';for(let i=0;i<g.maxLife;i++)s+=`<i class="st ${g.life>=i+1?'f':g.life>=i+.5?'h':''}"></i>`;$('stars').innerHTML=s;
+  let goal;if(endless)goal=`💎 ${g.pearls} · ${score()} 分`;else{const k=g.L.goal;goal=k.k==='pearl'?`💎 ${g.pearls} / ${k.n[hi]}`:k.k==='rescue'?`🐢 ${g.rescued} / ${k.n[hi]} · 💎 ${g.pearls}`:`💎 ${g.pearls}`}
+  $('cGoal').textContent=goal;$('cDist').textContent=endless?`${m} 米 · Lv.${g.lvl+1}`:`${m} / ${g.L.len} 米`;
+  $('cShield').hidden=!g.shield;$('cWhale').hidden=!g.whale;{const bf=ITEMS.filter(it=>g.buff[it.id]||(it.id==='magnet'&&g.magnet)).map(it=>it.ic).join(' ');$('cBuff').hidden=!bf;$('cBuff').textContent=bf}$('cFish').hidden=!g.nCaught;$('cFish').textContent='🎣 '+g.nCaught;$('cCombo').hidden=g.combo<3;$('cCombo').textContent=`连击 ${g.combo}`;
+  if(!endless)$('prog').firstElementChild.style.width=clamp(g.scroll/(g.L.len*60)*100,0,100)+'%';
+}
+
+/* ---------- screens ---------- */
+function show(id){document.querySelectorAll('.scr').forEach(s=>s.classList.toggle('on',s.id===id))}
+function toMenu(){G=null;state='menu';hud.hidden=true;$('toast').className='';refreshMenu();show('sMenu')}
+function showShop(){
+  $('wallet').textContent=SAVE.wallet;
+  $('shopList').innerHTML=ITEMS.map(it=>{const n=SAVE.inv[it.id]||0,on=SAVE.use[it.id]!==0;
+    return(it.h?`<p class="sub">${it.h}</p>`:'')+`<div class="it"><span class="ic">${it.ic}</span><b>${it.n}${n?`<small>已有 ${n} 个</small>`:''}</b><em>${it.d}</em><span class="act">${chN()<ITEM_CH[it.id]?`<button class="btn off" disabled>🔒 通关第 ${ITEM_CH[it.id]} 关</button>`:`<button class="btn sun" data-buy="${it.id}" ${SAVE.wallet<it.p?'disabled':''}>💎 ${it.p}</button>`}${n?`<button class="btn ${on?'mint':'off'}" data-tog="${it.id}">${on?'出发时带上':'先不带'}</button>`:''}</span></div>`}).join('')
+   +'<p class="sub">吊坠的变身（永久拥有）</p>'
+   +SKINS.map((k,i)=>{const own=SAVE.skins.includes(i),cur=SAVE.skin===i;
+    return`<div class="it"><span class="ic"><i style="background:radial-gradient(circle at 35% 30%,${k.c[0]},${k.c[1]})"></i></span><b>${k.n}</b><em>${cur?'正在使用':own?'已拥有':'换个颜色去冒险'}</em><span class="act">${own?`<button class="btn ${cur?'off':'mint'}" data-skin="${i}" ${cur?'disabled':''}>${cur?'使用中':'换上'}</button>`:`<button class="btn sun" data-skin="${i}" ${SAVE.wallet<k.p?'disabled':''}>💎 ${k.p}</button>`}</span></div>`}).join('');
+  show('sShop')}
+$('shopList').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)return;const d=b.dataset;
+  if(d.buy){const it=ITEMS.find(x=>x.id===d.buy);if(SAVE.wallet<it.p)return;SAVE.wallet-=it.p;SAVE.inv[it.id]=(SAVE.inv[it.id]||0)+1;SFX.shield()}
+  else if(d.tog){SAVE.use[d.tog]=SAVE.use[d.tog]===0?1:0;SFX.tap()}
+  else if(d.skin){const i=+d.skin;if(!SAVE.skins.includes(i)){if(SAVE.wallet<SKINS[i].p)return;SAVE.wallet-=SKINS[i].p;SAVE.skins.push(i);SFX.win()}SAVE.skin=i}
+  persist();refreshMenu();showShop()};
+const dot=k=>`<i style="background:radial-gradient(circle at 35% 30%,${FISH[k].c[0]},${FISH[k].c[1]})"></i>`;
+function showKitchen(){
+  ensureOrders();const lv=restLv(),nx=REPLV[lv],pv=REPLV[lv-1];
+  $('restCard').innerHTML=`<div class="stat"><span>小馆等级</span><span>Lv.${lv}「${RESTN[lv-1]}」</span></div><div class="stat"><span>声望</span><span>${SAVE.rep}${nx?' / '+nx:'（已满级）'}</span></div><div id="prog2"><i style="width:${nx?Math.min(100,(SAVE.rep-pv)/(nx-pv)*100):100}%"></i></div>`;
+  const needs=d=>Object.entries(d.need).map(([k,n])=>`<span class="${(SAVE.fish[k]||0)>=n?'':'no'}">${dot(k)} ${FISH[k].n}×${n}</span>`).join('　');
+  $('ordList').innerHTML=SAVE.orders.list.map((o,i)=>{const d=DISH.find(x=>x.id===o.d),ok=hasFish(d);
+    return`<div class="it ${o.done?'done':''}"><span class="ic">${d.ic}</span><b>${o.c}：${d.n}</b><span class="need">${needs(d)}</span><span class="act">${o.done?'<button class="btn off" disabled>已上菜 ✔</button>':`<button class="btn ${ok?'sun':'off'}" data-ord="${i}" ${ok?'':'disabled'}>上菜<br>+💎${d.p*2}</button>`}</span></div>`}).join('');
+  $('bask').innerHTML=Object.keys(FISH).map(k=>`<span>${dot(k)}${FISH[k].n} × ${SAVE.fish[k]||0}</span>`).join('');
+  const un=DISH.filter(unlocked),lk=DISH.filter(d=>!unlocked(d)).sort((x,y)=>(UNL[x.id][0]-UNL[y.id][0])||(UNL[x.id][1]-UNL[y.id][1]));
+  $('kitList').innerHTML=un.map(d=>{const made=SAVE.dishes[d.id]||0,ok=hasFish(d);
+    return`<div class="it"><span class="ic">${d.ic}</span><b>${d.n}${made?`<small>做过 ${made} 次</small>`:'<small>首次双倍</small>'}</b><span class="need">${needs(d)}</span><span class="act"><button class="btn ${ok?'mint':'off'}" data-cook="${d.id}" ${ok?'':'disabled'}>制作<br>+💎${made?d.p:d.p*2}</button></span></div>`}).join('')
+   +(lk.length?'<p class="sub">即将解锁</p>':'')+lk.slice(0,3).map(d=>`<div class="it lock"><span class="ic">${d.ic}</span><b>${d.n}</b><span class="need">${needs(d)}</span><span class="act"><button class="btn off" disabled>🔒 ${lockWhy(d)}</button></span></div>`).join('')
+   +(lk.length>3?`<p class="sub" style="text-align:center">还有 ${lk.length-3} 道菜谱等待发现</p>`:'');
+  {const ids=un.map(d=>d.id),seen=SAVE.seenUn||[],nw=un.filter(d=>!seen.includes(d.id));if(nw.length){if(seen.length)setTimeout(()=>toast('新菜谱：'+nw.map(d=>d.n).join('、'),3.2),300);SAVE.seenUn=ids;persist()}}
+  $('kitTitle').textContent=`海边小馆 · 已学会 ${DISH.filter(d=>SAVE.dishes[d.id]).length} / ${DISH.length} 道`;
+  show('sKit')}
+$('kitList').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)return;const d=DISH.find(x=>x.id===b.dataset.cook);
+  if(!d||!hasFish(d)||!unlocked(d))return;const r=cookDish(d);persist();
+  toast(`${d.ic} ${d.n}做好了！+${r.gain} 💎`+(r.first?'（新菜谱）':''),2.4);refreshMenu();showKitchen()};
+$('ordList').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)return;const o=SAVE.orders.list[+b.dataset.ord],d=DISH.find(x=>x.id===o.d);
+  if(o.done||!hasFish(d))return;const r=cookDish(d,1);o.done=1;let msg=`${o.c}：谢谢，真好吃！+${r.gain} 💎`;
+  if(!SAVE.orders.bonus&&SAVE.orders.list.every(x=>x.done)){SAVE.orders.bonus=1;SAVE.wallet+=50;addRep(20);msg='今天的订单全部完成！额外 +50 💎'}
+  persist();toast(msg,2.6);refreshMenu();showKitchen()};
+$('bKit').onclick=()=>{SFX.tap();showKitchen()};
+$('bShop').onclick=()=>{SFX.tap();showShop()};
+function refreshMenu(){$('menuWal').textContent=SAVE.wallet;$('bMute').textContent='音效：'+(SAVE.mute?'关':'开');const b=SAVE.end;$('bestTxt').textContent=b.score?`最高 ${b.score} 分 · ${b.dist} 米`:'不停向前，刷新你的纪录！'}
+function showLevels(mode){
+  const hi=mode==='hard'?1:0,sv=SAVE[mode];$('lvTitle').textContent=(hi?'困难模式':'普通模式')+' · 选择关卡';
+  $('lvGrid').innerHTML=LV.map((L,i)=>{const open=i===0||sv.st[i-1]>0;let st='';for(let k=0;k<3;k++)st+=`<i class="st ${sv.st[i]>k?'f':''}"></i>`;if(sv.s4[i])st+='<i class="st f"></i>';
+    return`<button class="lv" data-lv="${i}" ${open?'':'disabled'}><b>${open?'':'🔒 '}第${i+1}关 ${L.name}</b><em>${goalText(L,hi)}</em><em>${cleared(i)?'🌊 海域已恢复':'海域褪色中'}</em><span class="mini">${st}</span></button>`}).join('');
+  $('lvGrid').dataset.mode=mode;show('sLevels')}
+function showEnd(win,stars,prev){
+  const g=G,m=Math.floor(g.scroll/60),endless=g.mode==='endless',hi=g.mode==='hard'?1:0;state='over';hud.hidden=true;$('toast').className='';
+  let title,html='',btns='';const earn=g.pearls*(g.buff.double?2:1);SAVE.wallet+=earn;for(const k in g.caught)SAVE.fish[k]=(SAVE.fish[k]||0)+g.caught[k];persist();
+  const stat=(a,b)=>`<div class="stat"><span>${a}</span><span>${b}</span></div>`;
+  if(win){const L=g.L;title='关卡完成！';
+    html='<div class="big">'+stars.slice(0,3).map(s=>`<i class="st ${s?'f':''}"></i>`).join('')+(stars[3]?'<i class="st f"></i>':'<i class="st x">?</i>')+'</div>'
+      +stat('收集珍珠',g.pearls+' 颗')+stat('游泳距离',m+' 米')+stat('剩余生命',g.life+' 颗星')+stat('使用结界',g.shieldUsed+' 次')+stat('最高连击',g.maxCombo+' 次')
+      +'<div class="cond">'+[['完成目标：'+goalText(L,hi),1],[`收集 ${L.extra[hi]} 颗珍珠`,stars[1]],[`保留至少 ${hi?1:2} 颗星通关`,stars[2]],
+        [prev?`隐藏星：无伤通关并收集 ${L.extra[hi]} 颗珍珠`:'隐藏星：再次挑战时解锁',stars[3]]].map(([c,o])=>`<span class="${o?'ok':''}">${o?'✔':'○'} ${c}</span>`).join('')+'</div>';
+    btns=(g.li<LV.length-1?'<button class="btn mint" data-act="next">下一关</button>':'')+'<button class="btn sun" data-act="retry">再次挑战</button><button class="btn" data-act="menu">主菜单</button>';
+  }else{
+    title={shark:'小鱼被鲨鱼吃掉了！',net:'小鱼没能逃出渔网…',hp:'星星用完了！',goal:'到终点了，但目标还没完成'}[g.cause]||'游戏结束';
+    if(endless){const sc=score(),b=SAVE.end,rec=sc>b.score;b.score=Math.max(b.score,sc);b.dist=Math.max(b.dist,m);b.combo=Math.max(b.combo,g.maxCombo);persist();
+      html=(rec?'<h3>🎉 新纪录！</h3>':'')+stat('本次得分',sc+' 分')+stat('本次距离',m+' 米')+stat('收集珍珠',g.pearls+' 颗')+stat('最高连击',g.maxCombo+' 次')+stat('历史最高',b.score+' 分 · '+b.dist+' 米');
+    }else html=stat('目标',goalText(g.L,hi))+stat('本次距离',m+' 米')+stat('收集珍珠',g.pearls+' 颗')+(g.L.goal.k==='rescue'?stat('救出伙伴',g.rescued+' 条'):'')+stat('最高连击',g.maxCombo+' 次')
+      +(g.cause==='shark'?'<div class="cond"><span>小提示：看到红色水带，马上游到水带外面。结界挡不住鲨鱼哦！</span></div>':'');
+    btns='<button class="btn mint" data-act="retry">再来一次</button><button class="btn" data-act="menu">主菜单</button>';
+  }
+  html+=`<div class="stat"><span>存入钱包</span><span>+${earn} 💎${g.buff.double?'（双倍）':''}（共 ${SAVE.wallet}）</span></div>`;html+=`<div class="stat"><span>捕到的鱼</span><span>${Object.entries(g.caught).map(([k,n])=>FISH[k].n+'×'+n).join(' ')||'没有'}</span></div>`;btns+='<button class="btn sun" data-act="shop">商店</button><button class="btn mint" data-act="kit">小馆</button>';
+  $('endTitle').textContent=title;$('endCard').innerHTML=html;$('endBtns').innerHTML=btns;show('sEnd')}
+function pause(){if(state!=='play')return;state='pause';hold=false;show('sPause')}
+
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{SFX.tap();const m=b.dataset.mode;
+  if(m==='hard'&&!hardOpen()){toast('先通关普通模式的全部 5 关，才能挑战困难模式',2.8);return}
+  if(m==='endless'&&!endOpen()){toast('先通关第 1 关「珊瑚湾」，再来无限模式',2.8);return}
+  m==='endless'?startGame(m,0):showLevels(m)});
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>show(b.dataset.go));
+$('bHelp').onclick=()=>show('sHelp');
+$('bMusic').onclick=()=>{SAVE.music=SAVE.music===0?1:0;persist();refreshMenu();SFX.tap()};
+$('bMute').onclick=()=>{SAVE.mute=SAVE.mute?0:1;persist();refreshMenu();SFX.tap()};
+$('lvGrid').onclick=e=>{const b=e.target.closest('.lv');if(b&&!b.disabled)launch($('lvGrid').dataset.mode,+b.dataset.lv)};
+$('bPause').onclick=pause;
+$('bResume').onclick=()=>{show('');state='play'};
+$('bRestart').onclick=()=>startGame(...lastArgs);
+$('bQuit').onclick=toMenu;
+$('endBtns').onclick=e=>{const a=e.target.dataset.act;if(a==='retry')startGame(...lastArgs);else if(a==='next')launch(lastArgs[0],lastArgs[1]+1);else if(a==='menu')toMenu();else if(a==='shop'){toMenu();showShop()}else if(a==='kit'){toMenu();showKitchen()}};
+
+cv.addEventListener('pointerdown',e=>{e.preventDefault();if(!tryCatch(e))press()});
+window.addEventListener('pointerup',()=>{hold=false});window.addEventListener('pointercancel',()=>{hold=false});
+window.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp'){if(state==='play'){e.preventDefault();if(!e.repeat)press()}}else if(e.code==='Escape'||e.code==='KeyP')pause()});
+window.addEventListener('keyup',e=>{if(e.code==='Space'||e.code==='ArrowUp')hold=false});
+window.addEventListener('resize',resize);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()});
+cv.addEventListener('contextmenu',e=>e.preventDefault());
+
+/* ---------- story & restaurant ---------- */
+SAVE=Object.assign({story:{},rep:0,orders:{day:'',list:[]}},SAVE);SAVE.inv=SAVE.inv||{};
+const cleared=li=>SAVE.simple.st[li]>0||SAVE.hard.st[li]>0;
+const STORY={
+ pro:[['旁白','海边的渔村里有个孩子，大家都叫这孩子“小鱼”。','shore'],['旁白','奶奶留下一封没写去向的信，离开了村子。海边小馆的钥匙，就压在信的下面。','dLetter'],['奶奶的信','小鱼，馆子交给你了。记住我们家的规矩：今天有几位客人，就带几条鱼回来。','dLetter'],['旁白','围裙口袋里有一枚贝壳吊坠。戴上它走进海里——小鱼真的变成了一条小鱼。','s0fish']],
+ pre0:[['老龟','这枚吊坠……你是她家的孩子吧？','s0turtle'],['老龟','珊瑚湾的颜色一年比一年淡了。先学会游吧，跟着珍珠走。','s0turtle'],['小鱼','带圆圈的鱼可以带回小馆。奶奶说过，只取所需。','s0turtle']],
+ post0:[['阿潮','烤沙丁鱼？……像你奶奶的味道。','dAchao'],['阿潮','小馆重新开张了，我每天都来。','dAchao'],['旁白','珊瑚湾的珊瑚，好像红了一点。','s0ok']],
+ pre1:[['小鱼','奶奶的菜谱本缺了几页。日记里说，掉在沉船那边了。','dKid'],['墨墨','站住！沉船是我的地盘。想进去？先躲得过那些渔网再说。','s1octo']],
+ post1:[['墨墨','这道菜……行吧，残页还你。以后缺什么，来我的杂货铺。','s1octo2'],['小满','小鱼！我来帮你跑堂，管饭就行！','dMan'],['旁白','沉船周围的渔网，少了一些。','s1ok']],
+ pre2:[['小鱼','这道老菜要用深海的鱼。','dKid'],['老龟','深海有一头大白鲨，叫大白。看见红色的水带，立刻躲开。','s2turtle']],
+ post2:[['小鱼','它为什么一直追我？','s2turtle'],['老龟','深海以前不是这样空的。饿着肚子的，不只是你的客人。','s2turtle'],['旁白','深海里，亮起了几点微光。','s2ok']],
+ pre3:[['小鱼','日记的最后一页，画着一头鲸。','dKid'],['鲸婆婆','你奶奶年轻的时候，也戴着这枚吊坠来看我。','s3whale'],['鲸婆婆','我最后一次见她，她往更远的海去了。这道结界，我替她交给你。','s3whale'],['旁白','获得了鲸鱼结界。','s3whale']],
+ post3:[['旁白','冰海上，一艘大船放下的渔网望不到头。船头站着一个人。','ice'],['阿潮','远洋号……船长叫海生。是我儿子。','shAchao'],['旁白','村里有几户渔民，开始照奶奶的规矩捕鱼了。','shOk']],
+ pre4:[['老龟','远洋号用黄色的墙把鱼群围在了海沟里。小海龟和海马也困在里面。','s4turtle'],['小鱼','我去救它们。','s4turtle']],
+ post4:[['旁白','大白又追了上来。这一次，小鱼没有逃。','s4shark'],['小鱼','你只是饿了，对吗？等我一下。','s4shark'],['旁白','小鱼回到岸上做了一道菜，带回海里。大白吃完，转身撞开了黄色的墙。','s4dish'],['海生','……爹，我回来了。我在远海，见过一位戴贝壳吊坠的老人。','shEnd'],['旁白','五片海都恢复了颜色。奶奶去了哪里？那是以后的故事。','s4ok']]};
+let stQ=null,lastUsed=[];
+function stShow(){const l=stQ.lines[stQ.i];$('stWho').textContent=l[0];$('stText').textContent='';stQ.n=0;stQ.k=-1}
+function playStory(lines,done){cutCur='';stQ={lines,i:0,done,n:0,k:-1};show('sStory');stShow()}
+$('sStory').onclick=e=>{if(!stQ)return;if(e.target.id==='stSkip')return;{const l=stQ.lines[stQ.i];if(stQ.n<l[1].length){stQ.n=l[1].length;stQ.k=-1;$('stText').textContent=l[1];return}stQ.i++}SFX.tap();
+  if(stQ.i>=stQ.lines.length){const d=stQ.done;stQ=null;show('');d()}else stShow()};
+const seenLines=k=>STORY[k].filter(l=>l[1]!=='获得了鲸鱼结界。');
+function launch(mode,li){const k='pre'+li,first=!SAVE.story[k];if(!first&&!SAVE.always){startGame(mode,li);return}
+  playStory(first?STORY[k]:seenLines(k),()=>{SAVE.story[k]=1;if(li===3&&first)SAVE.inv.whale=(SAVE.inv.whale||0)+1;persist();startGame(mode,li)})}
+{let skT=0;const sk=$('stSkip'),off=()=>{clearTimeout(skT);sk.classList.remove('hold')};
+ sk.addEventListener('pointerdown',()=>{sk.classList.add('hold');skT=setTimeout(()=>{off();if(stQ){const d=stQ.done;stQ=null;show('');SFX.tap();d()}},650)});
+ ['pointerup','pointerleave','pointercancel'].forEach(ev=>sk.addEventListener(ev,off))}
+const GAL=[['pro','序章 · 吊坠'],['pre0','第一章 珊瑚湾 · 开场'],['post0','第一章 珊瑚湾 · 结尾'],['pre1','第二章 沉船秘境 · 开场'],['post1','第二章 沉船秘境 · 结尾'],['pre2','第三章 深海追逐 · 开场'],['post2','第三章 深海追逐 · 结尾'],['pre3','第四章 冰海之旅 · 开场'],['post3','第四章 冰海之旅 · 结尾'],['pre4','第五章 黄金海沟 · 开场'],['post4','第五章 黄金海沟 · 结局']];
+function showGallery(){$('galList').innerHTML=GAL.map(([k,n])=>SAVE.story[k]?`<button class="btn" data-gal="${k}" style="text-align:start">▶ ${n}</button>`:`<button class="btn locked" disabled style="text-align:start">🔒 ${n.split(' · ')[0]} · 尚未看到</button>`).join('');show('sGal')}
+$('galList').onclick=e=>{const b=e.target.closest('[data-gal]');if(b){SFX.tap();playStory(seenLines(b.dataset.gal),showGallery)}};
+$('bStory').onclick=()=>{SFX.tap();showGallery()};
+$('bAlways').onclick=()=>{SAVE.always=SAVE.always?0:1;persist();refreshMenu();SFX.tap()};
+const FTIER={sard:0,bream:0,yellow:0,salmon:1,mack:1,eel:1,puffer:2,tuna:2,angler:2,saury:2,cod:3,gold:4,sword:4};
+const dishTier=d=>Math.max(...Object.keys(d.need).map(k=>FTIER[k]));
+const REPLV=[0,60,160,320,560,900],RESTN=['一张桌子','街角小馆','村里的招牌','游客必到','海边名店','传说中的味道'];
+const restLv=()=>REPLV.filter(x=>SAVE.rep>=x).length;
+const chN=()=>{let n=0;while(n<5&&cleared(n))n++;return n};
+const hardOpen=()=>SAVE.simple.st.every(x=>x>0),endOpen=()=>SAVE.simple.st[0]>0||SAVE.hard.st[0]>0;
+const UNL={d1:[0,1],d2:[0,1],d25:[0,1],d3:[0,2],d10:[0,2],d11:[0,3],d12:[0,3],
+ d14:[1,1],d4:[1,1],d33:[1,2],d15:[1,2],d5:[1,3],d28:[1,3],d13:[1,3],d32:[1,4],d16:[1,4],
+ d17:[2,2],d27:[2,2],d7:[2,3],d26:[2,3],d19:[2,3],d6:[2,4],d34:[2,4],d20:[2,4],d18:[2,4],d8:[2,5],d21:[2,5],d22:[2,5],
+ d29:[3,3],d30:[3,4],d31:[3,4],d23:[3,5],d9:[3,5],d35:[4,4],d36:[4,5],d24:[4,6]};
+const unlocked=d=>{const u=UNL[d.id]||[0,1];return chN()>=u[0]&&restLv()>=u[1]};
+const lockWhy=d=>{const u=UNL[d.id]||[0,1];return chN()<u[0]?`通关第 ${u[0]} 关解锁`:`小馆 Lv.${u[1]} 解锁`};
+const ITEM_CH={gold:0,life:0,magnet:0,slow:0,netbag:1,bait:1,scissors:1,double:2,radar:2,revive:3,whale:3};
+const hasFish=d=>Object.entries(d.need).every(([k,n])=>(SAVE.fish[k]||0)>=n);
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
+function ensureOrders(){const o=SAVE.orders;if(o.day===today())return;const lv=restLv(),n=lv>=6?5:lv>=4?4:lv>=2?3:2;
+  const pool=DISH.filter(d=>unlocked(d)&&Object.keys(d.need).length<=3),cs=['阿潮','渔婆阿梅','邮递员小海','灯塔的老周','外地游客'];if(SAVE.story.post4)cs[4]='海生';
+  const sh=pool.slice().sort(()=>Math.random()-.5);o.day=today();o.bonus=0;o.list=[];for(let i=0;i<n;i++)o.list.push({d:sh[i%sh.length].id,c:cs[i%cs.length],done:0});persist()}
+function addRep(n){const a=restLv();SAVE.rep+=n;const b=restLv();if(b>a)setTimeout(()=>toast(`小馆升到 Lv.${b}「${RESTN[b-1]}」！有新菜谱了`,3),2500)}
+function cookDish(d,order){for(const k in d.need)SAVE.fish[k]-=d.need[k];const first=!SAVE.dishes[d.id];let gain=first?d.p*2:d.p;if(order)gain=d.p*2;
+  SAVE.dishes[d.id]=(SAVE.dishes[d.id]||0)+1;SAVE.wallet+=gain;addRep(order?15:Math.round(d.p/5));SFX.win();return{gain,first}}
+
+/* ---------- pixel cutscenes ---------- */
+const pcv=document.createElement('canvas'),px=pcv.getContext('2d');let CW=98,CH2=195,cutT=0,cutCur='',cutFade=0;
+const R=(x,y,w,h,c)=>{px.fillStyle=c;px.fillRect(Math.round(x),Math.round(y),Math.round(w),Math.round(h))};
+const El=(cx,cy,rx,ry,c)=>{px.fillStyle=c;cx=Math.round(cx);cy=Math.round(cy);for(let y=-ry;y<=ry;y++){const w=Math.round(rx*Math.sqrt(Math.max(0,1-(y*y)/(ry*ry+.3))));px.fillRect(cx-w,cy+y,w*2+1,1)}};
+const hx=c=>[1,3,5].map(i=>parseInt(c.slice(i,i+2),16)),mixc=(a,b,t)=>{const A=hx(a),B=hx(b);return'#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('')};
+const HT=["....HHHH....","...HHHHHH...","..HHHHHHHH..","..HSSSSSSH..","..SSKSSKSS..","..SSSSSSSS..","...SSDDSS...","....TTTT....","..TTTTTTTT..",".ATTTTTTTTA.",".ATTTTTTTTA.",".S.TTTTTT.S.","...LLLLLL...","...LL..LL...","...LL..LL...","..FFF..FFF.."];
+const PEOPLE={kid:{H:'#5a3a22',T:'#ff9f1c',L:'#3f6fb0',D:'#ffd9b3',pend:1},achao:{H:'#e8e2d0',T:'#3f7f9a',L:'#5a4a3a',D:'#f4f4f4',hat:'#d9b45a'},
+ xiaoman:{H:'#2c2c3a',T:'#4fc98a',L:'#7a4a8a',D:'#ffd9b3'},haisheng:{H:'#2c2c3a',T:'#27406e',L:'#1f2c44',D:'#ffd9b3',hat:'#f4f4f4'}};
+function human(k,x,y,flip){const P=PEOPLE[k];x=Math.round(x-6);y=Math.round(y-16);
+  for(let r=0;r<16;r++)for(let c=0;c<12;c++){const ch=HT[r][flip?11-c:c];if(ch==='.')continue;
+    let col=ch==='H'?P.H:ch==='S'||ch==='A'?'#ffd9b3':ch==='K'?'#1b2a41':ch==='T'?P.T:ch==='L'?P.L:ch==='F'?'#3a2a20':P.D;if(P.hat&&r<2)col=P.hat;R(x+c,y+r,1,1,col)}
+  if(P.hat)R(x+1,y+2,10,1,mixc(P.hat,'#000000',.2));if(P.pend){R(x+5,y+8,2,1,'#fff27a');R(x+5,y+9,2,1,'#f0b400')}}
+const SPR={
+ fish(x,y,f,t){const d=f?-1:1,w=Math.sin(t*9)>0?1:0;R(x-d*9-(d<0?1:0),y-3+w,2,6-w,'#ff7f1f');R(x-d*7-(d<0?0:0),y-2,1,4,'#ff7f1f');El(x,y,6,4,'#ffa01f');R(x-3,y+2,6,1,'#ffd36b');R(x-1,y-5,3,1,'#ff7f1f');
+   R(x+d*3-(d<0?1:0),y-2,2,2,'#ffffff');R(x+d*4-(d<0?0:0),y-1,1,1,'#1b2a41')},
+ turtle(x,y,f,t){const d=f?-1:1,w=Math.sin(t*4)>0?1:0;R(x-5,y+3+w,3,2,'#8fe09a');R(x+3,y+3+(1-w),3,2,'#8fe09a');El(x+d*9,y-1,2,2,'#8fe09a');R(x+d*10,y-2,1,1,'#1b2a41');
+   El(x,y,7,4,'#3f9a55');R(x-4,y-3,8,1,'#5fc070');R(x-2,y-1,1,3,'#2c7440');R(x+2,y-1,1,3,'#2c7440')},
+ octo(x,y,f,t){for(let i=0;i<5;i++){const w=Math.round(Math.sin(t*4+i)*1);R(x-6+i*3+w,y+2,2,5,'#9a6ad6');R(x-6+i*3+w*2,y+7,2,2,'#7d4fbf')}El(x,y-3,6,5,'#b57af2');R(x-3,y-7,3,1,'#d9bdfa');
+   R(x-4,y-3,2,2,'#ffffff');R(x+2,y-3,2,2,'#ffffff');R(x-3+(f?-1:0),y-2,1,1,'#1b2a41');R(x+3+(f?-1:0),y-2,1,1,'#1b2a41')},
+ whale(x,y,f,t){const d=f?-1:1,w=Math.sin(t*2)>0?1:0;R(x-d*22-(d<0?3:0),y-6+w,4,4,'#3f6aa8');R(x-d*22-(d<0?3:0),y+1+w,4,3,'#3f6aa8');R(x-d*19-(d<0?2:0),y-2,3,4,'#3f6aa8');
+   El(x,y,18,8,'#4a78b8');El(x+d*2,y+5,14,3,'#cfe4f7');R(x+d*11-(d<0?1:0),y-3,2,2,'#ffffff');R(x+d*12-(d<0?0:0),y-2,1,1,'#1b2a41');R(x+d*10-(d<0?2:0),y-5,3,1,'#cfe4f7');
+   if(Math.sin(t*1.5)>.3){R(x+d*4,y-12,1,3,'#dff4ff');R(x+d*3,y-13,3,1,'#dff4ff')}},
+ shark(x,y,f,t){const d=f?-1:1,w=Math.sin(t*6)>0?1:0;R(x-d*18-(d<0?2:0),y-5+w,3,10-w,'#5f7fa3');R(x-d*16-(d<0?1:0),y-2,2,4,'#5f7fa3');El(x,y,15,5,'#7399c0');El(x+d*2,y+3,11,2,'#eef6fb');
+   for(let i=0;i<5;i++)R(x-d*2+i-2,y-6-i,5-i,1,'#5f7fa3');R(x+d*9-(d<0?4:0),y+1,5,2,'#b3263a');for(let i=0;i<3;i++)R(x+d*9+(i*2-2)*1,y+1,1,1,'#ffffff');
+   R(x+d*8-(d<0?1:0),y-3,2,2,'#ffffff');R(x+d*9-(d<0?0:0),y-2,1,1,'#1b2a41')},
+ ship(x,y,f,t){const b=Math.round(Math.sin(t*1.5)*1);y+=b;for(let i=0;i<5;i++)R(x-20+i,y-5+i,40-i*2,1,'#5f7080');R(x-20,y-6,40,1,'#3d4a58');R(x-8,y-14,14,8,'#f1f1f1');R(x-6,y-12,3,3,'#3fa9d8');R(x,y-12,3,3,'#3fa9d8');
+   R(x+8,y-19,4,13,'#b3263a');R(x+8,y-19,4,2,'#3d4a58');R(x-18,y-16,1,10,'#3d4a58');for(let i=0;i<7;i++){R(x-19+i*2-14,y-1,1,9,'#f5e6c0')}for(let j=0;j<4;j++)R(x-33,y+j*2+1,14,1,'#f5e6c0')},
+ letter(x,y,f,t){R(x-5,y-7,10,7,'#ffffff');R(x-5,y-7,10,1,'#d9d2c0');R(x-3,y-5,6,1,'#9aa8b5');R(x-3,y-3,5,1,'#9aa8b5');R(x+2,y-2,2,2,'#e0503f')},
+ pendant(x,y,f,t){El(x,y,3,2,'#fff27a');R(x-1,y-4,2,2,'#f0b400');R(x-2,y,1,2,'#f0b400');R(x+1,y,1,2,'#f0b400');if(Math.sin(t*6)>0){R(x-6,y-5,1,1,'#ffffff');R(x+5,y+3,1,1,'#ffffff');R(x+6,y-3,1,1,'#ffffff')}},
+ dish(x,y,f,t){R(x-5,y-2,10,2,'#ffffff');R(x-3,y-4,6,2,'#ff9a6a');R(x-1,y-5,3,1,'#ffd36b');if(Math.sin(t*3)>0)R(x,y-8,1,2,'#ffffff');else R(x+1,y-9,1,2,'#ffffff')},
+ book(x,y,f,t){R(x-5,y-6,10,6,'#8a5a2b');R(x-4,y-5,8,4,'#fff3d6');R(x,y-5,1,4,'#8a5a2b')}};
+const WHO={'小鱼':['kid','fish'],'阿潮':['achao'],'小满':['xiaoman'],'海生':['haisheng'],'老龟':['turtle'],'墨墨':['octo'],'鲸婆婆':['whale'],'奶奶的信':['letter']};
+const SCN={
+ shore:{bg:'shore',cast:[['kid',.38,'g']]},dLetter:{bg:'diner',cast:[['kid',.28,'g'],['letter',.7,'c']]},
+ s0fish:{bg:'sea',i:0,fd:1,cast:[['fish',.5,.3],['pendant',.5,.2]]},s0turtle:{bg:'sea',i:0,fd:1,cast:[['fish',.27,.3],['turtle',.72,.34,1]]},
+ dAchao:{bg:'diner',cast:[['kid',.26,'g'],['achao',.52,'g',1],['dish',.78,'c']]},s0ok:{bg:'sea',i:0,cast:[['turtle',.6,.3,1]]},
+ dKid:{bg:'diner',cast:[['kid',.36,'g'],['book',.72,'c']]},s1octo:{bg:'sea',i:1,fd:1,cast:[['fish',.25,.3],['octo',.72,.31,1]]},s1octo2:{bg:'sea',i:1,cast:[['fish',.25,.3],['octo',.6,.31,1],['dish',.42,.33]]},
+ dMan:{bg:'diner',cast:[['kid',.26,'g'],['xiaoman',.52,'g',1]]},s1ok:{bg:'sea',i:1,cast:[['octo',.7,.33,1]]},
+ s2turtle:{bg:'sea',i:2,fd:1,cast:[['fish',.27,.3],['turtle',.72,.34,1]]},s2ok:{bg:'sea',i:2,cast:[['shark',.72,.2,1]]},
+ s3whale:{bg:'sea',i:3,fd:1,cast:[['fish',.18,.36],['whale',.66,.25,1]]},ice:{bg:'shore',ice:1,cast:[['ship',.58,'h'],['haisheng',.4,'d']]},
+ shAchao:{bg:'shore',cast:[['kid',.24,'g'],['achao',.46,'g'],['ship',.3,'h']]},shOk:{bg:'shore',cast:[['achao',.3,'g'],['xiaoman',.5,'g',1]]},
+ s4turtle:{bg:'sea',i:4,fd:1,cast:[['fish',.27,.3],['turtle',.72,.34,1]]},s4shark:{bg:'sea',i:4,fd:1,cast:[['fish',.24,.32],['shark',.7,.28,1]]},
+ s4dish:{bg:'sea',i:4,fd:1,cast:[['fish',.24,.32],['dish',.44,.33],['shark',.7,.28,1]]},
+ shEnd:{bg:'shore',dusk:1,cast:[['kid',.16,'g'],['achao',.36,'g'],['haisheng',.56,'g',1],['xiaoman',.8,'g',1]]},s4ok:{bg:'sea',i:4,cast:[['shark',.3,.22],['turtle',.7,.34,1],['whale',.6,.12,1]]}};
+function bgShore(t,gy,hy,o){
+  const sky=o.dusk?['#ff9f6b','#ffe0a0']:o.ice?['#b8d8ec','#eef8ff']:['#7fcbff','#dff4ff'];for(let i=0;i<6;i++)R(0,Math.floor(hy*i/6),CW,Math.ceil(hy/6)+1,mixc(sky[0],sky[1],i/5));
+  El(CW*(o.dusk?.78:.2),hy*(o.dusk?.8:.4),5,5,o.dusk?'#ff6b4a':'#fff27a');
+  for(let i=0;i<3;i++){const cx=((i*47+t*2.5)%(CW+30))-15,cy=hy*(.2+i*.22);El(cx,cy,6,2,'#ffffff');El(cx+4,cy-1,4,2,'#ffffff')}
+  const sea=o.dusk?['#c9668a','#7a4a9a']:o.ice?['#8fc4e0','#5f9cc4']:['#3fa9d8','#2f8fc4'];R(0,hy,CW,gy-hy,sea[0]);R(0,hy+Math.floor((gy-hy)/2),CW,gy-hy,sea[1]);
+  for(let i=0;i<9;i++){const y=hy+1+(i*5)%(gy-hy-1),x=((i*23+t*(4+i%3))%(CW+8))-4;R(x,y,4,1,'#bfe6ff')}
+  if(o.ice){for(let i=0;i<5;i++){const x=((i*29-t*1.5)%(CW+20)+CW+20)%(CW+20)-10;R(x,hy+3+(i*7)%(gy-hy-6),8+i%3*3,2,'#ffffff')}R(0,gy,CW,CH2-gy,'#e6f4fb');R(0,gy,CW,2,'#ffffff');return}
+  R(0,gy,CW,CH2-gy,o.dusk?'#e0b080':'#f3d9a0');R(0,gy,CW,1,'#fff3d6');for(let i=0;i<14;i++)R((i*37)%CW,gy+3+(i*11)%30,2,1,'#d9b98a');
+  for(let i=0;i<3;i++){R(4+i*6,hy+4,1,gy-hy-2,'#6b4226')}R(2,hy+4,18,2,'#8a5a2b');
+  const hxp=Math.round(CW*.74);R(hxp-11,gy-15,23,15,'#fff3d6');for(let i=0;i<6;i++)R(hxp-13+i*2,gy-16-i,27-i*4,1,'#e0503f');R(hxp-3,gy-9,6,9,'#8a5a2b');R(hxp+5,gy-11,5,4,'#7fcbff');R(hxp-10,gy-11,5,4,'#7fcbff');
+  R(hxp-6,gy-22,13,5,'#27406e');R(hxp-3,gy-21,5,3,'#ffa01f');R(hxp-5,gy-20,2,1,'#ffa01f');R(hxp+3,gy-20,1,1,'#ffffff')}
+function bgDiner(t,gy){
+  R(0,0,CW,gy,'#f6e7c4');R(0,gy-12,CW,12,'#d9b98a');R(0,gy-12,CW,1,'#b8935e');R(0,gy,CW,CH2-gy,'#b07a44');for(let i=0;i<8;i++)R(0,gy+6+i*9,CW,1,'#8f5f33');
+  R(7,12,30,20,'#8a5a2b');R(9,14,26,16,'#7fcbff');R(9,23,26,7,'#3fa9d8');R(21,14,1,16,'#8a5a2b');for(let i=0;i<3;i++)R(((i*11+t*3)%22)+10,25+i,3,1,'#bfe6ff');
+  const sw=Math.round(Math.sin(t*1.2)*2),lx=Math.round(CW*.5);R(lx,0,1,9,'#5a4a3a');R(lx-4+sw,9,9,3,'#ffd23f');R(lx-2+sw,12,5,1,'#fff27a');
+  const cx=Math.round(CW*.58);R(cx,gy-10,CW-cx,10,'#8a5a2b');R(cx,gy-10,CW-cx,2,'#b07a44');
+  R(cx+4,10,CW-cx-8,2,'#8a5a2b');for(let i=0;i<4;i++)R(cx+7+i*7,4,3,6,['#4fc98a','#e0503f','#ffd23f','#3fa9d8'][i])}
+function bgSea(t,gy,o){
+  const T=TH[o.i],c=x=>o.fd?mixc(x,'#8f9aa3',.5):x,fl=Math.round(gy*1.12);
+  for(let i=0;i<8;i++)R(0,Math.floor(fl*i/8),CW,Math.ceil(fl/8)+1,c(mixc(T.top,T.bot,i/7)));
+  if(o.i<2||o.i===4)for(let i=0;i<3;i++){const x=(i*37+10)%CW;for(let y=0;y<fl;y+=2)R(x-y*.35+Math.sin(t+i)*2,y,3,1,'rgba(255,255,255,.07)')}
+  for(let x=0;x<CW;x++){const h=Math.round(8+Math.sin(x*.11)*4+Math.sin(x*.31+2)*3);R(x,fl-h,1,h,c(T.far))}
+  for(let x=0;x<CW;x++){const h=Math.round(4+Math.sin(x*.17+1)*2+Math.sin(x*.4)*2);R(x,fl-h,1,h,c(T.mid))}
+  R(0,fl,CW,CH2-fl,c(T.sand));R(0,fl,CW,1,c(mixc(T.sand,'#ffffff',.4)));
+  if(o.i===0||o.i===4)for(let i=0;i<5;i++){const x=6+i*((CW-12)/4),col=c(o.i===4?'#f4bb3a':['#ff8f80','#ff7fb0','#ffb24d'][i%3]);R(x,fl-7,2,7,col);R(x-3,fl-5,2,5,col);R(x+3,fl-6,2,6,col);R(x-3,fl-2,8,2,col)}
+  if(o.i===1){const x=Math.round(CW*.42);for(let i=0;i<7;i++)R(x-16+i,fl-9+i,34-i*2,1,c('#7d5229'));R(x-16,fl-10,34,1,c('#5a3a1a'));R(x-2,fl-26,2,17,c('#5a3a1a'));R(x-9,fl-22,16,2,c('#5a3a1a'));R(x+6,fl-7,3,3,c('#2a1a0a'))}
+  if(o.i===2)for(let i=0;i<(o.fd?5:14);i++)if(Math.sin(t*2+i*1.7)>-.2)R((i*29)%CW,(i*17)%fl,1,1,'#8ff0ff');
+  if(o.i===3)for(let i=0;i<7;i++){const x=i*(CW/6),h=6+(i*5)%9;for(let j=0;j<h;j++)R(x-(h-j)/2,j,h-j,1,'#ffffff')}
+  if(o.i===4&&o.fd){const x=Math.round(CW*.88);R(x,0,4,fl,Math.sin(t*8)>0?'#fff27a':'#ffd23f');R(x+1,0,2,fl,'#ffffff')}
+  for(let i=0;i<7;i++){const x=(i*31+7)%CW,y=fl-((t*(7+i%3*2)+i*23)%fl);R(x,y,2,1,'rgba(255,255,255,.55)');R(x,y+2,2,1,'rgba(255,255,255,.55)');R(x-1,y+1,1,1,'rgba(255,255,255,.55)');R(x+2,y+1,1,1,'rgba(255,255,255,.55)')}}
+function drawCut(dt){
+  const q=stQ,ln=q.lines[q.i];cutT+=dt;const t=cutT,id=ln[2]||'shore',sc=SCN[id]||SCN.shore;if(id!==cutCur){cutCur=id;cutFade=1}cutFade=Math.max(0,cutFade-dt*3);
+  if(q.n<ln[1].length){q.n=Math.min(ln[1].length,q.n+dt*26);const k=Math.floor(q.n);if(k!==q.k){q.k=k;$('stText').textContent=ln[1].slice(0,k)}}
+  const ps=Math.max(2,Math.ceil(Math.max(W,H)/150));CW=Math.ceil(W/ps);CH2=Math.ceil(H/ps);if(pcv.width!==CW||pcv.height!==CH2){pcv.width=CW;pcv.height=CH2}
+  const cr=$('sStory').querySelector('.card').getBoundingClientRect(),gy=Math.round(Math.min(CH2*.6,Math.max(22,(cr.top-cv.getBoundingClientRect().top)/ps-9))),hy=Math.round(gy*.66);
+  if(sc.bg==='shore')bgShore(t,gy,hy,sc);else if(sc.bg==='diner')bgDiner(t,gy);else bgSea(t,gy,sc);
+  const sp=WHO[ln[0]]||[];
+  (sc.cast||[]).forEach((a,i)=>{const[k,xf,yf,fl]=a,talk=sp.includes(k)&&q.n<ln[1].length;let x=Math.round(CW*xf),y;
+    if(PEOPLE[k]){y=yf==='d'?hy-2:gy+5;human(k,x,y-(talk&&Math.sin(t*14)>0?1:0),fl)}
+    else{y=yf==='g'?gy:yf==='c'?gy-10:yf==='h'?hy+3:Math.round(gy*2*yf);if(typeof yf==='number'&&k!=='pendant')y+=Math.round(Math.sin(t*2+i*2)*1.5);if(talk)y-=Math.sin(t*14)>0?1:0;SPR[k](x,y,fl,t)}});
+  R(0,0,CW,Math.round(CH2*.045),'#0b1a2a');
+  if(cutFade>0){px.fillStyle=`rgba(11,26,42,${Math.ceil(cutFade*4)/4})`;px.fillRect(0,0,CW,CH2)}
+  ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.imageSmoothingEnabled=false;ctx.drawImage(pcv,0,0,CW,CH2,0,0,CW*ps*cv.width/W,CH2*ps*cv.width/W);ctx.restore()}
+
+/* ---------- i18n ---------- */
+SAVE.lang=SAVE.lang||'zh';
+const DICT={};`按住屏幕向上游，松开慢慢下沉|Hold to swim up, let go to sink|画面を押すと上へ、はなすとゆっくり下へ|Держи палец — плыви вверх, отпусти — вниз|اضغط لتسبح للأعلى، واترك لتنزل ببطء
+普通模式|Normal mode|ふつうモード|Обычный режим|الوضع العادي
+轻松出发，快乐学游泳！|Take it easy and learn to swim!|のんびり泳ぎをおぼえよう！|Спокойно учимся плавать!|انطلق بهدوء وتعلّم السباحة!
+困难模式|Hard mode|むずかしいモード|Сложный режим|الوضع الصعب
+挑战极限，成为海底高手！|Push your limits, sea master!|限界にチャレンジしよう！|Испытай себя, мастер глубин!|تحدَّ نفسك وكن بطل البحر!
+无限模式|Endless mode|エンドレスモード|Бесконечный режим|الوضع اللانهائي
+不停向前，刷新你的纪录！|Keep going and beat your record!|どこまでも進んで記録更新！|Плыви вперёд и побей рекорд!|اسبح بلا توقف وحطّم رقمك!
+商店 · 💎|Shop · 💎|ショップ · 💎|Магазин · 💎|المتجر · 💎
+海边小馆|Kitchen|キッチン|Кухня|المطبخ
+玩法说明|How to play|あそびかた|Как играть|طريقة اللعب
+设置|Settings|せってい|Настройки|الإعدادات
+语言|Language|ことば|Язык|اللغة
+声音|Sound|サウンド|Звук|الصوت
+返回主菜单|Main menu|メニューへ|В главное меню|القائمة الرئيسية
+墨墨的杂货铺|Sea Shop|うみのショップ|Морской магазин|متجر البحر
+我的珍珠 💎|My pearls 💎|もっている真珠 💎|Мой жемчуг 💎|لآلئي 💎
+保护道具（每局用掉一个）|Protection (one used per run)|おまもり（1プレイで1こ使う）|Защита (одна штука на заплыв)|الحماية (واحدة لكل جولة)
+帮手道具（每局用掉一个）|Helpers (one used per run)|おたすけ（1プレイで1こ使う）|Помощники (одна штука на заплыв)|المساعدات (واحدة لكل جولة)
+吊坠的变身（永久拥有）|Fish skins (yours forever)|スキン（ずっと使える）|Облики рыбки (навсегда)|أشكال السمكة (لك للأبد)
+我的鱼篓|My fish basket|さかなカゴ|Моя корзина с рыбой|سلة أسماكي
+小鱼的海底守则|Little Fish Rules|うみのルール|Правила рыбки|قواعد السمكة الصغيرة
+知道啦|Got it|わかった|Понятно|فهمت
+游戏暂停|Paused|ポーズ|Пауза|توقف مؤقت
+继续游戏|Resume|つづける|Продолжить|متابعة
+重新开始|Restart|やりなおす|Заново|إعادة
+结界已开启|Shield on|バリアON|Щит включён|الدرع يعمل
+🐋 鲸鱼结界|🐋 Whale shield|🐋 クジラバリア|🐋 Щит кита|🐋 درع الحوت
+金鱼结界|Goldfish shield|金魚バリア|Щит золотой рыбки|درع السمكة الذهبية
+出发就带着结界，挡一次普通危险|Start with a shield that blocks one normal danger|バリアつきでスタート。ふつうの危険を1回ふせぐ|Старт со щитом: спасает от одной обычной опасности|تبدأ بدرع يصدّ خطرًا عاديًا واحدًا
+鲸鱼结界|Whale shield|クジラバリア|Щит кита|درع الحوت
+连大鲨鱼也能挡住一次！|Blocks even a shark, once!|サメも1回ふせげる！|Один раз остановит даже акулу!|يصدّ حتى القرش مرة واحدة!
+生命星|Life star|ライフの星|Звезда жизни|نجمة الحياة
+出发时多带一颗星|Start with one extra star|星を1こ多くもってスタート|На старте на одну звезду больше|تبدأ بنجمة إضافية
+复活海星|Revive starfish|ふっかつヒトデ|Морская звезда-спасатель|نجم البحر المنقذ
+失败时复活一次，恢复 2 颗星|Revive once with 2 stars|やられても1回ふっかつ（星2こ）|Один раз оживит и вернёт 2 звезды|يعيدك مرة واحدة مع نجمتين
+渔网剪刀|Net scissors|あみ切りバサミ|Ножницы для сетей|مقص الشباك
+第一次被网住时自动剪开|Cuts the first net that catches you|さいしょのあみを自動で切る|Сами разрежут первую сеть|يقصّ أول شبكة تمسكك تلقائيًا
+鲨鱼雷达|Shark radar|サメレーダー|Радар акул|رادار القرش
+鲨鱼预警提前 1 秒|Shark warning comes 1 s earlier|サメの警告が1秒はやくなる|Предупреждение об акуле на 1 с раньше|تحذير القرش يظهر أبكر بثانية
+珍珠磁铁|Pearl magnet|真珠マグネット|Магнит для жемчуга|مغناطيس اللؤلؤ
+整局自动吸来附近的珍珠|Pulls in nearby pearls all run|近くの真珠をすいよせる|Весь заплыв притягивает жемчуг рядом|يجذب اللآلئ القريبة طوال الجولة
+双倍珍珠袋|Double pearl bag|2倍真珠ぶくろ|Мешочек «жемчуг ×2»|كيس اللؤلؤ المضاعف
+本局存入钱包的珍珠翻倍|Doubles the pearls you bank this run|このプレイでもらえる真珠が2倍|Удваивает жемчуг за этот заплыв|يضاعف لآلئ هذه الجولة
+捕鱼网兜|Fishing net|さかなとりあみ|Сачок|شبكة الصيد
+本局所有鱼点一下就能捕获|Catch any fish with one tap this run|どの魚も1タップでつかまえる|Любая рыба ловится одним касанием|تصطاد أي سمكة بلمسة واحدة
+幸运鱼饵|Lucky bait|ラッキーえさ|Счастливая наживка|الطُّعم المحظوظ
+本局游来的鱼多一倍|Twice as many fish this run|魚が2倍あらわれる|Рыбы в этом заплыве вдвое больше|ضعف عدد الأسماك في هذه الجولة
+慢慢游海藻|Slow seaweed|ゆっくり海そう|Медленная водоросль|عشبة البطء
+本局游得慢一点，更好躲|Swim a bit slower, easier to dodge|少しゆっくり泳げてよけやすい|Плывёшь чуть медленнее — легче уворачиваться|تسبح أبطأ قليلًا ليسهل التفادي
+橙色小鱼|Orange fish|オレンジのさかな|Оранжевая рыбка|السمكة البرتقالية
+蓝色小鱼|Blue fish|あおいさかな|Синяя рыбка|السمكة الزرقاء
+粉色小鱼|Pink fish|ピンクのさかな|Розовая рыбка|السمكة الوردية
+翡翠小鱼|Jade fish|ひすいのさかな|Изумрудная рыбка|السمكة الزمردية
+紫罗兰小鱼|Violet fish|すみれのさかな|Фиолетовая рыбка|السمكة البنفسجية
+墨墨小鱼|Inky fish|すみいろのさかな|Чернильная рыбка|السمكة الحبرية
+黄金小鱼|Golden fish|おうごんのさかな|Золотая рыбка|السمكة الذهبية
+沙丁鱼|Sardine|イワシ|Сардина|سردين
+鲷鱼|Sea bream|タイ|Морской лещ|دنيس
+三文鱼|Salmon|サーモン|Лосось|سلمون
+河豚|Pufferfish|フグ|Фугу|ينفوخ
+金枪鱼|Tuna|マグロ|Тунец|تونة
+小黄鱼|Yellow croaker|キグチ|Жёлтый горбыль|السمكة الصفراء
+秋刀鱼|Saury|サンマ|Сайра|صوري
+鲭鱼|Mackerel|サバ|Скумбрия|إسقمري
+鳕鱼|Cod|タラ|Треска|قد
+鳗鱼|Eel|ウナギ|Угорь|أنقليس
+鮟鱇鱼|Anglerfish|アンコウ|Удильщик|أبو الشص
+旗鱼|Swordfish|カジキ|Рыба-меч|سمكة السيف
+黄金鱼|Goldscale|おうごんうお|Златочешуйка|ذهبية الحراشف
+烤沙丁鱼|Grilled sardines|イワシの串焼き|Сардины на гриле|سردين مشوي
+鱼丸汤|Fish ball soup|つみれ汁|Суп с рыбными шариками|شوربة كرات السمك
+清蒸鲷鱼|Steamed sea bream|タイの蒸しもの|Лещ на пару|دنيس على البخار
+香煎三文鱼|Pan-fried salmon|サーモンのソテー|Жареный лосось|سلمون مقلي
+三文鱼寿司|Salmon sushi|サーモン寿司|Суши с лососем|سوشي السلمون
+河豚火锅|Pufferfish hot pot|ふぐ鍋|Горячий котёл с фугу|قدر الينفوخ الساخن
+金枪鱼刺身|Tuna sashimi|マグロの刺身|Сашими из тунца|ساشيمي التونة
+金枪鱼饭团|Tuna rice ball|ツナおにぎり|Онигири с тунцом|كرة أرز بالتونة
+海鲜大拼盘|Seafood platter|海鮮もりあわせ|Большое морское ассорти|طبق بحري مشكّل
+沙丁鱼罐头|Canned sardines|イワシの缶づめ|Консервы из сардин|سردين معلّب
+沙丁鱼披萨|Sardine pizza|イワシのピザ|Пицца с сардинами|بيتزا السردين
+红烧鲷鱼|Braised sea bream|タイの煮つけ|Тушёный лещ|دنيس مطهو
+鲷鱼茶泡饭|Sea bream ochazuke|鯛茶づけ|Рис с лещом и чаем|أرز بالدنيس والشاي
+三文鱼沙拉|Salmon salad|サーモンサラダ|Салат с лососем|سلطة السلمون
+三文鱼汉堡|Salmon burger|サーモンバーガー|Бургер с лососем|برغر السلمون
+三文鱼咖喱饭|Salmon curry rice|サーモンカレー|Карри с лососем|كاري السلمون بالأرز
+炸河豚块|Fried pufferfish bites|ふぐのからあげ|Жареные кусочки фугу|قطع الينفوخ المقلية
+河豚饺子|Pufferfish dumplings|ふぐギョーザ|Пельмени с фугу|زلابية الينفوخ
+海鲜粥|Seafood porridge|海鮮おかゆ|Морская каша|عصيدة بحرية
+金枪鱼三明治|Tuna sandwich|ツナサンド|Сэндвич с тунцом|شطيرة التونة
+金枪鱼卷饼|Tuna taco|ツナタコス|Тако с тунцом|تاكو التونة
+金枪鱼意面|Tuna pasta|ツナパスタ|Паста с тунцом|معكرونة التونة
+三鲜鱼糕|Three-fish cake|三色かまぼこ|Рыбный рулет «три вкуса»|كعكة السمك الثلاثية
+深海皇家宴|Royal deep-sea feast|深海ロイヤルごちそう|Королевский пир глубин|وليمة الأعماق الملكية
+香酥小黄鱼|Crispy yellow croaker|キグチのカリカリあげ|Хрустящий горбыль|السمكة الصفراء المقرمشة
+三色鱼丸串|Three-colour fish balls|三色つみれ串|Трёхцветные рыбные шарики|أسياخ كرات السمك الملونة
+盐烤秋刀鱼|Salt-grilled saury|サンマの塩焼き|Сайра на гриле с солью|صوري مشوي بالملح
+味噌鲭鱼|Miso mackerel|サバのみそ煮|Скумбрия в мисо|إسقمري بالميسو
+炸鳕鱼薯条|Fish and chips|フィッシュ＆チップス|Рыба с картошкой фри|سمك وبطاطا مقلية
+鳕鱼卷|Cod wrap|タラのラップサンド|Ролл с треской|لفافة القد
+冰海双拼|Icy sea duo|氷の海の二色もり|Дуэт ледяного моря|ثنائي البحر الجليدي
+蒲烧鳗鱼饭|Grilled eel rice|うな丼|Рис с жареным угрём|أرز بالأنقليس المشوي
+鳗鱼拉面|Eel ramen|うなぎラーメン|Рамен с угрём|رامن الأنقليس
+鮟鱇鱼锅|Anglerfish hot pot|あんこう鍋|Котёл с удильщиком|قدر أبو الشص
+香煎旗鱼排|Swordfish steak|カジキのステーキ|Стейк из рыбы-меч|شريحة سمكة السيف
+黄金鱼汤|Goldscale soup|おうごんスープ|Суп из златочешуйки|شوربة ذهبية الحراشف
+珊瑚湾|Coral Bay|サンゴの入り江|Коралловая бухта|خليج المرجان
+沉船秘境|Shipwreck Cove|ちんぼつ船のひみつ|Тайна затонувшего корабля|سر السفينة الغارقة
+深海追逐|Deep Sea Chase|深海のおいかけっこ|Погоня в глубине|مطاردة الأعماق
+冰海之旅|Icy Sea Journey|氷の海のたび|Путешествие по ледяному морю|رحلة البحر الجليدي
+黄金海沟|Golden Trench|おうごんの海こう|Золотая впадина|الخندق الذهبي
+深海|Deep Sea|深海|Глубокое море|أعماق البحر
+冰海|Icy Sea|氷の海|Ледяное море|البحر الجليدي
+章鱼触手发光时，离它远一点！|Stay away when the octopus glows!|タコの足が光ったらはなれよう！|Щупальца осьминога светятся — держись подальше!|ابتعد عن الأخطبوط حين تضيء أذرعه!
+渔网来了！绕开它游过去|A net! Swim around it|あみだ！よけて泳ごう|Сеть! Обойди её|شبكة! اسبح حولها
+黄色墙不能撞！跟着箭头走|Don't hit the yellow wall! Follow the arrows|黄色いかべにぶつからないで！矢印の方へ|Не врезайся в жёлтую стену! Плыви по стрелкам|لا تصطدم بالجدار الأصفر! اتبع الأسهم
+吃掉金鱼泡泡，获得结界保护！|Grab the goldfish bubble for a shield!|金魚のあわを取るとバリアがつくよ！|Поймай пузырь с золотой рыбкой — получишь щит!|التقط فقاعة السمكة الذهبية لتحصل على درع!
+水母会电人，别碰它！|Jellyfish sting, don't touch!|クラゲはビリビリ！さわらないで|Медуза жжётся, не трогай!|قنديل البحر يلسع، لا تلمسه!
+旋涡会把小鱼吸过去！|Whirlpools pull you in!|うずまきにすいこまれるよ！|Водоворот затягивает!|الدوامة تسحبك نحوها!
+小心漂动的冰块！|Watch out for drifting ice!|ながれる氷に気をつけて！|Осторожно, плавучие льдины!|احذر قطع الجليد العائمة!
+碰一碰泡泡，救出小伙伴！|Touch the bubble to rescue a friend!|あわにさわってなかまを助けよう！|Коснись пузыря и спаси друга!|المس الفقاعة لتنقذ صديقك!
+绕开礁石，跟着珍珠游！|Go around the rocks, follow the pearls!|岩をよけて真珠をたどろう！|Обходи скалы и плыви за жемчугом!|تجنّب الصخور واتبع اللآلئ!
+贝壳旗是检查点|The flag is a checkpoint|はたはチェックポイント|Флажок — это контрольная точка|العلم هو نقطة الحفظ
+无限模式：能游多远就游多远！|Endless: swim as far as you can!|エンドレス：行けるところまで泳ごう！|Бесконечный режим: плыви как можно дальше!|الوضع اللانهائي: اسبح لأبعد ما تستطيع!
+按住屏幕，让小鱼向上游！|Hold the screen to swim up!|画面を押して上へ泳ごう！|Держи палец на экране, чтобы плыть вверх!|اضغط على الشاشة لتسبح للأعلى!
+结界挡住了！|Shield blocked it!|バリアでふせいだ！|Щит спас!|الدرع صدّها!
+鲸鱼结界挡住了鲨鱼！|Whale shield stopped the shark!|クジラバリアがサメをふせいだ！|Щит кита остановил акулу!|درع الحوت صدّ القرش!
+鲸鱼结界挡住了！|Whale shield blocked it!|クジラバリアでふせいだ！|Щит кита спас!|درع الحوت صدّها!
+复活海星救了小鱼！|The starfish revived you!|ヒトデがふっかつさせてくれた！|Морская звезда тебя оживила!|نجم البحر أعادك للحياة!
+撞到黄色墙，回到检查点！|Hit the yellow wall. Back to the checkpoint!|黄色いかべにぶつかった！チェックポイントへ|Удар о жёлтую стену. Назад к контрольной точке!|اصطدمت بالجدار الأصفر. عودة إلى نقطة الحفظ!
+挣脱啦！|Free!|ぬけだした！|Свобода!|تحرّرت!
+渔网松开了，下次点快一点！|The net let go. Tap faster next time!|あみがはずれた。次はもっとはやくタップ！|Сеть отпустила. В следующий раз жми быстрее!|أفلتتك الشبكة. اضغط أسرع في المرة القادمة!
+剪刀剪开了渔网！|Scissors cut the net!|ハサミであみを切った！|Ножницы разрезали сеть!|المقص قطع الشبكة!
+最后机会！快速连点屏幕！|Last chance! Tap fast!|ラストチャンス！れんだしよう！|Последний шанс! Жми быстро!|الفرصة الأخيرة! اضغط بسرعة!
+被网住了！快速连点挣脱！|Caught in a net! Tap fast to escape!|あみにつかまった！れんだでぬけだそう！|Ты в сети! Жми быстро, чтобы вырваться!|علقت في الشبكة! اضغط بسرعة لتتحرر!
+注意！鲨鱼来了！|Watch out! Shark!|気をつけて！サメが来た！|Осторожно! Акула!|انتبه! قرش!
+金鱼结界已开启！|Goldfish shield on!|金魚バリアON！|Щит золотой рыбки включён!|درع السمكة الذهبية يعمل!
+救出小伙伴！|Friend rescued!|なかまを助けた！|Друг спасён!|أنقذت صديقك!
+用手指点一下带圆圈的鱼，就能捕获它！|Tap a circled fish to catch it!|丸でかこまれた魚をタップしてつかまえよう！|Нажми на рыбу в кружке, чтобы поймать её!|المس السمكة المحاطة بدائرة لتصطادها!
+终点|FINISH|ゴール|ФИНИШ|النهاية
+最后机会！|Last chance!|ラストチャンス！|Последний шанс!|الفرصة الأخيرة!
+快点我！|Tap me!|タップ！|Жми!|اضغط!
+连续点击|Keep tapping|れんだ！|Жми быстро|اضغط بسرعة
+-1 星|-1 star|星 -1|-1 звезда|-1 نجمة
+-半星|-½ star|星 -½|-½ звезды|-½ نجمة
+关卡完成！|Level complete!|ステージクリア！|Уровень пройден!|اكتملت المرحلة!
+收集珍珠|Pearls|真珠|Жемчуг|اللآلئ
+游泳距离|Distance|きょり|Дистанция|المسافة
+剩余生命|Lives left|のこりライフ|Осталось жизней|الحياة المتبقية
+使用结界|Shields used|バリア使用|Щитов использовано|الدروع المستخدمة
+最高连击|Best combo|最大コンボ|Лучшее комбо|أفضل سلسلة
+下一关|Next level|次のステージ|Следующий уровень|المرحلة التالية
+再次挑战|Play again|もういちど|Сыграть ещё|العب مجددًا
+主菜单|Menu|メニュー|Меню|القائمة
+小鱼被鲨鱼吃掉了！|The shark got you!|サメに食べられちゃった！|Рыбку съела акула!|أكل القرش السمكة!
+小鱼没能逃出渔网…|Couldn't escape the net…|あみからにげられなかった…|Не удалось выбраться из сети…|لم تستطع الهرب من الشبكة…
+星星用完了！|Out of stars!|星がなくなった！|Звёзды закончились!|انتهت النجوم!
+到终点了，但目标还没完成|You reached the end, but the goal isn't done|ゴールしたけど目標がまだ|Финиш достигнут, но цель не выполнена|وصلت للنهاية لكن الهدف لم يكتمل
+游戏结束|Game over|ゲームオーバー|Игра окончена|انتهت اللعبة
+🎉 新纪录！|🎉 New record!|🎉 新記録！|🎉 Новый рекорд!|🎉 رقم قياسي جديد!
+本次得分|Score|スコア|Счёт|النقاط
+本次距离|Distance|きょり|Дистанция|المسافة
+历史最高|Best|ベスト|Рекорд|أفضل رقم
+目标|Goal|目標|Цель|الهدف
+救出伙伴|Rescued|助けたなかま|Спасено|تم إنقاذهم
+小提示：看到红色水带，马上游到水带外面。结界挡不住鲨鱼哦！|Tip: when you see the red band, swim out of it right away. A normal shield can't stop a shark!|ヒント：赤いおびが見えたら、すぐ外へにげよう。ふつうのバリアではサメをふせげないよ！|Подсказка: увидел красную полосу — сразу уплывай из неё. Обычный щит не спасёт от акулы!|تلميح: عندما ترى الشريط الأحمر اخرج منه فورًا. الدرع العادي لا يصدّ القرش!
+再来一次|Try again|もういちど|Ещё раз|حاول مجددًا
+存入钱包|Banked|ちょきん|В кошелёк|إلى المحفظة
+捕到的鱼|Fish caught|つかまえた魚|Поймано рыбы|الأسماك المصطادة
+没有|None|なし|Нет|لا شيء
+商店|Shop|ショップ|Магазин|المتجر
+小馆|Kitchen|キッチン|Кухня|المطبخ
+出发时带上|Bring it|もっていく|Взять с собой|خذها معك
+先不带|Leave it|おいていく|Не брать|اتركها
+正在使用|In use|使用中|Используется|قيد الاستخدام
+已拥有|Owned|もっている|Есть|تملكها
+换个颜色去冒险|A new colour for your adventure|色をかえてぼうけん|Новый цвет для приключений|لون جديد لمغامرتك
+使用中|In use|使用中|Надето|مستخدمة
+换上|Use|きがえる|Надеть|استخدم
+首次双倍|2× first time|はじめては2倍|первый раз ×2|أول مرة ×2
+制作|Cook|作る|Готовить|اطبخ
+隐藏星：再次挑战时解锁|Hidden star: unlocks on replay|かくれ星：もういちどあそぶと出るよ|Скрытая звезда: откроется при повторной игре|النجمة المخفية: تُفتح عند اللعب مجددًا`.split('\n').forEach(l=>{const a=l.split('|');DICT[a[0]]=a.slice(1)});
+const fishList=(s,sep)=>s.split(' ').map(x=>{const m=x.match(/^(.+)×(\d+)$/);return tl(m[1])+' ×'+m[2]}).join(sep);
+const RULES=[
+ [/^收集 (\d+) 颗珍珠$/,m=>`Collect ${m[1]} pearls`,m=>`真珠を${m[1]}こ集める`],
+ [/^救出 (\d+) 只小伙伴$/,m=>`Rescue ${m[1]} fish`,m=>`なかまを${m[1]}ひき助ける`],
+ [/^游到 (\d+) 米，逃离鲨鱼$/,m=>`Swim ${m[1]} m and escape the sharks`,m=>`${m[1]}m泳いでサメからにげる`],
+ [/^(.+?) · 已带上：(.+)$/,m=>tl(m[1])+' · Packed: '+m[2].split('、').map(tl).join(', '),m=>tl(m[1])+' · もちもの：'+m[2].split('、').map(tl).join('、')],
+ [/^目标：(.+)$/,m=>'Goal: '+tl(m[1]),m=>'目標：'+tl(m[1])],
+ [/^完成目标：(.+)$/,m=>'Goal: '+tl(m[1]),m=>'目標：'+tl(m[1])],
+ [/^([✔○]) (.+)$/,m=>m[1]+' '+tl(m[2]),m=>m[1]+' '+tl(m[2])],
+ [/^保留至少 ([\d.]+) 颗星通关$/,m=>`Finish with at least ${m[1]} stars`,m=>`星を${m[1]}こ以上のこしてクリア`],
+ [/^隐藏星：无伤通关并收集 (\d+) 颗珍珠$/,m=>`Hidden star: no damage and ${m[1]} pearls`,m=>`かくれ星：ノーダメージで真珠${m[1]}こ`],
+ [/^(\d+) 颗$/,m=>m[1],m=>m[1]+'こ'],
+ [/^(\d+) 米$/,m=>m[1]+' m',m=>m[1]+'m'],
+ [/^([\d.]+) 颗星$/,m=>m[1]+' stars',m=>'星'+m[1]+'こ'],
+ [/^(\d+) 次$/,m=>m[1]+'×',m=>m[1]+'回'],
+ [/^(\d+) 分$/,m=>m[1]+' pts',m=>m[1]+'点'],
+ [/^(\d+) 条$/,m=>m[1],m=>m[1]+'ひき'],
+ [/^(\d+) 秒$/,m=>m[1]+' s',m=>m[1]+'秒'],
+ [/^(\d+) 分 · (\d+) 米$/,m=>`${m[1]} pts · ${m[2]} m`,m=>`${m[1]}点 · ${m[2]}m`],
+ [/^最高 (\d+) 分 · (\d+) 米$/,m=>`Best ${m[1]} pts · ${m[2]} m`,m=>`ベスト ${m[1]}点 · ${m[2]}m`],
+ [/^音效：(开|关)$/,m=>'Sound: '+(m[1]==='开'?'On':'Off'),m=>'サウンド：'+(m[1]==='开'?'オン':'オフ')],
+ [/^(普通模式|困难模式) · 选择关卡$/,m=>tl(m[1])+' · Choose a level',m=>tl(m[1])+' · ステージをえらぶ'],
+ [/^(🔒 )?第(\d+)关 (.+)$/,m=>`${m[1]||''}Level ${m[2]}: ${tl(m[3])}`,m=>`${m[1]||''}ステージ${m[2]} ${tl(m[3])}`],
+ [/^(\d+) \/ (\d+) 米$/,m=>`${m[1]} / ${m[2]} m`,m=>`${m[1]} / ${m[2]}m`],
+ [/^(\d+) 米 · Lv\.(\d+)$/,m=>`${m[1]} m · Lv.${m[2]}`,m=>`${m[1]}m · Lv.${m[2]}`],
+ [/^💎 (\d+) · (\d+) 分$/,m=>`💎 ${m[1]} · ${m[2]} pts`,m=>`💎 ${m[1]} · ${m[2]}点`],
+ [/^连击 (\d+)$/,m=>'Combo '+m[1],m=>'コンボ '+m[1]],
+ [/^连击 (\d+)！\+(\d+)$/,m=>`Combo ${m[1]}! +${m[2]}`,m=>`コンボ ${m[1]}！+${m[2]}`],
+ [/^捕获 (.+)！$/,m=>`Caught: ${tl(m[1])}!`,m=>`${tl(m[1])}をゲット！`],
+ [/^再点 (\d+) 下！$/,m=>`Tap ${m[1]} more!`,m=>`あと${m[1]}回タップ！`],
+ [/^难度提升！Lv\.(\d+) · (.+)$/,m=>`Harder! Lv.${m[1]} · ${tl(m[2])}`,m=>`レベルアップ！Lv.${m[1]} · ${tl(m[2])}`],
+ [/^已有 (\d+) 个$/,m=>`×${m[1]} owned`,m=>`${m[1]}こ持ってる`],
+ [/^做过 (\d+) 次$/,m=>`made ${m[1]}×`,m=>`${m[1]}回作った`],
+ [/^\S+×\d+( \S+×\d+)*$/,m=>fishList(m[0],', '),m=>fishList(m[0],'、')],
+ [/^(.+) × (\d+)$/,m=>`${tl(m[1])} × ${m[2]}`,m=>`${tl(m[1])} × ${m[2]}`],
+ [/^海边小馆 · 已学会 (\d+) \/ (\d+) 道$/,m=>`Kitchen · ${m[1]} / ${m[2]} recipes`,m=>`キッチン · レシピ ${m[1]} / ${m[2]}`],
+ [/^(\S+) (.+)做好了！\+(\d+) 💎(（新菜谱）)?$/,m=>`${m[1]} ${tl(m[2])} is ready! +${m[3]} 💎${m[4]?' (new recipe)':''}`,m=>`${m[1]} ${tl(m[2])}ができた！+${m[3]} 💎${m[4]?'（新レシピ）':''}`],
+ [/^\+(\d+) 💎(（双倍）)?（共 (\d+)）$/,m=>`+${m[1]} 💎${m[2]?' (double)':''} (total ${m[3]})`,m=>`+${m[1]} 💎${m[2]?'（2倍）':''}（合計 ${m[3]}）`]];
+RULES.push([/^音乐：(开|关)$/,m=>'Music: '+(m[1]==='开'?'On':'Off'),m=>'BGM：'+(m[1]==='开'?'オン':'オフ'),m=>'Музыка: '+(m[1]==='开'?'вкл':'выкл'),m=>'الموسيقى: '+(m[1]==='开'?'تشغيل':'إيقاف')]);
+function tl(z){const L=SAVE.lang;if(L==='zh'||!z)return z;const i={en:0,ja:1,ru:2,ar:3}[L],d=DICT[z];if(d)return d[i];for(const r of RULES){const m=z.match(r[0]);if(m)return r[1+i](m)}return z}
+const tlKeep=v=>{const m=v.match(/^(\s*)([\s\S]*?)(\s*)$/);return m[2]?m[1]+tl(m[2])+m[3]:v};
+const HELP={zh:['按住屏幕向上游，松开就慢慢下沉。','<b>章鱼</b>和<b>水母</b>碰一下，掉一颗星；章鱼触手发光时最危险。','<b>礁石</b>和<b>冰块</b>撞一下，掉一颗星。','<b>鲨鱼</b>会一口吃掉小鱼！看到红色警告，赶快游出红色水带。','<b>渔网</b>罩住小鱼时别害怕，快速连点屏幕就能挣脱。','<b>金鱼结界</b>能挡一次危险，但挡不住大鲨鱼。','<b>黄色墙</b>不能乱撞，没有结界就要回到检查点。','关卡里游过带圆圈的鱼，<b>用手指点它</b>就能捕获；大鱼要多点几下。捕到的鱼可以去<b>海边小馆</b>做菜换珍珠。','每局收集的珍珠会存进钱包，可以去<b>商店</b>买鲸鱼结界、磁铁和新皮肤。','过关得星星，再次挑战还能拿隐藏的第 4 颗星！'],
+ en:['Hold the screen to swim up. Let go to sink slowly.','Touching an <b>octopus</b> or <b>jellyfish</b> costs one star. An octopus is most dangerous when its arms glow.','Bumping a <b>rock</b> or <b>ice block</b> costs one star.','A <b>shark</b> eats you in one bite! When you see the red warning, swim out of the red band.','Caught in a <b>net</b>? Don\'t panic. Tap the screen fast to break free.','The <b>goldfish shield</b> blocks one danger, but not a shark.','Don\'t hit a <b>yellow wall</b>. Without a shield you go back to the checkpoint.','Fish with a dotted circle can be caught: <b>tap them</b>. Big fish need more taps. Cook your catch in the <b>Kitchen</b> to earn pearls.','Pearls you collect go into your wallet. Spend them in the <b>Shop</b> on shields, helpers and skins.','Finish a level to earn stars. Play it again to find the hidden 4th star!'],
+ ja:['画面を押すと上へ泳ぐよ。はなすとゆっくり下がるよ。','<b>タコ</b>や<b>クラゲ</b>にさわると星が1こへるよ。タコは足が光ったときがいちばんあぶない。','<b>岩</b>や<b>氷</b>にぶつかると星が1こへるよ。','<b>サメ</b>はひとくちで食べちゃう！赤い警告が出たら、赤いおびの外へにげよう。','<b>あみ</b>につかまってもあわてないで。画面をれんだすればぬけだせるよ。','<b>金魚バリア</b>は危険を1回ふせぐけど、サメはふせげないよ。','<b>黄色いかべ</b>にぶつからないで。バリアがないとチェックポイントにもどるよ。','丸でかこまれた魚は<b>タップ</b>でつかまえられるよ。大きい魚は何回もタップしよう。つかまえた魚は<b>キッチン</b>で料理して真珠にかえよう。','集めた真珠はおさいふに入るよ。<b>ショップ</b>でバリアやおたすけ、スキンが買えるよ。','クリアすると星がもらえるよ。もういちどあそぶと、かくれた4こめの星も！']};
+const TITLE={zh:['小','鱼','快','跑'],en:['Fish','Dash'],ja:['おさかな','ダッシュ']};
+[[m=>`Собери жемчужин: ${m[1]}`,m=>`اجمع اللآلئ: ${m[1]}`],
+ [m=>`Спаси рыбок: ${m[1]}`,m=>`أنقذ الأسماك: ${m[1]}`],
+ [m=>`Проплыви ${m[1]} м и спасись от акул`,m=>`اسبح ${m[1]} م واهرب من القروش`],
+ [m=>tl(m[1])+' · С собой: '+m[2].split('、').map(tl).join(', '),m=>tl(m[1])+' · معك: '+m[2].split('、').map(tl).join('، ')],
+ [m=>'Цель: '+tl(m[1]),m=>'الهدف: '+tl(m[1])],
+ [m=>'Цель: '+tl(m[1]),m=>'الهدف: '+tl(m[1])],
+ [m=>m[1]+' '+tl(m[2]),m=>m[1]+' '+tl(m[2])],
+ [m=>`Финишируй, сохранив звёзд: ${m[1]}`,m=>`أنهِ المرحلة ومعك نجوم: ${m[1]}`],
+ [m=>`Скрытая звезда: без урона и жемчужин: ${m[1]}`,m=>`النجمة المخفية: بلا ضرر مع لآلئ: ${m[1]}`],
+ [m=>m[1],m=>m[1]],
+ [m=>m[1]+' м',m=>m[1]+' م'],
+ [m=>'★ '+m[1],m=>'★ '+m[1]],
+ [m=>m[1]+'×',m=>m[1]+'×'],
+ [m=>m[1]+' очк.',m=>m[1]+' نقطة'],
+ [m=>m[1],m=>m[1]],
+ [m=>m[1]+' с',m=>m[1]+' ث'],
+ [m=>`${m[1]} очк. · ${m[2]} м`,m=>`${m[1]} نقطة · ${m[2]} م`],
+ [m=>`Рекорд: ${m[1]} очк. · ${m[2]} м`,m=>`الأفضل: ${m[1]} نقطة · ${m[2]} م`],
+ [m=>'Звук: '+(m[1]==='开'?'вкл.':'выкл.'),m=>'الصوت: '+(m[1]==='开'?'يعمل':'متوقف')],
+ [m=>tl(m[1])+' · Выбери уровень',m=>tl(m[1])+' · اختر مرحلة'],
+ [m=>`${m[1]||''}Уровень ${m[2]}: ${tl(m[3])}`,m=>`${m[1]||''}المرحلة ${m[2]}: ${tl(m[3])}`],
+ [m=>`${m[1]} / ${m[2]} м`,m=>`${m[1]} / ${m[2]} م`],
+ [m=>`${m[1]} м · Lv.${m[2]}`,m=>`${m[1]} م · Lv.${m[2]}`],
+ [m=>`💎 ${m[1]} · ${m[2]} очк.`,m=>`💎 ${m[1]} · ${m[2]} نقطة`],
+ [m=>'Комбо '+m[1],m=>'سلسلة '+m[1]],
+ [m=>`Комбо ${m[1]}! +${m[2]}`,m=>`سلسلة ${m[1]}! +${m[2]}`],
+ [m=>`Поймано: ${tl(m[1])}!`,m=>`اصطدت: ${tl(m[1])}!`],
+ [m=>`Ещё нажатий: ${m[1]}!`,m=>`اضغط أيضًا: ${m[1]}!`],
+ [m=>`Сложнее! Lv.${m[1]} · ${tl(m[2])}`,m=>`أصعب! Lv.${m[1]} · ${tl(m[2])}`],
+ [m=>`есть: ${m[1]}`,m=>`لديك: ${m[1]}`],
+ [m=>`готовили: ${m[1]}×`,m=>`طُبخ: ${m[1]}×`],
+ [m=>fishList(m[0],', '),m=>fishList(m[0],'، ')],
+ [m=>`${tl(m[1])} × ${m[2]}`,m=>`${tl(m[1])} × ${m[2]}`],
+ [m=>`Кухня · рецептов: ${m[1]} / ${m[2]}`,m=>`المطبخ · الوصفات: ${m[1]} / ${m[2]}`],
+ [m=>`${m[1]} ${tl(m[2])} — готово! +${m[3]} 💎${m[4]?' (новый рецепт)':''}`,m=>`${m[1]} ${tl(m[2])} جاهز! +${m[3]} 💎${m[4]?' (وصفة جديدة)':''}`],
+ [m=>`+${m[1]} 💎${m[2]?' (×2)':''} (всего ${m[3]})`,m=>`+${m[1]} 💎${m[2]?' (×2)':''} (المجموع ${m[3]})`]].forEach((x,i)=>RULES[i].push(x[0],x[1]));
+if(RULES.some(r=>r.length!==5))console.error('i18n rules mismatch');
+HELP.ru=['Держи палец на экране — рыбка плывёт вверх. Отпусти — медленно опускается.','<b>Осьминог</b> и <b>медуза</b> отнимают звезду. Осьминог опаснее всего, когда его щупальца светятся.','Удар о <b>скалу</b> или <b>льдину</b> отнимает одну звезду.','<b>Акула</b> съедает рыбку сразу! Увидел красное предупреждение — уплывай из красной полосы.','Попал в <b>сеть</b>? Не бойся: быстро нажимай на экран, чтобы вырваться.','<b>Щит золотой рыбки</b> спасает от одной опасности, но не от акулы.','Не врезайся в <b>жёлтую стену</b>: без щита вернёшься к контрольной точке.','Рыбу в пунктирном кружке можно поймать: <b>нажми на неё</b>. На крупную рыбу нужно нажать несколько раз. Готовь улов на <b>Кухне</b> и получай жемчуг.','Собранный жемчуг попадает в кошелёк. В <b>Магазине</b> можно купить щиты, помощников и облики.','За прохождение уровня дают звёзды. Сыграй ещё раз и найди скрытую четвёртую звезду!'];
+HELP.ar=['اضغط على الشاشة لتسبح للأعلى، واتركها لتنزل ببطء.','لمس <b>الأخطبوط</b> أو <b>قنديل البحر</b> يُفقدك نجمة. الأخطبوط أخطر حين تضيء أذرعه.','الاصطدام بـ<b>صخرة</b> أو <b>قطعة جليد</b> يُفقدك نجمة كاملة.','<b>القرش</b> يأكل السمكة بلقمة واحدة! عندما ترى التحذير الأحمر اخرج من الشريط الأحمر.','علقت في <b>الشبكة</b>؟ لا تخف، اضغط على الشاشة بسرعة لتتحرر.','<b>درع السمكة الذهبية</b> يصدّ خطرًا واحدًا، لكنه لا يصدّ القرش.','لا تصطدم بـ<b>الجدار الأصفر</b>. بدون درع ستعود إلى نقطة الحفظ.','السمكة المحاطة بدائرة منقّطة يمكن صيدها: <b>المسها</b>. السمكة الكبيرة تحتاج لمسات أكثر. اطبخ صيدك في <b>المطبخ</b> لتكسب اللآلئ.','اللآلئ التي تجمعها تذهب إلى محفظتك. اشترِ من <b>المتجر</b> دروعًا ومساعدات وأشكالًا جديدة.','أكمل المرحلة لتكسب النجوم. العب مجددًا لتجد النجمة الرابعة المخفية!'];
+TITLE.ru=['Рыбка,','плыви!'];TITLE.ar=['السمكة','السريعة'];
+HELP.zh.splice(3,0,'碰到<b>海底</b>也会掉一颗星，别沉到底。');HELP.en.splice(3,0,'Touching the <b>sea floor</b> costs one star too. Don\'t sink to the bottom.');HELP.ja.splice(3,0,'<b>海のそこ</b>にさわっても星が1こへるよ。しずみすぎないで。');HELP.ru.splice(3,0,'Коснёшься <b>дна</b> — тоже потеряешь звезду. Не опускайся слишком низко.');HELP.ar.splice(3,0,'لمس <b>قاع البحر</b> يُفقدك نجمة أيضًا. لا تنزل إلى القاع.');
+
+const lOrig=new WeakMap(),lOut=new WeakMap();
+function locNode(n){const v=n.nodeValue;if(lOut.get(n)===v)return;lOrig.set(n,v);const o=tlKeep(v);lOut.set(n,o);if(o!==v)n.nodeValue=o}
+function locAll(){const w=document.createTreeWalker($('app'),NodeFilter.SHOW_TEXT);let n;while((n=w.nextNode())){const z=lOrig.has(n)?lOrig.get(n):n.nodeValue;lOrig.set(n,z);const o=tlKeep(z);lOut.set(n,o);if(n.nodeValue!==o)n.nodeValue=o}}
+function applyLang(){const L=SAVE.lang;document.documentElement.lang=L==='zh'?'zh-CN':L;document.documentElement.dir=L==='ar'?'rtl':'ltr';
+  FONT=({ja:'"Yusei Magic","Hiragino Maru Gothic ProN",',ru:'"Comfortaa",',ar:'"Baloo Bhaijaan 2","Geeza Pro","Noto Sans Arabic",'}[L]||'')+'"ZCOOL KuaiLe","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+  $('title').className=L==='zh'?'':'long';$('title').innerHTML=TITLE[L].map(x=>`<span>${x}</span>`).join('');
+  $('helpList').innerHTML=HELP[L].map(x=>`<li>${x}</li>`).join('');
+  document.querySelectorAll('[data-lang]').forEach(b=>b.classList.toggle('mint',b.dataset.lang===L));
+  locAll();if(G)G.hudKey=''}
+new MutationObserver(ms=>{for(const m of ms){if(m.type==='characterData'){if(m.target.nodeType===3)locNode(m.target)}else for(const a of m.addedNodes){if(a.nodeType===3)locNode(a);else if(a.nodeType===1){const w=document.createTreeWalker(a,NodeFilter.SHOW_TEXT);let n;while((n=w.nextNode()))locNode(n)}}}}).observe($('app'),{subtree:true,childList:true,characterData:true});
+$('langRow').onclick=e=>{const b=e.target.closest('[data-lang]');if(!b)return;SAVE.lang=b.dataset.lang;persist();SFX.tap();applyLang()};
+$('bSet').onclick=()=>{SFX.tap();show('sSet')};
+
+/* ---------- music (synthesised) ---------- */
+const TRK={
+ menu:{bpm:96,root:60,mo:12,kick:1,ch:[[0,4,7],[7,11,14],[9,12,16],[5,9,12]],
+  A:'4 . 7 . 12 - 7 . 11 . 7 . 2 - 7 . 9 . 12 . 16 - 12 . 9 7 5 . 4 - 2 .',
+  B:'12 - 16 14 12 - 7 . 14 - 11 7 11 - 14 . 16 - 12 9 12 - 16 . 17 16 14 12 9 - 12 -'},
+ lv0:{bpm:104,root:55,mo:12,kick:1,ch:[[0,4,7],[5,9,12],[0,4,7],[7,11,14]],
+  A:'0 2 4 . 7 - 4 . 5 . 9 . 12 - 9 . 7 9 7 4 2 - 0 . 2 . 7 . 11 - 14 -',
+  B:'12 - 9 7 9 - 4 . 9 - 5 . 9 12 14 . 16 - 12 . 7 9 12 . 14 12 11 . 7 - - .'},
+ lv1:{bpm:92,root:50,mo:24,ch:[[0,3,7],[-2,2,5],[-4,0,3],[-2,2,5]],
+  A:'0 . 3 . 7 - - . 5 . 2 . -2 - - . 3 . 0 . -4 - 0 . 2 - 5 - 7 - - .',
+  B:'12 - 10 . 7 - 3 . 5 - 7 . 10 - - . 8 - 7 . 3 - 0 . 2 . 5 . 2 - - .'},
+ lv2:{bpm:120,root:45,mo:24,kick:1,pulse:1,ch:[[0,3,7],[0,3,7],[-4,0,3],[-5,-1,2]],
+  A:'0 . 0 3 . 0 7 . 0 . 0 3 . 0 8 7 8 . 5 3 . 0 3 . 2 . -1 2 . 4 2 .',
+  B:'12 - 7 . 8 - 7 . 12 - 7 . 3 - 0 . 8 - 5 . 3 - 5 8 7 - 4 . 2 - -1 .'},
+ lv3:{bpm:100,root:53,mo:12,bell:1,ch:[[0,4,7],[4,7,11],[5,9,12],[7,11,14]],
+  A:'12 . 7 . 4 . 7 . 11 . 7 . 4 . 7 . 12 . 9 . 5 . 9 . 14 - 12 . 11 - 7 .',
+  B:'16 - 12 . 16 - 19 . 16 - 11 . 16 - 19 . 17 - 12 . 17 - 21 . 19 - 16 14 12 - - .'},
+ lv4:{bpm:112,root:52,mo:12,kick:1,ch:[[0,3,7],[-4,0,3],[3,7,10],[-2,2,5]],
+  A:'0 - 7 . 10 - 7 . 8 - 7 . 3 - 0 . 3 - 7 . 10 - 15 . 14 - 9 . 14 - - .',
+  B:'12 - 15 14 12 - 10 . 12 - 8 . 12 - 15 . 19 - 15 . 10 - 15 . 14 - 12 10 9 - 14 .'},
+ kit:{bpm:100,root:53,mo:12,ch:[[0,4,7],[-3,0,4],[2,5,9],[-5,-1,2]],
+  A:'12 . 9 12 . 9 7 . 5 . 9 5 . 2 0 . 2 . 5 9 . 10 9 . 7 . 4 7 . 4 0 .',
+  B:'16 - 12 . 9 - 12 . 14 - 9 . 5 - 9 . 14 - 10 . 7 - 10 . 12 11 9 7 4 - 0 .'}};
+for(const k in TRK){const t=TRK[k],a=t.A.split(' '),b=t.B.split(' ');t.seq=[...a,...a,...b,...a]}
+const MUS={cur:null,step:0,next:0,out:null,lp:null,noise:null,chk:0};
+function initAudio(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();
+  if(!MUS.out){MUS.out=AC.createGain();MUS.out.gain.value=.5;MUS.lp=AC.createBiquadFilter();MUS.lp.type='lowpass';MUS.lp.frequency.value=6000;MUS.out.connect(MUS.lp);MUS.lp.connect(AC.destination);
+    const n=AC.sampleRate*.2,buf=AC.createBuffer(1,n,AC.sampleRate),d=buf.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;MUS.noise=buf}}catch(e){}}
+document.addEventListener('pointerdown',initAudio,true);document.addEventListener('keydown',initAudio,true);
+function mNote(midi,t,dur,type,vol){const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=440*Math.pow(2,(midi-69)/12);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.015);g.gain.exponentialRampToValueAtTime(.0008,t+dur);o.connect(g);g.connect(MUS.out);o.start(t);o.stop(t+dur+.03)}
+function mKick(t){const o=AC.createOscillator(),g=AC.createGain();o.frequency.setValueAtTime(120,t);o.frequency.exponentialRampToValueAtTime(45,t+.12);g.gain.setValueAtTime(.16,t);g.gain.exponentialRampToValueAtTime(.001,t+.16);o.connect(g);g.connect(MUS.out);o.start(t);o.stop(t+.18)}
+function mHat(t){const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();s.buffer=MUS.noise;f.type='highpass';f.frequency.value=6500;g.gain.setValueAtTime(.022,t);g.gain.exponentialRampToValueAtTime(.001,t+.05);s.connect(f);f.connect(g);g.connect(MUS.out);s.start(t);s.stop(t+.06)}
+function mStep(tr,step,t,e8,sparse,tense){
+  const seq=tr.seq,i=step%seq.length,bar=Math.floor(i/8),pos=i%8,ch=tr.ch[bar%tr.ch.length];
+  if(pos===0)mNote(tr.root-12+ch[0],t,e8*3.6,'sine',.15);else if(pos===4)mNote(tr.root-12+ch[0]+(sparse?0:7),t,e8*2.6,'sine',.11);
+  if(!sparse){mNote(tr.root+ch[pos%3]+(pos>=4?12:0),t,e8*.9,'triangle',.03);if(tr.kick&&pos%4===0)mKick(t);if(tr.kick&&pos%2===1)mHat(t)}
+  if(tr.pulse||tense)mNote(tr.root-24+ch[0],t,e8*.7,'sawtooth',tense?.05:.025);
+  const tok=seq[i];if(tok!=='.'&&tok!=='-'&&!(sparse&&bar%4>=2)){let n=1;while(n<8&&seq[(i+n)%seq.length]==='-')n++;
+    const m=tr.root+tr.mo+ +tok;if(tr.bell){mNote(m,t,e8*n*1.6,'sine',.1);mNote(m+12,t,e8*.8,'sine',.03)}else{mNote(m,t,e8*n*1.05,'triangle',.1);mNote(m,t,e8*n*.9,'sine',.04)}}}
+function musWant(){if(stQ){const c=SCN[stQ.lines[stQ.i][2]]||{};return c.bg==='sea'?'lv'+c.i:c.bg==='diner'?'kit':'menu'}if(G)return state==='over'?null:'lv'+G.theme;const on=document.querySelector('.scr.on');return on&&on.id==='sKit'?'kit':'menu'}
+function musTick(){
+  if(!AC||!MUS.out||AC.state!=='running')return;
+  if(--MUS.chk<=0){MUS.chk=12;const w=SAVE.music===0?null:musWant();if(w!==MUS.cur){MUS.cur=w;MUS.step=0;MUS.next=AC.currentTime+.25}
+    const sparse=!!(G&&G.faded);MUS.lp.frequency.setTargetAtTime(sparse?1100:6000,AC.currentTime,.4);MUS.out.gain.setTargetAtTime(state==='pause'?.15:.5,AC.currentTime,.2)}
+  const tr=TRK[MUS.cur];if(!tr)return;const sparse=!!(G&&G.faded),tense=!!(G&&state==='play'&&(G.sharks.length||G.trap));
+  const e8=30/(tr.bpm*(tense?1.15:sparse?.85:1));if(MUS.next<AC.currentTime)MUS.next=AC.currentTime+.05;
+  let n=0;while(MUS.next<AC.currentTime+.22&&n++<8){mStep(tr,MUS.step,MUS.next,e8,sparse,tense);MUS.next+=e8;MUS.step++}}
+
+let last=0;
+function frame(ts){
+  const dt=Math.min(.034,(ts-last)/1000||0);last=ts;musTick();
+  if(G){if(state==='play'||state==='dying')update(dt);if(G){drawWorld();if(state==='play'||state==='dying')updateHUD()}}
+  if(!G){menuT+=dt;drawBG(0,menuT*45,menuT);const y=VT*.8+Math.sin(menuT*1.4)*18;
+    drawFish(VW*.5,y,Math.sin(menuT*1.4+1.5)*.15,menuT,{s:1.5,...skin()});drawFish(VW*.5-110,y+34,Math.sin(menuT*1.4+1)*.15,menuT+1,{s:.7,c0:'#bff0ff',c1:'#56b8f0',c2:'#2f8fd0'})}
+  if(stQ)drawCut(dt);
+  requestAnimationFrame(frame)}
+const _rm=refreshMenu;refreshMenu=()=>{_rm();$('bAlways').textContent='进关剧情：'+(SAVE.always?'每次都播':'只播一次');$('bMusic').textContent='音乐：'+(SAVE.music===0?'关':'开');const h=hardOpen(),e=endOpen(),hb=document.querySelector('[data-mode=hard]'),eb=document.querySelector('[data-mode=endless]');
+  hb.classList.toggle('locked',!h);eb.classList.toggle('locked',!e);$('hardSub').textContent=h?'挑战极限，成为海底高手！':'🔒 通关普通模式全部 5 关后解锁';if(!e)$('bestTxt').textContent='🔒 通关第 1 关后解锁'};
+resize();refreshMenu();applyLang();requestAnimationFrame(frame);
+if(!SAVE.story.pro)playStory(STORY.pro,()=>{SAVE.story.pro=1;persist();show('sMenu')});
+window.__M=MUS;window.__cut=k=>{const who={shore:'旁白',dAchao:'阿潮',s3whale:'鲸婆婆',ice:'旁白',s4dish:'旁白',shEnd:'海生'}[k];playStory([[who,'这是一句用来检查过场画面的测试对白。',k]],()=>show('sMenu'))};window.__T={startGame,update,press,release:()=>{hold=false},get G(){return G},get state(){return state},dims:()=>({yMin,yMax,fishSX,VW}),entY,LV};
+})();
+</script>
+</body>
+</html>
