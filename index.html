@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>小鱼快跑</title>
+<meta name="version" content="1.0.0">
 <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Yusei+Magic&family=Comfortaa:wght@600;700&family=Baloo+Bhaijaan+2:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -164,6 +165,8 @@ h2{margin:0;font-weight:400;font-size:30px;color:#fff;text-shadow:0 3px 0 rgba(6
 .mbtn.sig{box-shadow:0 0 0 3px #ffd23f,0 4px 0 rgba(6,40,70,.3)}.stn.hand{outline:3px solid #ffd23f;outline-offset:-3px}
 .it.tap{cursor:pointer}.it .chev{display:inline-block;font-style:normal;color:var(--muted);margin-inline-start:6px;transition:transform .15s}.it.open .chev{transform:rotate(90deg)}.it.open{box-shadow:0 0 0 3px var(--sun),0 6px 0 rgba(6,40,70,.25)}.card.rcp{margin-top:-4px}
 .card.rcp{padding:14px 18px;font-size:15.5px;line-height:1.6}.card.rcp h4{margin:6px 0 2px;font-size:16px;font-weight:400;color:var(--muted)}.card.rcp ol{margin:0;padding-inline-start:22px}.card.rcp p{margin:0}.card.rcp .note{color:var(--muted);font-size:14px;margin-top:8px}
+.pcd{position:relative}.pcd .nw{position:absolute;top:-8px;inset-inline-end:-8px;background:#ff5a4a;color:#fff;font-size:11px;line-height:1.5;padding:0 6px;box-shadow:0 0 0 2px #1b2a41;z-index:2}.tab .dot,.rnd.hasNew::after{content:'';display:inline-block;width:9px;height:9px;border-radius:50%;background:#ff5a4a;margin-inline-start:4px;vertical-align:top}.rnd{position:relative}.rnd.hasNew::after{position:absolute;top:2px;right:2px;margin:0;box-shadow:0 0 0 2px #fff}
+#sServe .svTop{flex-wrap:wrap;row-gap:6px}#sServe .svTop .btn,#sServe .svTop .chip{white-space:nowrap}
 .tabs.scroll{overflow-x:auto;justify-content:flex-start;scrollbar-width:none;padding-bottom:2px}.tabs.scroll .tab{flex:0 0 auto;padding:6px 13px}
 .pback{display:grid;place-items:center;aspect-ratio:48/30;background:#7f8c99 repeating-linear-gradient(45deg,rgba(255,255,255,.12) 0 6px,transparent 6px 12px);color:#fff;font-size:26px;box-shadow:0 0 0 2px #1b2a41}.pback.big{font-size:44px}
 #bookInfo{width:min(100%,440px);border-radius:0;box-shadow:0 0 0 3px #1b2a41,6px 6px 0 3px rgba(6,40,70,.4);padding:14px}
@@ -225,7 +228,7 @@ h2{margin:0;font-weight:400;font-size:30px;color:#fff;text-shadow:0 3px 0 rgba(6
   <div id="toast" role="status"></div>
 
   <section class="scr on" id="sMenu">
-    <div class="mtop"><span class="wal">💎 <span id="menuWal">0</span></span><span class="sp"></span><button class="rnd" id="bDev" hidden aria-label="开发者模式">🛠</button><button class="rnd" id="bBook" hidden aria-label="奇珍书">📖</button><button class="rnd" id="bConch" hidden aria-label="潮音螺">🐚</button><button class="rnd" id="bMore" aria-label="更多">☰</button></div>
+    <div class="mtop"><span class="wal">⚪ <span id="menuWal">0</span></span><span class="sp"></span><button class="rnd" id="bDev" hidden aria-label="开发者模式">🛠</button><button class="rnd" id="bBook" hidden aria-label="奇珍书">📖</button><button class="rnd" id="bConch" hidden aria-label="潮音螺">🐚</button><button class="rnd" id="bMore" aria-label="更多">☰</button></div>
     <h1 id="title"><span>小</span><span>鱼</span><span>快</span><span>跑</span></h1>
     <p class="tag">按住屏幕向上游，松开慢慢下沉</p>
     <div class="col">
@@ -266,11 +269,13 @@ h2{margin:0;font-weight:400;font-size:30px;color:#fff;text-shadow:0 3px 0 rgba(6
       <button class="btn" id="bHelp">玩法说明</button>
       <button class="btn" id="bSet">设置</button>
     </div>
+    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v1.0.0</p>
     <button class="btn sm float" data-go="sMenu">返回主菜单</button>
   </section>
 
   <section class="scr" id="sLevels">
     <div class="tabs" id="modeTabs"><button class="tab" data-mode="simple">普通模式</button><button class="tab" data-mode="hard">困难模式</button><button class="tab" data-mode="endless">无限模式</button></div>
+    <p class="sub" id="starInfo" style="text-align:center;margin:0"></p>
     <h2 id="lvTitle" hidden>选择关卡</h2><span id="hardSub" hidden></span>
     <div id="lvGrid"></div>
     <div class="card" id="endPanel" hidden><h3>无限模式</h3><p id="bestTxt" style="text-align:center"></p><div class="rowb" style="margin-top:14px"><button class="btn sun" id="bEndGo">出发</button></div></div>
@@ -279,7 +284,7 @@ h2{margin:0;font-weight:400;font-size:30px;color:#fff;text-shadow:0 3px 0 rgba(6
 
   <section class="scr dim" id="sShop">
     <h2>墨墨的杂货铺</h2>
-    <span class="wal">我的珍珠 💎 <span id="wallet">0</span></span>
+    <span class="wal">我的珍珠 ⚪ <span id="wallet">0</span></span>
     <div id="shopList"></div>
     <button class="btn sm float" data-go="sMenu">返回主菜单</button>
   </section>
@@ -583,6 +588,7 @@ function hurt(n){const g=G;if(SAVE.god&&SAVE.dev)return 0;if(g.inv>0)return 0;if
 function die(c){const g=G;if(state!=='play')return;if(SAVE.god&&SAVE.dev){g.life=g.maxLife;g.inv=1;return}
   if(g.boss&&!g.boss.done){g.noDmg=false;g.boss.tries=(g.boss.tries||0)+1;bossRetry();return}
   if(g.buff.revive){g.buff.revive=false;g.life=Math.max(1,Math.min(2,g.maxLife));g.inv=2.5;if(g.trap)g.trap.e.gone=1;g.trap=null;g.sharks=[];g.flash=.5;SFX.win();burst(fishSX,g.fish.y,'#ffd23f',24);toast('复活海星救了小鱼！',2.2);return}
+  if(g.mode!=='endless'&&g.cp>0){g.noDmg=false;if(g.trap)g.trap.e.gone=1;g.trap=null;g.sharks=[];g.flash=.5;g.shake=.4;SFX.lose();g.life=Math.max(1,g.cpLife||1);restoreCP('回到检查点，带着当时的 '+g.life+' 颗星再来');return}
   g.life=0;g.cause=c;g.dead=1.2;g.trap=null;state='dying';g.shake=.4;SFX.lose()}
 function restoreCP(msg){const g=G;if(SAVE.god&&SAVE.dev){g.inv=1.5;return}g.scroll=g.cp;g.noDmg=false;g.combo=0;g.sharks=[];g.inv=2;g.flash=.5;g.fish.y=(yMin+yMax)/2;g.fish.vy=0;SFX.hit();
   for(const e of g.E){if(e.x<=g.cp+fishSX)continue;e.dx=0;e.trig=0;e.broken=0;e.hold=0;if(e.t==='door'){e.open=0;e.a=0}if(e.t==='btn')e.on=0;if(e.t==='net'||e.t==='shield')e.gone=0}
@@ -679,8 +685,8 @@ function bossTap(ev){const g=G;if(state!=='play'||!g||!g.boss||g.boss.done||g.tr
   B.carry--;B.hun++;SFX.save();CSND.growl();burst(bx-110,by+10,'#ffd23f',14);ftext(B.hun>=B.need?'吃饱了！':'咕！还要！',bx-170,by-70,'#ffe27a');
   if(B.hun>=B.need){B.done=1;g.sharks=[];g.inv=3;g.flash=.6;g.shake=.5;g.bonus+=300;CSND.crash();SFX.win();for(const e of g.E)if(e.t==='wild'&&e.x>g.scroll)e.gone=1;if(B.fin)B.fin.x=g.scroll+VW+500;toast('大白吃饱了！它转身撞开了黄色的墙',3.4)}
   return true}
-function bossRetry(){const g=G,B=g.boss;if(B.k!=='feed'){g.life=g.maxLife;g.inv=2.5;g.sharks=[];g.trap=null;g.flash=.5;g.fish.y=(yMin+yMax)/2;g.fish.vy=0;SFX.hit();for(const e of g.E)if(e.x>g.scroll-100&&(e.t==='jelly'||e.t==='rock'||e.t==='torb'||e.t==='pearl'&&B.k==='chase'))e.gone=1;B.reset();toast('再来一次！（第 '+(B.tries+1)+' 次挑战）',2.6,1);return}
-  g.life=g.maxLife;g.inv=2.5;g.sharks=[];g.trap=null;g.flash=.5;B.hun=0;B.carry=0;B.ph='idle';B.t=-2;B.dbl=0;g.fish.y=(yMin+yMax)/2;g.fish.vy=0;SFX.hit();for(const e of g.E)if((e.t==='jelly'||e.t==='wild')&&e.x>g.scroll-100)e.gone=1;toast('被大白顶了回来。从头再喂一次！（第 '+(B.tries+1)+' 次挑战）',2.8,1)}
+function bossRetry(){const g=G,B=g.boss;if(B.k!=='feed'){g.life=Math.max(1,g.cpLife||1);g.inv=2.5;g.sharks=[];g.trap=null;g.flash=.5;g.fish.y=(yMin+yMax)/2;g.fish.vy=0;SFX.hit();for(const e of g.E)if(e.x>g.scroll-100&&(e.t==='jelly'||e.t==='rock'||e.t==='torb'||e.t==='pearl'&&B.k==='chase'))e.gone=1;B.reset();toast('再来一次！（第 '+(B.tries+1)+' 次挑战）',2.6,1);return}
+  g.life=Math.max(1,g.cpLife||1);g.inv=2.5;g.sharks=[];g.trap=null;g.flash=.5;B.hun=0;B.carry=0;B.ph='idle';B.t=-2;B.dbl=0;g.fish.y=(yMin+yMax)/2;g.fish.vy=0;SFX.hit();for(const e of g.E)if((e.t==='jelly'||e.t==='wild')&&e.x>g.scroll-100)e.gone=1;toast('被大白顶了回来。从头再喂一次！（第 '+(B.tries+1)+' 次挑战）',2.8,1)}
 function score(){const g=G;return Math.floor(g.scroll/60)*10+g.pearls*20+g.bonus}
 
 function entY(e,t){switch(e.t){
@@ -753,7 +759,7 @@ function update(dt){
     case'help':if(!e.hit&&dx<0){e.hit=1;SFX.win();toast(e.who+'来帮忙了！',2.2);
         if(e.k==='whale')g.whale=true;else if(e.k==='gold')g.shield=true;else if(e.k==='doors'){for(const q of g.E)if(q.t==='door')q.open=1}
         else for(const q of g.E)if(q.x>e.x&&q.x<e.x+2600){if(q.t==='net')q.gone=1;if(q.t==='sharkT')q.trig=1;if(q.t==='wall')q.broken=1}}break;
-    case'boss':if(!g.boss&&dx<0){e.gone=1;g.cp=e.x-fishSX;g.sharks=[];g.tips.wild=1;g.boss=mkBoss(g);g.flash=.4;CSND.growl();
+    case'boss':if(!g.boss&&dx<0){e.gone=1;g.cp=e.x-fishSX;g.sharks=[];g.tips.wild=1;g.cpLife=g.life;g.boss=mkBoss(g);g.flash=.4;CSND.growl();
         toast(BOSSMSG[g.boss.k],4.4)}break;
     case'torb':if(dist<50){e.gone=1;if(g.boss)g.boss.orbs++;SFX.shield();burst(sx,y,'#9ff0ff',16);ftext('接住了一颗潮心！',fx+20,F.y-56,'#bff6ff')}break;
     case'btn':if(!e.on&&dist<50){e.on=1;e.d.open=1;SFX.shield();burst(sx,y,'#4fe0b5',14);ftext('石门打开了！',fx+20,F.y-56,'#bff6e6')}break;
@@ -763,7 +769,7 @@ function update(dt){
     case'shield':if(dist<46){e.gone=1;if(g.shield)g.bonus+=50;g.shield=true;SFX.shield();burst(sx,y,'#ffd23f',14);toast('金鱼结界已开启！',1.6)}break;
     case'friend':if(dist<54){e.gone=1;g.rescued++;g.bonus+=100;SFX.save();burst(sx,y,'#fff',14,1);ftext('救出小伙伴！',fx+20,F.y-56,'#bff6ff')}break;
     case'wild':if(!g.trap)e.dx=(e.dx||0)+FISH[e.k].v*dt;if(!g.tips.wild&&sx<VW-40&&t>4){g.tips.wild=1;toast('用手指点一下带圆圈的鱼，就能捕获它！',3)}break;
-    case'cp':if(!e.hit&&dx<0){e.hit=1;g.cp=e.x-fishSX;SFX.shield()}break;
+    case'cp':if(!e.hit&&dx<0){e.hit=1;g.cp=e.x-fishSX;g.cpLife=g.life;SFX.shield()}break;
     case'fin':if(dx+fishSX<0){finish();return}break;
     }
     if(state!=='play')return;
@@ -974,7 +980,7 @@ function updateHUD(){
   const g=G,hi=g.mode==='hard'?1:0,m=Math.floor(g.scroll/60),endless=g.mode==='endless';
   const key=[g.life,g.pearls,g.rescued,m,g.shield,g.combo,g.lvl,g.whale,g.nCaught,g.magnet,Object.keys(g.buff).filter(k=>g.buff[k]).join('')].join();if(key===g.hudKey)return;g.hudKey=key;
   let s='';for(let i=0;i<g.maxLife;i++)s+=`<i class="st ${g.life>=i+1?'f':g.life>=i+.5?'h':''}"></i>`;$('stars').innerHTML=s;
-  let goal;if(endless)goal=`💎 ${g.pearls} · ${score()} 分`;else{const k=g.L.goal;goal=k.k==='pearl'?`💎 ${g.pearls} / ${k.n[hi]}`:k.k==='rescue'?`🐢 ${g.rescued} / ${k.n[hi]} · 💎 ${g.pearls}`:k.k==='boss'?(g.L.friends?`🐢 ${g.rescued} · 💎 ${g.pearls}`:`✨ ${gcount(g)} · 💎 ${g.pearls}`):k.k==='gather'?`✨ ${gcount(g)} / ${k.n[hi]} · 💎 ${g.pearls}`:`💎 ${g.pearls}`}
+  let goal;if(endless)goal=`⚪ ${g.pearls} · ${score()} 分`;else{const k=g.L.goal;goal=k.k==='pearl'?`⚪ ${g.pearls} / ${k.n[hi]}`:k.k==='rescue'?`🐢 ${g.rescued} / ${k.n[hi]} · ⚪ ${g.pearls}`:k.k==='boss'?(g.L.friends?`🐢 ${g.rescued} · ⚪ ${g.pearls}`:`✨ ${gcount(g)} · ⚪ ${g.pearls}`):k.k==='gather'?`✨ ${gcount(g)} / ${k.n[hi]} · ⚪ ${g.pearls}`:`⚪ ${g.pearls}`}
   $('cGoal').textContent=goal;$('cDist').textContent=endless?`${m} 米 · Lv.${g.lvl+1}`:`${m} / ${g.L.len} 米`;
   $('cShield').hidden=!g.shield;$('cWhale').hidden=!g.whale;{const bf=ITEMS.filter(it=>g.buff[it.id]||(it.id==='magnet'&&g.magnet)).map(it=>it.ic).join(' ');$('cBuff').hidden=!bf;$('cBuff').textContent=bf}$('cFish').hidden=!g.nCaught;$('cFish').textContent='🎣 '+g.nCaught;$('cCombo').hidden=g.combo<3;$('cCombo').textContent=`连击 ${g.combo}`;
   if(!endless)$('prog').firstElementChild.style.width=clamp(g.scroll/(g.L.len*60)*100,0,100)+'%';
@@ -987,12 +993,12 @@ let shopTab='prot',shopSel='';
 const STABS=[['prot','🛡️','保护'],['help','🧰','帮手'],['tool','🔦','工具'],['skin','🐟','变身']];
 function shopItems(){
   if(shopTab==='prot'||shopTab==='help'){const i0=ITEMS.findIndex(x=>x.id==='magnet');return(shopTab==='prot'?ITEMS.slice(0,i0):ITEMS.slice(i0)).map(it=>{const n=SAVE.inv[it.id]||0,lock=chN()<ITEM_CH[it.id],on=SAVE.use[it.id]!==0;
-    return{id:it.id,ic:lock?'❓':it.ic,n:lock?'？？？':it.n,d:lock?'墨墨还没有进这件货。':it.d,note:lock?'':'每局用掉一个'+(n?'，现在有 '+n+' 个':''),tag:lock?'🔒':'💎 '+it.p,badge:n?'×'+n:'',lock,
-      act:lock?`<button class="btn off" disabled>🔒 通关第 ${ITEM_CH[it.id]} 关</button>`:`<button class="btn sun" data-buy="${it.id}" ${SAVE.wallet<it.p?'disabled':''}>💎 ${it.p}</button>`+(n?`<button class="btn ${on?'mint':'off'}" data-tog="${it.id}">${on?'出发时带上':'先不带'}</button>`:'')}})}
-  if(shopTab==='tool')return TOOLS.filter(t=>chN()>=(t.ch||5)).map(t=>{const own=SAVE.tools[t.id];return{id:t.id,ic:t.ic,n:t.n,d:t.d,note:'买一次，永久使用',tag:own?'已拥有':'💎 '+t.p,own,
-    act:own?'<button class="btn off" disabled>已拥有</button>':`<button class="btn sun" data-tool="${t.id}" ${SAVE.wallet<t.p?'disabled':''}>💎 ${t.p}</button>`}});
-  return SKINS.map((k,i)=>{const own=SAVE.skins.includes(i),cur=SAVE.skin===i;return{id:'s'+i,ic:`<i style="background:radial-gradient(circle at 35% 30%,${k.c[0]},${k.c[1]})"></i>`,n:k.n,d:cur?'正在使用':own?'已拥有':'换个颜色去冒险',note:'永久拥有',tag:cur?'使用中':own?'已拥有':'💎 '+k.p,own,
-    act:own?`<button class="btn ${cur?'off':'mint'}" data-skin="${i}" ${cur?'disabled':''}>${cur?'使用中':'换上'}</button>`:`<button class="btn sun" data-skin="${i}" ${SAVE.wallet<k.p?'disabled':''}>💎 ${k.p}</button>`}})}
+    return{id:it.id,ic:lock?'❓':it.ic,n:lock?'？？？':it.n,d:lock?'墨墨还没有进这件货。':it.d,note:lock?'':'每局用掉一个'+(n?'，现在有 '+n+' 个':''),tag:lock?'🔒':'⚪ '+it.p,badge:n?'×'+n:'',lock,
+      act:lock?`<button class="btn off" disabled>🔒 通关第 ${ITEM_CH[it.id]} 关</button>`:`<button class="btn sun" data-buy="${it.id}" ${SAVE.wallet<it.p?'disabled':''}>⚪ ${it.p}</button>`+(n?`<button class="btn ${on?'mint':'off'}" data-tog="${it.id}">${on?'出发时带上':'先不带'}</button>`:'')}})}
+  if(shopTab==='tool')return TOOLS.filter(t=>chN()>=(t.ch||5)).map(t=>{const own=SAVE.tools[t.id];return{id:t.id,ic:t.ic,n:t.n,d:t.d,note:'买一次，永久使用',tag:own?'已拥有':'⚪ '+t.p,own,
+    act:own?'<button class="btn off" disabled>已拥有</button>':`<button class="btn sun" data-tool="${t.id}" ${SAVE.wallet<t.p?'disabled':''}>⚪ ${t.p}</button>`}});
+  return SKINS.map((k,i)=>{const own=SAVE.skins.includes(i),cur=SAVE.skin===i;return{id:'s'+i,ic:`<i style="background:radial-gradient(circle at 35% 30%,${k.c[0]},${k.c[1]})"></i>`,n:k.n,d:cur?'正在使用':own?'已拥有':'换个颜色去冒险',note:'永久拥有',tag:cur?'使用中':own?'已拥有':'⚪ '+k.p,own,
+    act:own?`<button class="btn ${cur?'off':'mint'}" data-skin="${i}" ${cur?'disabled':''}>${cur?'使用中':'换上'}</button>`:`<button class="btn sun" data-skin="${i}" ${SAVE.wallet<k.p?'disabled':''}>⚪ ${k.p}</button>`}})}
 function showShop(){
   $('wallet').textContent=SAVE.wallet;const items=shopItems();if(!items.some(x=>x.id===shopSel))shopSel=items[0]?items[0].id:'';const cur=items.find(x=>x.id===shopSel);
   $('shopList').innerHTML=`<div class="tabs">${STABS.map(t=>`<button class="tab ${t[0]===shopTab?'on':''}" data-stab="${t[0]}">${t[1]} ${t[2]}</button>`).join('')}</div>`
@@ -1012,11 +1018,11 @@ function showKitchen(){
   $('restCard').innerHTML=`<div class="stat"><span>小馆等级</span><span>Lv.${lv}「${RESTN[lv-1]}」</span></div><div class="stat"><span>声望</span><span>${SAVE.rep}${nx?' / '+nx:'（已满级）'}</span></div><div class="stat"><span>菜价加成</span><span>+${(lv-1)*2}%</span></div>${nx?`<div class="stat"><span>下一级</span><span style="text-align:end">菜价再 +2%${PERK[lv+1]?'，'+PERK[lv+1]:''}</span></div>`:''}<div id="prog2"><i style="width:${nx?Math.min(100,(SAVE.rep-pv)/(nx-pv)*100):100}%"></i></div>`;
   const needs=d=>Object.entries(d.need).map(([k,n])=>`<span class="${(SAVE.fish[k]||0)>=n?'':'no'}">${dot(k)} ${FISH[k].n}×${n}</span>`).join('　');
   $('ordList').innerHTML=SAVE.orders.list.map((o,i)=>{const d=DISH.find(x=>x.id===o.d),ok=hasFish(d);
-    return`<div class="it ${o.done?'done':''}"><span class="ic">${d.ic}</span><b>${o.c}：${d.n}</b><span class="need">${needs(d)}</span><span class="act">${o.done?'<button class="btn off" disabled>已上菜 ✔</button>':`<button class="btn off" disabled>营业时到店<br>+💎${Math.round(d.p*1.5)}</button>`}</span></div>`}).join('');
+    return`<div class="it ${o.done?'done':''}"><span class="ic">${d.ic}</span><b>${o.c}：${d.n}</b><span class="need">${needs(d)}</span><span class="act">${o.done?'<button class="btn off" disabled>已上菜 ✔</button>':`<button class="btn off" disabled>营业时到店<br>+⚪${Math.round(d.p*1.5)}</button>`}</span></div>`}).join('');
   {const have=Object.keys(FISH).filter(k=>(SAVE.fish[k]||0)>0);$('bask').innerHTML=have.length?have.map(k=>`<span>${dot(k)}${FISH[k].n} × ${SAVE.fish[k]}</span>`).join(''):'<span>鱼篓是空的，出海去捕鱼吧</span>'}
   const un=DISH.filter(unlocked),lk=DISH.filter(d=>!unlocked(d)).sort((x,y)=>(UNL[x.id][0]-UNL[y.id][0])||(UNL[x.id][1]-UNL[y.id][1]));
   $('kitList').innerHTML=un.map(d=>{const made=SAVE.dishes[d.id]||0,ok=hasFish(d);
-    return`<div class="it tap ${kitOpen===d.id?'open':''}" data-rcp="${d.id}"><span class="ic">${d.ic}</span><b>${d.n}<i class="chev">›</i>${made?`<small>做过 ${made} 次</small>`:'<small>首次上菜加五成</small>'}</b><span class="need">${needs(d)}</span><span class="act"><button class="btn ${ok?'':'off'}" data-cook="${d.id}" ${ok?'':'disabled'} style="box-shadow:0 4px 0 #b9c9d6">打包外卖<br>+💎${Math.round(d.p/2)}</button></span></div>`+(kitOpen===d.id&&RCP[d.id]?(r=>`<div class="card rcp">${r[3]?'<span class="ptag">含虚构食材</span>':''}<h4>用料</h4><p>${r[0]}</p><h4>做法</h4><ol>${r[1].map(x=>`<li>${x}</li>`).join('')}</ol>${r[2]?`<p class="note">${r[2]}</p>`:''}<p class="note">游戏里用到的食材：${Object.entries(d.need).map(([k,n])=>FISH[k].n+'×'+n).join('、')}，在${STN[methodOf(d.id)][1]}上完成。</p></div>`)(RCP[d.id]):'')}).join('')
+    return`<div class="it tap ${kitOpen===d.id?'open':''}" data-rcp="${d.id}"><span class="ic">${d.ic}</span><b>${d.n}<i class="chev">›</i>${made?`<small>做过 ${made} 次</small>`:'<small>首次上菜加五成</small>'}</b><span class="need">${needs(d)}</span><span class="act"><button class="btn ${ok?'':'off'}" data-cook="${d.id}" ${ok?'':'disabled'} style="box-shadow:0 4px 0 #b9c9d6">打包外卖<br>+⚪${Math.round(d.p/2)}</button></span></div>`+(kitOpen===d.id&&RCP[d.id]?(r=>`<div class="card rcp">${r[3]?'<span class="ptag">含虚构食材</span>':''}<h4>用料</h4><p>${r[0]}</p><h4>做法</h4><ol>${r[1].map(x=>`<li>${x}</li>`).join('')}</ol>${r[2]?`<p class="note">${r[2]}</p>`:''}<p class="note">游戏里用到的食材：${Object.entries(d.need).map(([k,n])=>FISH[k].n+'×'+n).join('、')}，${M2[d.id]?'先在'+STN[M2[d.id][0]][1]+'上准备，再到'+STN[M2[d.id][1]][1]+'上完成':'在'+STN[methodOf(d.id)][1]+'上完成'}。</p></div>`)(RCP[d.id]):'')}).join('')
    +(lk.length?'<p class="sub">尚未学会</p>':'')+lk.slice(0,3).map(d=>`<div class="it lock"><span class="ic">❓</span><b>？？？</b><span class="need">一道新菜谱</span><span class="act"><button class="btn off" disabled>🔒 ${lockWhy(d)}</button></span></div>`).join('')
    ;
   {const ids=un.map(d=>d.id),seen=SAVE.seenUn||[],nw=un.filter(d=>!seen.includes(d.id));if(nw.length){if(seen.length)setTimeout(()=>toast('新菜谱：'+nw.map(d=>d.n).join('、'),3.2),300);SAVE.seenUn=ids;persist()}}
@@ -1025,10 +1031,10 @@ function showKitchen(){
   show('sKit')}
 $('kitList').onclick=e=>{const b=e.target.closest('button');if(!b){const r=e.target.closest('[data-rcp]');if(r){kitOpen=kitOpen===r.dataset.rcp?'':r.dataset.rcp;SFX.tap();showKitchen()}return}if(b.disabled)return;const d=DISH.find(x=>x.id===b.dataset.cook);
   if(!d||!hasFish(d)||!unlocked(d))return;const g=takeaway(d);persist();
-  toast(`${d.ic} ${d.n}打包卖出，+${g} 💎（半价）`,2.2);refreshMenu();showKitchen()};
+  toast(`${d.ic} ${d.n}打包卖出，+${g} ⚪（半价）`,2.2);refreshMenu();showKitchen()};
 $('ordList').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)return;const o=SAVE.orders.list[+b.dataset.ord],d=DISH.find(x=>x.id===o.d);
-  if(o.done||!hasFish(d))return;const r=cookDish(d,1);o.done=1;let msg=`${o.c}：谢谢，真好吃！+${r.gain} 💎`;
-  if(!SAVE.orders.bonus&&SAVE.orders.list.every(x=>x.done)){SAVE.orders.bonus=1;SAVE.wallet+=50;addRep(20);msg='今天的订单全部完成！额外 +50 💎'}
+  if(o.done||!hasFish(d))return;const r=cookDish(d,1);o.done=1;let msg=`${o.c}：谢谢，真好吃！+${r.gain} ⚪`;
+  if(!SAVE.orders.bonus&&SAVE.orders.list.every(x=>x.done)){SAVE.orders.bonus=1;SAVE.wallet+=50;addRep(20);msg='今天的订单全部完成！额外 +50 ⚪'}
   persist();toast(msg,2.6);refreshMenu();showKitchen()};
 let kitTab='open';
 function kitShow(){document.querySelectorAll('#kitTabs .tab').forEach(t=>t.classList.toggle('on',t.dataset.kt===kitTab));document.querySelectorAll('#sKit .pane').forEach(p=>p.hidden=p.dataset.pane!==kitTab)}
@@ -1039,21 +1045,28 @@ $('bShop').onclick=()=>{SFX.tap();showShop()};
 function refreshMenu(){$('menuWal').textContent=SAVE.wallet;$('bMute').textContent='音效：'+(SAVE.mute?'关':'开');const b=SAVE.end;$('bestTxt').textContent=b.score?`最高 ${b.score} 分 · ${b.dist} 米`:'不停向前，刷新你的纪录！'}
 function showLevels(mode){
   if(cleared(4)&&!SAVE.story.guest){playStory(STORY.guest,()=>{SAVE.story.guest=1;persist();showLevels(mode)});return}
+  {const tot=starTotal(),nx=STARGIFT[SAVE.sg||0];$('starInfo').textContent='⭐ 已集 '+tot+' 颗星'+(nx?(tot>=nx[0]?' · 下次通关领取礼物':' · 再集 '+(nx[0]-tot)+' 颗有礼物'):'')}
   lastMode=mode;document.querySelectorAll('#modeTabs .tab').forEach(t=>t.classList.toggle('on',t.dataset.mode===mode));$('lvGrid').hidden=mode==='endless';$('endPanel').hidden=mode!=='endless';if(mode==='endless'){show('sLevels');return}
   const hi=mode==='hard'?1:0,sv=SAVE[mode];$('lvTitle').textContent=(hi?'困难模式':'普通模式')+' · 选择关卡';
   $('lvGrid').innerHTML=LV.map((L,i)=>{const open=i===0||sv.st[i-1]>0;if(!open)return i===1||sv.st[i-2]>0?'<button class="lv" disabled><b>🔒 ？？？</b><em>通关上一关后揭晓</em><span class="mini"></span></button>':'';let st='';for(let k=0;k<3;k++)st+=`<i class="st ${sv.st[i]>k?'f':''}"></i>`;if(sv.s4[i])st+='<i class="st f"></i>';
     return`<button class="lv" data-lv="${i}" ${open?'':'disabled'}><b>${open?'':'🔒 '}第${i+1}关 ${L.name}</b><em>${goalText(L,hi)}</em><em>${L.tool?TOOLN[L.tool][0]+(SAVE.tools[L.tool]?' 带着':' 需要')+TOOLN[L.tool][1]:cleared(i)?'🌊 海域已恢复':'海域褪色中'}</em><span class="mini">${st}</span></button>`}).join('');
   $('lvGrid').dataset.mode=mode;show('sLevels')}
+const STARGIFT=[[4,'gold',2,'金鱼结界 ×2'],[9,'life',1,'生命星 ×1'],[14,'pearl',150,'150 颗珍珠'],[20,'whale',2,'鲸鱼结界 ×2'],[27,'revive',1,'复活海星 ×1'],[34,'pearl',400,'400 颗珍珠'],[42,'double',3,'双倍珍珠袋 ×3'],[52,'pearl',800,'800 颗珍珠'],[66,'revive',3,'复活海星 ×3'],[80,'pearl',1500,'1500 颗珍珠'],[96,'pearl',3000,'3000 颗珍珠']];
+const starTotal=()=>['simple','hard'].reduce((a,m)=>a+SAVE[m].st.reduce((x,y)=>x+y,0)+SAVE[m].s4.reduce((x,y)=>x+(y?1:0),0),0);
+if(SAVE.starPaid===undefined)SAVE.starPaid=starTotal();
 function showEnd(win,stars,prev){
   const g=G,m=Math.floor(g.scroll/60),endless=g.mode==='endless',hi=g.mode==='hard'?1:0;state='over';hud.hidden=true;$('toast').className='';
-  let title,html='',btns='';const earn=g.pearls*(g.buff.double?2:1);SAVE.wallet+=earn;for(const k in g.caught)SAVE.fish[k]=(SAVE.fish[k]||0)+g.caught[k];{SAVE.stat.caught=(SAVE.stat.caught||0)+Object.keys(g.caught).reduce((a,k)=>a+(FISH[k].x?0:g.caught[k]),0);SAVE.stat.combo=Math.max(SAVE.stat.combo||0,g.maxCombo);const nw=[];for(const k in g.caught){if(!SAVE.dex[k])nw.push(FISH[k].n);SAVE.dex[k]=(SAVE.dex[k]||0)+g.caught[k]}if(nw.length&&SAVE.story.post0)setTimeout(()=>toast('《奇珍书》新收录：'+nw.join('、'),3.2),1400)}persist();
+  let title,html='',btns='';const earn=Math.round(g.pearls*(g.buff.double?2:1)*(endless?.4:1));SAVE.wallet+=earn;for(const k in g.caught)SAVE.fish[k]=(SAVE.fish[k]||0)+g.caught[k];{SAVE.stat.caught=(SAVE.stat.caught||0)+Object.keys(g.caught).reduce((a,k)=>a+(FISH[k].x?0:g.caught[k]),0);SAVE.stat.combo=Math.max(SAVE.stat.combo||0,g.maxCombo);const nw=[];for(const k in g.caught){if(!SAVE.dex[k])nw.push(FISH[k].n);SAVE.dex[k]=(SAVE.dex[k]||0)+g.caught[k]}if(nw.length&&SAVE.story.post0)setTimeout(()=>toast('《奇珍书》新收录：'+nw.join('、'),3.2),1400)}persist();
   const stat=(a,b)=>`<div class="stat"><span>${a}</span><span>${b}</span></div>`;
   if(win){const L=g.L;title='关卡完成！';
     html='<div class="big">'+stars.slice(0,3).map(s=>`<i class="st ${s?'f':''}"></i>`).join('')+(stars[3]?'<i class="st f"></i>':'<i class="st x">?</i>')+'</div>'
       +stat('收集珍珠',g.pearls+' 颗')+stat('游泳距离',m+' 米')+stat('剩余生命',g.life+' 颗星')+stat('使用结界',g.shieldUsed+' 次')+stat('最高连击',g.maxCombo+' 次')
       +'<div class="cond">'+[['完成目标：'+goalText(L,hi),1],[`收集 ${L.extra[hi]} 颗珍珠`,stars[1]],[`保留至少 ${hi?1:2} 颗星通关`,stars[2]],
         [prev?`隐藏星：无伤通关并收集 ${L.extra[hi]} 颗珍珠`:'隐藏星：再次挑战时解锁',stars[3]]].map(([c,o])=>`<span class="${o?'ok':''}">${o?'✔':'○'} ${c}</span>`).join('')+'</div>';
-    btns=(g.li<LV.length-1?'<button class="btn mint" data-act="next">下一关</button>':'')+'<button class="btn sun" data-act="retry">再次挑战</button><button class="btn" data-act="menu">主菜单</button>';
+    {const tot=starTotal(),nw=tot-(SAVE.starPaid||0);if(nw>0){SAVE.starPaid=tot;SAVE.wallet+=nw*15;html+=stat('新得到 '+nw+' 颗星','+'+nw*15+' ⚪')}
+      const got=[];while((SAVE.sg||0)<STARGIFT.length&&tot>=STARGIFT[SAVE.sg||0][0]){const m=STARGIFT[SAVE.sg||0];if(m[1]==='pearl')SAVE.wallet+=m[2];else SAVE.inv[m[1]]=(SAVE.inv[m[1]]||0)+m[2];got.push(m[3]);SAVE.sg=(SAVE.sg||0)+1}
+      if(got.length)html+=stat('集星礼物（共 '+tot+' 颗星）',got.join('、'));const nx=STARGIFT[SAVE.sg||0];if(nx)html+=`<div class="cond"><span>再集 ${nx[0]-tot} 颗星，还有一份礼物</span></div>`;persist()}
+    btns=(g.li<LV.length-1?'<button class="btn mint" data-act="next">下一关</button>':'')+'<button class="btn sm" data-act="retry">再次挑战</button><button class="btn sm" data-act="menu">主菜单</button>';
   }else{
     title={shark:'小鱼被鲨鱼吃掉了！',net:'小鱼没能逃出渔网…',hp:'星星用完了！',goal:'到终点了，但目标还没完成',orb:'潮心被撞灭了…'}[g.cause]||'游戏结束';
     if(endless){const sc=score(),b=SAVE.end,rec=sc>b.score;b.score=Math.max(b.score,sc);b.dist=Math.max(b.dist,m);b.combo=Math.max(b.combo,g.maxCombo);persist();
@@ -1062,7 +1075,7 @@ function showEnd(win,stars,prev){
       +(g.cause==='shark'?'<div class="cond"><span>小提示：看到红色水带，马上游到水带外面。结界挡不住鲨鱼哦！</span></div>':'');
     btns='<button class="btn mint" data-act="retry">再来一次</button><button class="btn" data-act="menu">主菜单</button>';
   }
-  html+=`<div class="stat"><span>存入钱包</span><span>+${earn} 💎${g.buff.double?'（双倍）':''}（共 ${SAVE.wallet}）</span></div>`;html+=`<div class="stat"><span>捕到的鱼</span><span>${Object.entries(g.caught).map(([k,n])=>FISH[k].n+'×'+n).join(' ')||'没有'}</span></div>`;btns+='<button class="btn sun" data-act="shop">商店</button><button class="btn mint" data-act="kit">小馆</button>';
+  html+=`<div class="stat"><span>存入钱包</span><span>+${earn} ⚪${g.buff.double?'（双倍）':''}（共 ${SAVE.wallet}）</span></div>`;html+=`<div class="stat"><span>捕到的鱼</span><span>${Object.entries(g.caught).map(([k,n])=>FISH[k].n+'×'+n).join(' ')||'没有'}</span></div>`;if(endless)html+='<div class="cond"><span>无限模式的珍珠按四成存入钱包</span></div>';
   $('endTitle').textContent=title;$('endCard').innerHTML=html;$('endBtns').innerHTML=btns;show('sEnd')}
 function pause(){if(state!=='play')return;state='pause';hold=false;show('sPause')}
 
@@ -1121,8 +1134,8 @@ const STORY={
   ['墨墨','站住！欢迎光临墨墨杂货铺！本店今日大酬宾，全场——原价！','s1octo',{cut:1}],['小鱼','我是来找东西的，不买。','s1octo'],
   ['墨墨','不买？不买不让进。沉船是我的地盘。……除非你躲得过外面那些渔网。','s1octo']],
  post1:[['墨墨','……这汤。','s1octo2'],['墨墨','我八只手，开了二十年店，头一回有人拿一碗汤跟我换东西。行，残页还你。亏本！亏大了！','s1octo2',{cut:1}],
-  ['小鱼','（他明明把碗都舔干净了。）','s1octo2',{em:'…'}],['阿珍','小鱼——！听说你把小馆开起来了！我来当经理！','dMan',{em:'!'}],['小鱼','我没钱请人。','dMan'],
-  ['阿珍','管饭就行！我算过了，照这个势头，三年开分店，五年上市！','dMan',{cut:1}],['小鱼','……先把今天的碗洗了。','dMan',{em:'…'}],['旁白','沉船周围的渔网，少了一些。','s1ok']],
+  ['小鱼','（他明明把碗都舔干净了。）','s1octo2',{em:'…'}],['阿强','……招人吗。','dQiang',{cut:1}],['小鱼','哇！你、你谁啊？我没钱请人。','dQiang',{em:'!',shake:1}],
+  ['阿强','阿强。力气大。……管饭，可以。','dQiang'],['小鱼','……先把今天的碗洗了。','dQiang',{em:'…'}],['旁白','他一只手端走了五摞碗。','dQiang'],['旁白','沉船周围的渔网，少了一些。','s1ok']],
  pre2:[['阿潮','今天的汤，四分。','dAchao',{cut:1}],['小鱼','昨天不是三分吗？涨了！','dAchao',{em:'!'}],['阿潮','你奶奶有道炖菜，要用深海的鱼。那个才叫十分。','dAchao'],
   ['小鱼','深海……那不是更深吗。我、我明天再去。','dAchao',{em:'…'}],['老龟','深——海——有——','s2turtle'],['小鱼','有鲨鱼对吧！您每次都说到一半！','s2turtle',{em:'!',shake:1}],
   ['老龟','……有一头大白鲨，叫大白。看见红色的水带，立刻躲开。','s2turtle',{cut:1}]],
@@ -1132,8 +1145,9 @@ const STORY={
   ['小鱼','不、不用了婆婆！','s3whale',{em:'!'}],['鲸婆婆','你奶奶年轻的时候，也戴着这枚吊坠来看我。她呀，报喜不报忧，跟你一个样。','s3whale'],
   ['鲸婆婆','我最后一次见她，她往更远的海去了。这道结界，婆婆替她交给你。你这孩子。','s3whale'],['旁白','获得了鲸鱼结界。','s3whale',{snd:'chime'}]],
  post3:[['旁白','冰海上，一艘大船放下的渔网望不到头。船头站着一个人。','ice'],['阿潮','远洋号……','shAchao',{em:'…'}],['阿潮','船长叫海生。是我儿子。他走那年，我一句留他的话都没说。','shAchao',{cut:1}],
-  ['小鱼','（阿潮今天没有说“难吃”。）','shAchao',{em:'…'}],['阿强','……可以。','dCrew',{cut:1}],
-  ['阿珍','他是从远洋号上下来的厨子！说不想再往海里撒那么大的网了。我已经录用了，工资我算过了！','dCrew',{em:'!'}],['小鱼','你算的账就没对过。……留下吧。明天——明天多进点货。','dCrew']],
+  ['小鱼','（阿潮今天没有说“难吃”。）','shAchao',{em:'…'}],['阿珍','借过借过！我是远洋号上的厨娘。船上那口大网我看不下去，不干了！路过贵店，讨碗水喝——','dCrew',{em:'!'}],
+  ['阿强','……水。','dCrew',{cut:1}],['阿珍','……','dCrew',{em:'!'}],['阿珍','我算过了！这家店正缺一个掌勺的。我留下，工钱好商量！','dCrew',{cut:1,shake:1}],
+  ['小鱼','你刚才不是说只是路过吗？','dCrew',{em:'?'}],['旁白','那天夜里，天上一颗星星也没有。阿珍看了阿强一眼，就决定不走了。','dCrew'],['小鱼','……行吧。明天——明天多进点货。','dCrew']],
  pre4:[['老龟','远——洋——号——用——黄——','s4turtle'],['小鱼','用黄色的墙把鱼群围起来了，对不对？','s4turtle'],['老龟','……小海龟和海马，也困在里面。那是我的孙辈。','s4turtle',{cut:1}],
   ['小鱼','您怎么不早说！我现在就去！','s4turtle',{em:'!',shake:1}],['小鱼','（奇怪。我刚才说的是“现在就去”，不是“明天”。）','s4turtle',{em:'?'}]],
  guest:[['老船医','请问——码头怎么走？','dGuest',{em:'?'}],['小鱼','您现在就在码头边上。','dGuest'],['老船医','哦！那海边小馆呢？','dGuest'],['小鱼','……您坐着的这儿就是。','dGuest',{em:'…'}],
@@ -1160,8 +1174,8 @@ const STORY={
  post8:[['旁白','海沟尽头泊着一艘收光船，船底垂下的管子连着第二颗潮心。','s8ship'],['海生','就是这艘。我当年以为，买的只是一种新渔具。我想多挣点钱，给村里修码头。','shHai',{cut:1}],
   ['阿潮','……码头的事，你怎么不跟我说。','shHai'],['海生','你也没问。','shHai',{em:'…'}],['小鱼','你们两个回家再吵！看那艘船上的徽记——和我的吊坠是同一个形状。','s8ship',{em:'!',flash:1}]],
  banq:[['旁白','一封烫金的请柬送到了小馆：澄光商会要在沉灯之城办宴席，点名请海边小馆掌勺。','dKid'],['阿珍','这是混进去的好机会！我算过了，成功率有一百二十成！','dCrew',{em:'!'}],
-  ['小鱼','没有一百二十成这种东西。','dCrew',{em:'…'}],['阿强','……可以。','dCrew',{cut:1}],['阿珍','可他们只许掌勺的一个人进后厨，阿强和我进不去。小鱼，全靠你自己了。','dCrew'],
-  ['旁白','宴席挑战：80 秒内为六位宾客上菜，至少上四道才算过关。食材不限量，没有店员帮忙。','dCrew']],
+  ['小鱼','没有一百二十成这种东西。','dCrew',{em:'…'}],['阿强','……可以。','dCrew',{cut:1}],['阿珍','可请柬上写明了，要小馆的主人亲自掌勺，阿强和我只能在外头等。小鱼，全靠你自己了。','dCrew'],
+  ['旁白','宴席挑战：110 秒内为十位宾客上菜，至少上七道才算过关。食材不限量，没有店员帮忙。','dCrew']],
  pre9:[['旁白','宴席散去，小鱼溜进了沉灯之城。满城的灯都亮着——每一盏的光，都是从潮心里抽出来的。','s9'],['小鱼','……真好看。可恶，为什么这么好看。','s9',{em:'…'}],['小鱼','探照灯在来回扫。躲着光圈走。','s9']],
  post9:[['阿澄','宴席上那道汤，是你做的。汤里有月光盐花——这世上只有一个人会这么用。','s9achen',{cut:1}],['阿澄','你是阿汐的孙子。','s9achen'],['小鱼','是你把潮心关起来的。海在褪色！','s9achen',{em:'!',shake:1}],
   ['阿澄','你说得对。可是——岸上的城要灯，船要动力，孩子们冬天要取暖。海有那么多光，分一点出来，错了吗？','s9achen'],['小鱼','……','s9achen',{em:'…'}],
@@ -1170,6 +1184,7 @@ const STORY={
   ['小鱼','走吧。你跟在我后面，别撞到东西——我带你下去。','s10',{cut:1}]],
  post10:[['奶奶','小鱼。汤喝了没有？','s10gran',{cut:1}],['小鱼','……一年了！你第一句话问这个？！','s10gran',{em:'!',shake:1}],['奶奶','那就是喝了。小馆呢？','s10gran'],['小鱼','开着。阿潮说我九分。……回家吧，奶奶。','s10gran'],
   ['奶奶','我走不开。我一离开，这最后一颗就会熄。有件事该告诉你了：我本来是海里的人。这枚吊坠，是让海里的人上岸用的。','s10gran'],
+  ['小鱼','…………','s10gran',{em:'…'}],['小鱼','海里的人？！那我……我是半条鱼？！那我这些年吃的烤鱼算什么！！','s10gran',{shock:1,shake:1,snd:'crash'}],['奶奶','算晚饭。','s10gran',{cut:1}],
   ['奶奶','所以你一半属于海，一半属于岸。你怕水，是岸上的那一半；你会游，是海里的这一半。不用选。','s10gran'],['小鱼','阿澄让我带句话。她说，那碗汤，她没有忘。','s10gran'],
   ['奶奶','……这个人。四十年了，还是不会好好道歉。','s10gran',{em:'…'}],['旁白','奶奶把一枚小海螺放进小鱼手里：“这是潮音螺。想不通的时候，就对着它说话。记得按时吃饭。”','s10gran'],['旁白','获得了潮音螺。主菜单里可以随时使用。','s10gran']],
  pre11:[['小鱼','五颗潮心都找到了。我一个人送不回去。——大家，帮帮我！','s11',{cut:1}],['鲸婆婆','哎哟，这小子会开口求人了！婆婆给你开路，顺便唱一路——','s11'],['墨墨','结界一个，算我的。不要钱。……就这一次！亏死了！','s11',{em:'!'}],
@@ -1235,13 +1250,14 @@ function cookDish(d,order){for(const k in d.need)SAVE.fish[k]-=d.need[k];const f
 
 /* ---------- restaurant service (kitchen mini-game) ---------- */
 const METHOD={cut:['d49','d50','d7','d5','d14','d37','d40'],grill:['d47','d48','d41','d1','d4','d25','d27','d35','d17','d29','d32','d11'],pot:['d2','d3','d6','d19','d34','d36','d33','d12','d28','d16','d13','d22','d39','d42','d43','d45']};
-const methodOf=id=>METHOD.cut.includes(id)?'cut':METHOD.grill.includes(id)?'grill':METHOD.pot.includes(id)?'pot':'asm';
+const M2={d2:['cut','pot'],d23:['cut','pot'],d18:['asm','pot'],d46:['asm','pot'],d11:['asm','grill'],d15:['grill','asm']},startKind=id=>M2[id]?M2[id][0]:methodOf(id);
+const methodOf=id=>M2[id]?M2[id][1]:METHOD.cut.includes(id)?'cut':METHOD.grill.includes(id)?'grill':METHOD.pot.includes(id)?'pot':'asm';
 const STN={cut:['🔪','砧板'],grill:['🔥','烤架'],pot:['🍲','汤锅'],asm:['🍽️','装盘台']},TIME={grill:[4,6.5,9],pot:[7,13,17]};
 const FACES=['👵','👴','👩','🧔','👧','🧑','👨‍🦳','👩‍🦰'];
 SAVE.up=SAVE.up||{seat:0,grill:0,pot:0};SAVE.staff=SAVE.staff||{waiter:0,chef:0};
 const UPG=[{id:'seat',ic:'🪑',n:'加一张桌子',d:'多招待一位客人',cost:[300,700,1500]},{id:'grill',ic:'🔥',n:'第二个烤架',d:'同时烤两份',cost:[500]},{id:'pot',ic:'🍲',n:'第二口汤锅',d:'同时煮两锅',cost:[900]}];
-const STAFF=[{id:'waiter',ic:'🧒',n:'阿珍（跑堂）',d:'出菜口的菜，她会自动端给客人',w:12,ok:()=>!!SAVE.story.post1,why:'通关第 2 关后加入'},
- {id:'chef',ic:'👨‍🍳',n:'阿强师傅（厨师）',d:'自动开火、切菜、出锅，但做不出“刚好”',w:20,ok:()=>restLv()>=3,why:'小馆 Lv.3 解锁'}];
+const STAFF=[{id:'waiter',ic:'🧑',n:'阿强（跑堂）',d:'出菜口的菜，他会自动端给客人',w:12,ok:()=>!!SAVE.story.post1,why:'通关第 2 关后加入'},
+ {id:'chef',ic:'👩‍🍳',n:'阿珍师傅（厨师）',d:'自动开火、切菜、出锅，可她一边掌勺一边算账，做不出“刚好”',w:20,ok:()=>restLv()>=3&&!!SAVE.story.post3,why:'通关第 4 关且小馆 Lv.3'}];
 DISH.push({id:'d37',ic:'🥗',n:'海葡萄沙拉',need:{grape:1},p:70},{id:'d38',ic:'🌯',n:'海葡萄鳗鱼卷',need:{grape:1,eel:1},p:100},{id:'d39',ic:'🍵',n:'洞穴清汤',need:{grape:1,angler:1},p:120},
  {id:'d40',ic:'🦪',n:'扇贝刺身',need:{scallop:1},p:90},{id:'d41',ic:'🧄',n:'蒜蓉烤扇贝',need:{scallop:1,yellow:1},p:120},{id:'d42',ic:'🥘',n:'扇贝鲷鱼汤',need:{scallop:1,bream:1},p:140},
  {id:'d43',ic:'🍮',n:'海胆蒸蛋',need:{urchin:1},p:100},{id:'d44',ic:'🍚',n:'海胆拌饭',need:{urchin:1,sard:1},p:120},{id:'d45',ic:'🦐',n:'白灼逆潮虾',need:{shrimp:1},p:100},{id:'d46',ic:'🥟',n:'鲜虾云吞',need:{shrimp:1,cod:1},p:130},
@@ -1259,13 +1275,13 @@ function startServe(banq){
   const st=[{k:'cut'},{k:'grill'},{k:'pot'},{k:'asm'}];if(SAVE.up.grill)st.push({k:'grill'});if(SAVE.up.pot)st.push({k:'pot'});
   SAVE.orders.list.forEach(o=>delete o.in);
   SV={t:90,earn:0,tips:0,rep:0,served:0,lost:0,wage,staff,seats:Array(2+SAVE.up.seat).fill(null),shelf:[],st,next:1,wt:0,dirty:1,over:0,salt:!banq&&(SAVE.fish.salt||0)>0};
-  if(banq){SV.banq=1;SV.t=80;SV.seats=Array(3).fill(null);const un=DISH.filter(d=>unlocked(d)&&Object.keys(d.need).length<=2).sort((a,b)=>b.p-a.p).slice(0,8);SV.q=Array.from({length:6},(_,i)=>un[(i*3)%un.length].id)}
+  if(banq){SV.banq=1;SV.t=110;SV.seats=Array(4).fill(null);const un=DISH.filter(d=>unlocked(d)&&Object.keys(d.need).length<=2).sort((a,b)=>b.p-a.p).slice(0,8);SV.q=Array.from({length:10},(_,i)=>un[(i*3)%un.length].id)}
   $('svEnd').hidden=true;$('app').classList.add('serve');$('svScene').hidden=$('svShelf').hidden=false;show('sServe');svBuild();svRender();
-  if(banq)toast('宴席挑战：店员进不了后厨，全靠你自己！',3.2);else if(broke.length)toast('珍珠不够付工资，'+broke.join('、')+'这场没来',3.2,1);else if(came.length)toast('本场店员：'+came.join('、')+'（工资 '+wage+' 💎）',3);else toast('客人点什么，就在下面点那道菜开始做',3)}
+  if(banq)toast('宴席挑战：店员进不了后厨，全靠你自己！',3.2);else if(broke.length)toast('珍珠不够付工资，'+broke.join('、')+'这场没来',3.2,1);else if(came.length)toast('本场店员：'+came.join('、')+'（工资 '+wage+' ⚪）',3);else toast('客人点什么，就在下面点那道菜开始做',3)}
 function svSigNeed(id){const v=SV;return v.seats.filter(x=>x&&x.d===id&&x.sig).length-v.st.filter(x=>x.d===id&&x.hand&&x.ph!=='burn').length-v.shelf.filter(p=>p.d===id&&p.hand).length}
-function svStart(id,byHand){const v=SV,d=dById(id),m=methodOf(id),s=v.st.find(x=>x.k===m&&!x.d);if(!s||svPending(id)<=0||!(v.banq||canMake(d,SAVE.fish)))return;s.hand=byHand&&svSigNeed(id)>0?1:0;
+function svStart(id,byHand){const v=SV,d=dById(id),m=startKind(id),s=v.st.find(x=>x.k===m&&!x.d);if(!s||svPending(id)<=0||!(v.banq||canMake(d,SAVE.fish)))return;s.hand=byHand&&svSigNeed(id)>0?1:0;
   if(!v.banq)for(const k in d.need)SAVE.fish[k]-=d.need[k];s.d=id;s.t=0;s.n=0;s.ph=m==='cut'||m==='asm'?'work':'cook';s.need=m==='cut'?6:3+Object.values(d.need).reduce((a,b)=>a+b,0);v.dirty=1;SFX.tap();svFx('start',v.st.indexOf(s),d.ic,id)}
-function svPlate(s,q){const v=SV;if(v.shelf.length>=4){toast('出菜口满了，先把菜端给客人',1.6);return false}svFx('plate',v.st.indexOf(s),dById(s.d).ic);v.shelf.push({d:s.d,q,hand:s.hand,age:0});s.d=null;s.ph='';s.hand=0;v.dirty=1;if(!v.banq&&!SAVE.tipFin){SAVE.tipFin=1;toast('点一下出菜口的菜，给它“点睛”，多卖一成半',3.2)}return true}
+function svPlate(s,q){const v=SV;if(M2[s.d]&&!s.stg){const k2=M2[s.d][1],t2=v.st.find(x=>x.k===k2&&!x.d);if(!t2){if(!v.banq||true)toast(STN[k2][1]+'没空，先腾出来',1.3);return false}t2.d=s.d;t2.ph=k2==='grill'||k2==='pot'?'cook':'work';t2.t=0;t2.n=0;t2.stg=1;t2.q0=q;t2.hand=s.hand;svFx('plate',v.st.indexOf(s),dById(s.d).ic);s.d=null;s.ph='';s.hand=0;v.dirty=1;SFX.tap();return true}if(s.q0&&s.q0!=='ok')q=s.q0;s.stg=0;s.q0=0;if(v.shelf.length>=4){toast('出菜口满了，先把菜端给客人',1.6);return false}svFx('plate',v.st.indexOf(s),dById(s.d).ic);v.shelf.push({d:s.d,q,hand:s.hand,age:0});s.d=null;s.ph='';s.hand=0;v.dirty=1;if(!v.banq&&!SAVE.tipFin){SAVE.tipFin=1;toast('点一下出菜口的菜，给它“点睛”，多卖一成半',3.2)}return true}
 function svTapSt(s){const v=SV;if(!s.d)return;
   if(s.k==='cut'||s.k==='asm'){if(s.n<s.need){s.n++;SFX.tap();v.dirty=1;svFx('chop',v.st.indexOf(s))}if(s.n>=s.need)svPlate(s,'ok')}
   else if(s.ph==='cook')toast('还没熟，再等等',1);
@@ -1285,12 +1301,12 @@ function svTick(dt){const v=SV;v.t-=dt;{const rd=dt/(SAVE.spd||1);v.gcd=Math.max
   v.seats.forEach((s,i)=>{if(!s)return;s.p-=dt;if(s.p<=0){svGhost(s,i,0);v.seats[i]=null;v.lost++;v.rep-=2;if(s.o)delete s.o.in;v.dirty=1;SFX.hit()}});
   v.next-=dt;if(v.next<=0&&v.t>8){v.next=5-.7*v.seats.length+Math.random()*3;const i=v.seats.indexOf(null);if(i>=0&&v.banq){if(v.q.length){const d=dById(v.q.shift());v.seats[i]={d:d.id,p:30,P:30,face:'🧑',name:'宾客',o:null,look:svLook(),x:1e3};v.dirty=1;SFX.tap()}}else if(i>=0){const f=svAvail(),o=SAVE.orders.list.find(o=>!o.done&&!o.in&&unlocked(dById(o.d))&&canMake(dById(o.d),f));let d=null;
       if(o){o.in=1;d=dById(o.d)}else{const pool=DISH.filter(d=>unlocked(d)&&canMake(d,f));if(pool.length)d=pool[Math.floor(Math.random()*pool.length)]}
-      if(d){const sig=!v.seats.some(x=>x&&x.sig)&&Math.random()<(o?.5:.22),P=o?30:sig?28:24;v.seats[i]={d:d.id,p:P,P,face:FACES[Math.floor(Math.random()*FACES.length)],name:o?o.c:'',o,sig,look:svLook(o),x:1e3};v.dirty=1;SFX.tap();if(sig&&v.staff.chef&&!v.sigTip){v.sigTip=1;toast('阿强：“这道得你来。”带 ⭐ 的单你亲手做能多卖四成；等太久他才会接手',3.6)}}}}
+      if(d){const sig=!v.seats.some(x=>x&&x.sig)&&Math.random()<(o?.5:.22),P=o?30:sig?28:24;v.seats[i]={d:d.id,p:P,P,face:FACES[Math.floor(Math.random()*FACES.length)],name:o?o.c:'',o,sig,look:svLook(o),x:1e3};v.dirty=1;SFX.tap();if(sig&&v.staff.chef&&!v.sigTip){v.sigTip=1;toast('阿珍：“这道得你来，我算过了。”带 ⭐ 的单你亲手做能多卖四成；等太久她才会接手',3.6)}}}}
   for(const s of v.st){if(!s.d)continue;
     if(s.k==='grill'||s.k==='pot'){s.t+=dt;const T=TIME[s.k],ph=s.t<T[0]?'cook':s.t<T[1]?'perfect':s.t<T[2]?'ok':'burn';if(ph!==s.ph){s.ph=ph;v.dirty=1;if(ph==='perfect')SFX.shield();if(ph==='burn')SFX.hit()}
       if(v.staff.chef&&!s.hand&&s.ph!=='burn'&&s.t>=TIME[s.k][0]+1.5&&v.shelf.length<4)svPlate(s,'ok')}
     else if(v.staff.chef&&!s.hand){s.ct=(s.ct||0)+dt;if(s.ct>.45){s.ct=0;svTapSt(s)}}}
-  if(v.staff.chef){v.cs=(v.cs||0)+dt;if(v.cs>.7){v.cs=0;for(const id of new Set(v.seats.filter(Boolean).map(s=>s.d))){const m=methodOf(id),A=v.seats.filter(x=>x&&x.d===id&&(!x.sig||x.p/x.P<.45)).length,C=v.st.filter(x=>x.d===id&&x.ph!=='burn'&&!x.hand).length+v.shelf.filter(p=>p.d===id&&!p.hand).length;if(C<A&&svPending(id)>0&&(v.banq||canMake(dById(id),SAVE.fish))&&v.st.some(x=>x.k===m&&!x.d)){svStart(id);break}}}}
+  if(v.staff.chef){v.cs=(v.cs||0)+dt;if(v.cs>.7){v.cs=0;for(const id of new Set(v.seats.filter(Boolean).map(s=>s.d))){const m=startKind(id),A=v.seats.filter(x=>x&&x.d===id&&(!x.sig||x.p/x.P<.45)).length,C=v.st.filter(x=>x.d===id&&x.ph!=='burn'&&!x.hand).length+v.shelf.filter(p=>p.d===id&&!p.hand).length;if(C<A&&svPending(id)>0&&(v.banq||canMake(dById(id),SAVE.fish))&&v.st.some(x=>x.k===m&&!x.d)){svStart(id);break}}}}
   if(v.staff.waiter){v.wt+=dt;if(v.wt>.9){v.wt=0;for(const p of v.shelf){if(!p.fin&&p.age<1.8)continue;const i=svSeatFor(p);if(i>=0){svServe(i);break}}}}
   const busy=v.seats.some(Boolean)||v.st.some(s=>s.d)||v.shelf.length;
   if(v.t<=0||(!busy&&(v.banq?!v.q.length:!DISH.some(d=>unlocked(d)&&canMake(d,SAVE.fish))))){svEnd(v.t<=0?'time':'stock');return}
@@ -1305,8 +1321,8 @@ function svBuild(){const v=SV,n=v.seats.length;
   $('svScene').innerHTML='<canvas id="svCv"></canvas>'+v.seats.map((s,i)=>`<button class="sb" data-seat="${i}" style="left:${svSeatF(i,n)*100}%" hidden><span class="bub"><span class="di"></span></span><span class="dnm"></span></button>`).join('');
   $('svSt').style.gridTemplateColumns=`repeat(${v.st.length>4?3:2},1fr)`;
   $('svSt').innerHTML=v.st.map((s,i)=>{const T=TIME[s.k],bg=T?`style="background:conic-gradient(#cfd6dc 0 ${T[0]/T[2]*100}%,#ffd23f ${T[0]/T[2]*100}% ${T[1]/T[2]*100}%,#ff9f8f ${T[1]/T[2]*100}% 100%)"`:'';
-    return`<div class="stn k-${s.k} idle" data-st="${i}"><span class="lab">${STN[s.k][0]} ${STN[s.k][1]}</span><span class="fl"></span><span class="smk s1"></span><span class="smk s2"></span><span class="smk s3"></span><span class="kn">🔪</span><span class="cf">👨‍🍳</span><span class="dial" ${bg}><i class="ptr"></i><b class="fd"></b></span><span class="tx"></span></div>`}).join('');
-  {const e=$('svStaff'),a=[];if(v.staff.waiter)a.push('<span class="chip">🧒 阿珍：自动上菜</span>');if(v.staff.chef)a.push('<span class="chip">👨‍🍳 阿强：自动做菜</span>');e.hidden=!a.length;e.innerHTML=a.join('')}
+    return`<div class="stn k-${s.k} idle" data-st="${i}"><span class="lab">${STN[s.k][0]} ${STN[s.k][1]}</span><span class="fl"></span><span class="smk s1"></span><span class="smk s2"></span><span class="smk s3"></span><span class="kn">🔪</span><span class="cf">👩‍🍳</span><span class="dial" ${bg}><i class="ptr"></i><b class="fd"></b></span><span class="tx"></span></div>`}).join('');
+  {const e=$('svStaff'),a=[];if(v.staff.waiter)a.push('<span class="chip">🧑 阿强：自动上菜</span>');if(v.staff.chef)a.push('<span class="chip">👩‍🍳 阿珍：自动做菜</span>');e.hidden=!a.length;e.innerHTML=a.join('')}
   SVE={sb:[...$('svScene').querySelectorAll('.sb')],st:[...$('svSt').children]};v.ghosts=[];v.wx=6;v.wtx=6;v.at=0}
 function svFly(ic,a,b){if(!a||!b||!a.getBoundingClientRect)return;const A=a.getBoundingClientRect(),B=b.getBoundingClientRect();if(!A.width||!B.width)return;const e=document.createElement('span');e.className='fly';e.textContent=ic;document.body.appendChild(e);
   const x0=A.left+A.width/2,y0=A.top+A.height/2,x1=B.left+B.width/2,y1=B.top+B.height/2;
@@ -1316,7 +1332,7 @@ function svPop(txt,el,cls){if(!el)return;const B=el.getBoundingClientRect();if(!
 function svFx(type,i,ic,x){if(!SVE)return;const st=SVE.st[i],sb=SVE.sb[i];
   if(type==='start')svFly(ic,$('svMenu').querySelector(`[data-mk="${x}"]`),st);
   else if(type==='plate')svFly(ic,st,$('svShelf'));
-  else if(type==='serve'){svFly(ic,$('svShelf'),sb);setTimeout(()=>svPop(SV&&SV.banq?'👍':'+'+x+' 💎',sb),300)}
+  else if(type==='serve'){svFly(ic,$('svShelf'),sb);setTimeout(()=>svPop(SV&&SV.banq?'👍':'+'+x+' ⚪',sb),300)}
   else if(type==='leave')svPop('💢',sb,'bad');
   else if(type==='chop'&&st){st.classList.remove('chop');void st.offsetWidth;st.classList.add('chop')}}
 function svGhost(s,i,happy){const v=SV;v.ghosts.push({look:s.look,x:s.x<900?s.x:0,happy,t:0});if(happy&&v.staff.waiter)v.wtx=-1-i;if(!happy)svFx('leave',i)}
@@ -1327,10 +1343,10 @@ function svRender(){const v=SV;v.dirty=0;if(!SVE)return;
     e.querySelector('.tx').textContent=(s.d&&s.hand&&ph!=='burn'?'⭐ ':'')+(ph==='work'?(s.k==='cut'?'连点切菜！':'连点装盘！'):ph==='perfect'?'出锅！':ph==='ok'?'快出锅！':ph==='burn'?'焦了，点一下清理':ph==='cook'&&s.hand?'招牌菜，盯着火候':'');
     if(!TIME[s.k])e.querySelector('.dial').style.background=`conic-gradient(#4fe0b5 ${s.d?s.n/s.need*100:0}%,rgba(6,40,70,.15) 0)`});
   const ids=[...new Set(v.seats.filter(Boolean).map(s=>s.d))];
-  $('svMenu').innerHTML=ids.length?ids.map(id=>{const d=dById(id),m=methodOf(id),ok=svPending(id)>0&&(v.banq||canMake(d,SAVE.fish))&&v.st.some(x=>x.k===m&&!x.d);
-    return`<button class="mbtn ${svSigNeed(id)>0?'sig':''}" data-mk="${id}" ${ok?'':'disabled'}>${svSigNeed(id)>0?'⭐ ':''}${d.ic} ${d.n}<small>${STN[m][0]} ${Object.entries(d.need).map(([k,n])=>FISH[k].n+'×'+n).join(' ')}</small></button>`}).join(''):'<span class="lbl">等客人点菜…</span>';
+  $('svMenu').innerHTML=ids.length?ids.map(id=>{const d=dById(id),m=startKind(id),ok=svPending(id)>0&&(v.banq||canMake(d,SAVE.fish))&&v.st.some(x=>x.k===m&&!x.d);
+    return`<button class="mbtn ${svSigNeed(id)>0?'sig':''}" data-mk="${id}" ${ok?'':'disabled'}>${svSigNeed(id)>0?'⭐ ':''}${d.ic} ${d.n}<small>${STN[m][0]}${M2[id]?'→'+STN[M2[id][1]][0]:''} ${Object.entries(d.need).map(([k,n])=>FISH[k].n+'×'+n).join(' ')}</small></button>`}).join(''):'<span class="lbl">等客人点菜…</span>';
   svBars()}
-function svBars(){const v=SV;$('svSpd').textContent=(SAVE.spd||1)+'×';{const n=SAVE.fish.salt||0,e=$('svSalt');e.hidden=!n;e.textContent=`✨ 盐花 ×${n} · ${v.salt?'用':'不用'}`;e.style.background=v.salt?'var(--sun)':'';e.style.color=v.salt?'#6a4500':''}$('svTime').textContent='⏱ '+Math.max(0,Math.ceil(v.t))+' 秒';$('svEarn').textContent='💎 '+(v.earn+v.tips);if(!SVE)return;
+function svBars(){const v=SV;$('svSpd').textContent=(SAVE.spd||1)+'×';{const n=SAVE.fish.salt||0,e=$('svSalt');e.hidden=v.banq||!(n||SAVE.story.post5);e.textContent=n?`✨ 盐花 ×${n} · ${v.salt?'用':'不用'}`:'✨ 盐花 ×0';e.style.opacity=n?1:.55;e.style.background=n&&v.salt?'var(--sun)':'';e.style.color=n&&v.salt?'#6a4500':''}$('svTime').textContent='⏱ '+Math.max(0,Math.ceil(v.t))+' 秒';$('svEarn').textContent='⚪ '+(v.earn+v.tips);if(!SVE)return;
   v.seats.forEach((s,i)=>{if(!s)return;const f=Math.max(0,s.p/s.P),b=SVE.sb[i].firstElementChild;b.style.setProperty('--p',f*100);b.style.setProperty('--rc',f<.3?'#ff7a6b':f<.6?'#ffd23f':'#4fe0b5');SVE.sb[i].classList.toggle('greet',f<.6&&!s.greet&&!(v.gcd>0)&&!v.shelf.some(p=>p.d===s.d))});
   v.st.forEach((s,i)=>{if(s.d&&TIME[s.k])SVE.st[i].querySelector('.ptr').style.setProperty('--a',Math.min(360,s.t/TIME[s.k][2]*360)+'deg')})}
 function svScene(dt){const v=SV,c=document.getElementById('svCv');if(!c||!c.clientWidth)return;const w=Math.max(60,Math.round(c.clientWidth/4)),h=Math.max(30,Math.round(c.clientHeight/4)),n=v.seats.length;
@@ -1341,7 +1357,7 @@ function svScene(dt){const v=SV,c=document.getElementById('svCv');if(!c||!c.clie
   for(const lf of[.36,.8]){const lx=Math.round(w*lf),sw=Math.round(Math.sin(t*1.3+lx));R(lx,0,1,5,'#5a4a3a');R(lx-3+sw,5,7,2,'#ffd23f');R(lx-1+sw,7,3,1,'#fff27a')}
   R(w-10,gy-24,10,24,'#6b4226');R(w-9,gy-23,8,23,'#27384a');R(w-8,gy-12,1,2,'#ffd23f');
   v.wx+=((v.wtx<0?w*svSeatF(-1-v.wtx,n):6)-v.wx)*Math.min(1,dt*9);if(v.wtx<0&&(v.wT=(v.wT||0)+dt)>.7){v.wtx=6;v.wT=0}
-  if(v.staff.waiter)human('xiaoman',v.wx,gy+7);
+  if(v.staff.waiter)human('aqiang',v.wx,gy+7);
   v.seats.forEach((s,i)=>{if(!s)return;const sx=w*svSeatF(i,n);if(s.x>w+8)s.x=w+8;s.x=Math.max(sx,s.x-95*dt);const low=s.p/s.P<.3;human(s.look,s.x+(low&&Math.sin(t*30)>0?1:0),gy+7-(s.x>sx&&Math.sin(t*16)>0?1:0),1)});
   for(const g of v.ghosts){g.t+=dt;if(g.t>.5||!g.happy)g.x+=85*dt;const y=gy+7-(g.happy&&Math.sin(g.t*18)>0?2:Math.sin(g.t*16)>0?1:0);human(g.look,g.x,y,0);
     if(g.happy){R(g.x-3,y-20,2,2,'#ff6b8a');R(g.x,y-20,2,2,'#ff6b8a');R(g.x-2,y-18,3,1,'#ff6b8a');R(g.x-1,y-17,1,1,'#ff6b8a')}else{R(g.x+4,y-19,3,1,'#e0503f');R(g.x+5,y-20,1,3,'#e0503f')}}
@@ -1350,23 +1366,23 @@ function svScene(dt){const v=SV,c=document.getElementById('svCv');if(!c||!c.clie
   for(let i=0;i<n;i++){const sx=Math.round(w*svSeatF(i,n));R(sx-4,gy-1,9,1,'#ffffff');R(sx+6,gy-2,1,2,'#e0503f')}
   const g2=c.getContext('2d');g2.imageSmoothingEnabled=false;g2.clearRect(0,0,w,h);g2.drawImage(pcv,0,0)}
 
-function svEnd(why){const v=SV;v.over=1;if(v.banq){if(v.served>=6)SAVE.stat.banq6=1}else SAVE.stat.maxServe=Math.max(SAVE.stat.maxServe||0,v.served);
-  if(v.banq){const ok=v.served>=4;if(ok){SAVE.banq=1;SAVE.wallet+=200}persist();refreshMenu();ok?SFX.win():SFX.lose();$('svEnd').innerHTML=`<h3>${ok?'宴席成功！':'宴席没办好…'}</h3><div class="stat"><span>上菜</span><span>${v.served} / 6 道（至少 4 道）</span></div>`+(ok?'<div class="stat"><span>商会的酬劳</span><span>+200 💎</span></div><p>趁宴席散场，可以溜进沉灯之城了。</p>':'<p>再去选关里进一次沉灯之城，就能重办宴席。</p>')+'<div class="rowb" style="margin-top:12px"><button class="btn mint" id="svBack">好的</button></div>';$('svEnd').hidden=false;SVE=null;$('svStaff').hidden=true;$('svScene').hidden=$('svShelf').hidden=true;$('svSt').innerHTML=$('svMenu').innerHTML='';return}SAVE.orders.list.forEach(o=>delete o.in);const tot=v.earn+v.tips;SAVE.wallet+=tot;let bonus=0;
+function svEnd(why){const v=SV;v.over=1;if(v.banq){if(v.served>=10)SAVE.stat.banq6=1}else SAVE.stat.maxServe=Math.max(SAVE.stat.maxServe||0,v.served);
+  if(v.banq){const ok=v.served>=7;if(ok){SAVE.banq=1;SAVE.wallet+=200}persist();refreshMenu();ok?SFX.win():SFX.lose();$('svEnd').innerHTML=`<h3>${ok?'宴席成功！':'宴席没办好…'}</h3><div class="stat"><span>上菜</span><span>${v.served} / 10 道（至少 7 道）</span></div>`+(ok?'<div class="stat"><span>商会的酬劳</span><span>+200 ⚪</span></div><p>趁宴席散场，可以溜进沉灯之城了。</p>':'<p>再去选关里进一次沉灯之城，就能重办宴席。</p>')+'<div class="rowb" style="margin-top:12px"><button class="btn mint" id="svBack">好的</button></div>';$('svEnd').hidden=false;SVE=null;$('svStaff').hidden=true;$('svScene').hidden=$('svShelf').hidden=true;$('svSt').innerHTML=$('svMenu').innerHTML='';return}SAVE.orders.list.forEach(o=>delete o.in);const tot=v.earn+v.tips;SAVE.wallet+=tot;let bonus=0;
   if(!SAVE.orders.bonus&&SAVE.orders.list.length&&SAVE.orders.list.every(x=>x.done)){SAVE.orders.bonus=1;bonus=50;SAVE.wallet+=50;v.rep+=20}
   SAVE.rep=Math.max(0,SAVE.rep);addRep(Math.max(v.rep,-SAVE.rep));persist();refreshMenu();SFX.win();
   const st=(a,b)=>`<div class="stat"><span>${a}</span><span>${b}</span></div>`;
-  $('svEnd').innerHTML=`<h3>${why==='stock'?'食材用完，打烊！':why==='quit'?'提前打烊':'今天辛苦了！'}</h3>`+st('上菜',v.served+' 道')+st('没等到的客人',v.lost+' 位')+st('菜钱','+'+v.earn+' 💎')+st('小费','+'+v.tips+' 💎')+(v.wage?st('店员工资','-'+v.wage+' 💎'):'')+(bonus?st('今日订单全部完成','+50 💎'):'')+st('声望',(v.rep>=0?'+':'')+v.rep)+st('本场净收入',(tot+bonus-v.wage)+' 💎')+'<div class="rowb" style="margin-top:12px"><button class="btn mint" id="svBack">回到小馆</button></div>';
+  $('svEnd').innerHTML=`<h3>${why==='stock'?'食材用完，打烊！':why==='quit'?'提前打烊':'今天辛苦了！'}</h3>`+st('上菜',v.served+' 道')+st('没等到的客人',v.lost+' 位')+st('菜钱','+'+v.earn+' ⚪')+st('小费','+'+v.tips+' ⚪')+(v.wage?st('店员工资','-'+v.wage+' ⚪'):'')+(bonus?st('今日订单全部完成','+50 ⚪'):'')+st('声望',(v.rep>=0?'+':'')+v.rep)+st('本场净收入',(tot+bonus-v.wage)+' ⚪')+'<div class="rowb" style="margin-top:12px"><button class="btn mint" id="svBack">回到小馆</button></div>';
   $('svEnd').hidden=false;SVE=null;$('svStaff').hidden=true;$('svScene').hidden=$('svShelf').hidden=true;$('svSt').innerHTML=$('svMenu').innerHTML=''}
 $('sServe').addEventListener('pointerdown',e=>{const t=e.target;if(t.closest('#svBack')){const bq=SV&&SV.banq;SV=null;$('app').classList.remove('serve');if(bq)showLevels('simple');else showKitchen();return}if(!SV||SV.over)return;
-  if(t.closest('#svQuit')){svEnd('quit');return}if(t.closest('#svSpd')){SAVE.spd=SAVE.spd===1.5?2:SAVE.spd===2?1:1.5;persist();SFX.tap();svBars();return}if(t.closest('#svSalt')){SV.salt=!SV.salt;SFX.tap();svBars();return}let b;
+  if(t.closest('#svQuit')){svEnd('quit');return}if(t.closest('#svSpd')){SAVE.spd=SAVE.spd===1.5?2:SAVE.spd===2?1:1.5;persist();SFX.tap();svBars();return}if(t.closest('#svSalt')){if(!(SAVE.fish.salt>0)){toast('月光盐花用完了，去钟乳洞再采一些',2.2);return}SV.salt=!SV.salt;SFX.tap();svBars();return}let b;
   if((b=t.closest('[data-mk]'))){if(!b.disabled)svStart(b.dataset.mk,1)}else if((b=t.closest('[data-pl]')))svGarnish(+b.dataset.pl);else if((b=t.closest('[data-st]')))svTapSt(SV.st[+b.dataset.st]);else if((b=t.closest('[data-seat]')))svSeatTap(+b.dataset.seat);
   if(SV&&!SV.over&&SV.dirty)svRender()});
 function takeaway(d){for(const k in d.need)SAVE.fish[k]-=d.need[k];const gain=Math.round(d.p/2);SAVE.wallet+=gain;addRep(Math.round(d.p/10));SFX.tap();return gain}
 function svPanel(){
   $('svPanel').innerHTML=`<p class="sub">店员（每场营业付一次工资）</p>`
-   +STAFF.map(s=>{const ok=s.ok(),on=SAVE.staff[s.id];return`<div class="it ${ok?'':'lock'}"><span class="ic">${ok?s.ic:'❓'}</span><b>${ok?s.n:'？？？'}</b><em>${ok?s.d:'还没有人来应聘'}</em><span class="act">${ok?`<button class="btn ${on?'mint':'sun'}" data-staff="${s.id}">${on?'已雇用 ✔':'点击雇用'}<br>每场 💎${wageOf(s)}</button>`:`<button class="btn off" disabled>🔒 ${s.why}</button>`}</span></div>`}).join('')
+   +STAFF.map(s=>{const ok=s.ok(),on=SAVE.staff[s.id];return`<div class="it ${ok?'':'lock'}"><span class="ic">${ok?s.ic:'❓'}</span><b>${ok?s.n:'？？？'}</b><em>${ok?s.d:'还没有人来应聘'}</em><span class="act">${ok?`<button class="btn ${on?'mint':'sun'}" data-staff="${s.id}">${on?'已雇用 ✔':'点击雇用'}<br>每场 ⚪${wageOf(s)}</button>`:`<button class="btn off" disabled>🔒 ${s.why}</button>`}</span></div>`}).join('')
    +'<p class="sub">小馆升级（一次购买，永久有效）</p>'
-   +UPG.map(u=>{const lv=SAVE.up[u.id]||0,c=u.cost[lv];return`<div class="it"><span class="ic">${u.ic}</span><b>${u.n}${lv?`<small>已买 ${lv} 次</small>`:''}</b><em>${u.d}</em><span class="act">${u.id==='seat'&&lv===2&&restLv()<8?'<button class="btn off" disabled>🔒 小馆 Lv.8</button>':c?`<button class="btn sun" data-upg="${u.id}" ${SAVE.wallet<c?'disabled':''}>💎 ${c}</button>`:'<button class="btn off" disabled>已升满</button>'}</span></div>`}).join('')}
+   +UPG.map(u=>{const lv=SAVE.up[u.id]||0,c=u.cost[lv];return`<div class="it"><span class="ic">${u.ic}</span><b>${u.n}${lv?`<small>已买 ${lv} 次</small>`:''}</b><em>${u.d}</em><span class="act">${u.id==='seat'&&lv===2&&restLv()<8?'<button class="btn off" disabled>🔒 小馆 Lv.8</button>':c?`<button class="btn sun" data-upg="${u.id}" ${SAVE.wallet<c?'disabled':''}>⚪ ${c}</button>`:'<button class="btn off" disabled>已升满</button>'}</span></div>`}).join('')}
 $('svPanel').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)return;
   if(b.id==='bServe'){startServe();return}
   if(b.dataset.staff){SAVE.staff[b.dataset.staff]=SAVE.staff[b.dataset.staff]?0:1;SFX.tap()}
@@ -1436,11 +1452,11 @@ const El=(cx,cy,rx,ry,c)=>{px.fillStyle=c;cx=Math.round(cx);cy=Math.round(cy);fo
 const hx=c=>[1,3,5].map(i=>parseInt(c.slice(i,i+2),16)),mixc=(a,b,t)=>{const A=hx(a),B=hx(b);return'#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('')};
 const HT=["....HHHH....","...HHHHHH...","..HHHHHHHH..","..HSSSSSSH..","..SSKSSKSS..","..SSSSSSSS..","...SSDDSS...","....TTTT....","..TTTTTTTT..",".ATTTTTTTTA.",".ATTTTTTTTA.",".S.TTTTTT.S.","...LLLLLL...","...LL..LL...","...LL..LL...","..FFF..FFF.."];
 const PEOPLE={kid:{H:'#5a3a22',T:'#ff9f1c',L:'#3f6fb0',D:'#ffd9b3',pend:1},achao:{H:'#e8e2d0',T:'#3f7f9a',L:'#5a4a3a',D:'#f4f4f4',hat:'#d9b45a'},
- xiaoman:{H:'#2c2c3a',T:'#4fc98a',L:'#7a4a8a',D:'#ffd9b3'},haisheng:{H:'#2c2c3a',T:'#27406e',L:'#1f2c44',D:'#ffd9b3',hat:'#f4f4f4'},doctor:{H:'#f1f1f1',T:'#f7f7f7',L:'#4a5a6a',D:'#f1f1f1'},achen:{H:'#d9d2e8',T:'#c9a85a',L:'#5a4a8a',D:'#ffd9b3'},gran:{H:'#e8e2d0',T:'#9a6ad6',L:'#5a4a6a',D:'#ffd9b3'}};
+ xiaoman:{H:'#6a3a2a',T:'#f7f7f7',L:'#c9608a',D:'#ffd9b3',hat:'#ffffff',pony:1},haisheng:{H:'#2c2c3a',T:'#27406e',L:'#1f2c44',D:'#ffd9b3',hat:'#f4f4f4'},doctor:{H:'#f1f1f1',T:'#f7f7f7',L:'#4a5a6a',D:'#f1f1f1'},achen:{H:'#d9d2e8',T:'#c9a85a',L:'#5a4a8a',D:'#ffd9b3'},gran:{H:'#e8e2d0',T:'#9a6ad6',L:'#5a4a6a',D:'#ffd9b3'}};
 function human(k,x,y,flip){const P=typeof k==='string'?PEOPLE[k]:k;x=Math.round(x-6);y=Math.round(y-16);
   for(let r=0;r<16;r++)for(let c=0;c<12;c++){const ch=HT[r][flip?11-c:c];if(ch==='.')continue;
     let col=ch==='H'?P.H:ch==='S'||ch==='A'?'#ffd9b3':ch==='K'?'#1b2a41':ch==='T'?P.T:ch==='L'?P.L:ch==='F'?'#3a2a20':P.D;if(P.hat&&r<2)col=P.hat;R(x+c,y+r,1,1,col)}
-  if(P.hat)R(x+1,y+2,10,1,mixc(P.hat,'#000000',.2));if(P.pend){R(x+5,y+8,2,1,'#fff27a');R(x+5,y+9,2,1,'#f0b400')}}
+  if(P.hat)R(x+1,y+2,10,1,mixc(P.hat,'#000000',.2));if(P.pony){const hx=flip?x+10:x+1;R(hx,y+3,1,7,P.H);R(flip?hx+1:hx-1,y+5,1,5,P.H);R(hx,y+3,1,1,'#ff7aa8')}if(P.pend){R(x+5,y+8,2,1,'#fff27a');R(x+5,y+9,2,1,'#f0b400')}}
 const SPR={
  heart(x,y,f,t){const p=Math.sin(t*3)>0?1:0;El(x,y,5+p,5+p,'rgba(159,240,255,.35)');El(x,y,4,4,'#9ff0ff');El(x,y,2,2,'#ffffff')},
  cage(x,y,f,t){SPR.heart(x,y,f,t);R(x-8,y-9,17,1,'#c9a85a');R(x-8,y+8,17,2,'#c9a85a');for(let i=0;i<5;i++)R(x-8+i*4,y-8,1,16,'#8a6f3a');R(x-2,y+10,5,3,'#8a6f3a')},
@@ -1466,7 +1482,7 @@ const SPR={
  dish(x,y,f,t){R(x-5,y-2,10,2,'#ffffff');R(x-3,y-4,6,2,'#ff9a6a');R(x-1,y-5,3,1,'#ffd36b');if(Math.sin(t*3)>0)R(x,y-8,1,2,'#ffffff');else R(x+1,y-9,1,2,'#ffffff')},
  book(x,y,f,t){R(x-5,y-6,10,6,'#8a5a2b');R(x-4,y-5,8,4,'#fff3d6');R(x,y-5,1,4,'#8a5a2b')}};
 const WHO={'大白':['shark'],'阿强':['aqiang'],'阿澄':['achen'],'奶奶':['granny','gran'],'石蟹':['crab'],'老船医':['doctor'],'小鱼':['kid','fish'],'阿潮':['achao'],'阿珍':['xiaoman'],'海生':['haisheng'],'老龟':['turtle'],'墨墨':['octo'],'鲸婆婆':['whale'],'奶奶的信':['letter']};
-const SCN={dCrew:{bg:'diner',cast:[['kid',.2,'g'],['xiaoman',.42,'g',1],['aqiang',.62,'g',1]]},nShore:{bg:'shore',night:1,cast:[['gran',.42,'g']]},nShore2:{bg:'shore',night:1,cast:[['gran',.2,'w']]},nGlow:{bg:'shore',night:1,glow:1,cast:[]},dAchao0:{bg:'diner',cast:[['kid',.26,'g'],['achao',.52,'g',1]]},shPend:{bg:'shore',cast:[['kid',.56,'g'],['pendant',.3,'g']]},
+const SCN={dQiang:{bg:'diner',cast:[['kid',.26,'g'],['aqiang',.56,'g',1]]},dCrew:{bg:'diner',cast:[['kid',.2,'g'],['xiaoman',.42,'g',1],['aqiang',.62,'g',1]]},nShore:{bg:'shore',night:1,cast:[['gran',.42,'g']]},nShore2:{bg:'shore',night:1,cast:[['gran',.2,'w']]},nGlow:{bg:'shore',night:1,glow:1,cast:[]},dAchao0:{bg:'diner',cast:[['kid',.26,'g'],['achao',.52,'g',1]]},shPend:{bg:'shore',cast:[['kid',.56,'g'],['pendant',.3,'g']]},
  s7:{bg:'sea',i:7,cast:[['fish',.3,.3]]},s7octo:{bg:'sea',i:7,cast:[['fish',.27,.3],['octo',.7,.31,1]]},s7cage:{bg:'sea',i:7,cast:[['fish',.25,.32],['cage',.66,.3]]},
  shHai:{bg:'shore',cast:[['kid',.3,'g'],['haisheng',.52,'g',1],['ship',.3,'h']]},s8:{bg:'sea',i:8,cast:[['fish',.3,.3]]},s8ship:{bg:'sea',i:8,cast:[['ship',.6,.1],['cage',.62,.36],['fish',.22,.34]]},
  s9:{bg:'sea',i:9,cast:[['fish',.3,.3]]},s9achen:{bg:'sea',i:9,cast:[['fish',.25,.3],['achen',.66,'g',1]]},s10:{bg:'sea',i:10,cast:[['fish',.34,.3],['heart',.2,.3]]},s10gran:{bg:'sea',i:10,cast:[['fish',.24,.32],['granny',.62,.3,1],['heart',.82,.24]]},
@@ -1538,6 +1554,13 @@ function drawCut(dt){
     const c=fxo.em;if(c==='!'){R(ex,ey-3,1,4,'#e0503f');R(ex,ey+2,1,1,'#e0503f')}else if(c==='?'){R(ex-1,ey-3,3,1,'#3f8fd0');R(ex+1,ey-2,1,2,'#3f8fd0');R(ex,ey,1,1,'#3f8fd0');R(ex,ey+2,1,1,'#3f8fd0')}else{R(ex-3,ey,1,1,'#5f7080');R(ex,ey,1,1,'#5f7080');R(ex+3,ey,1,1,'#5f7080')}}
   if(spk&&fxo.cut){const k=spk[0],e=Math.min(1,q.lt/.22),bh=Math.round(gy*.42),by=Math.round(CH2*.07),ox=Math.round((1-e)*-CW);R(ox,by,CW,bh,'#1b2a41');R(ox,by,CW,1,'#ffd23f');R(ox,by+bh-1,CW,1,'#ffd23f');for(let i=0;i<7;i++)R(ox+((i*29+t*140)%CW),by+3+i*Math.floor((bh-6)/7),10,1,'rgba(255,255,255,.25)');
     px.save();px.beginPath();px.rect(ox,by+1,CW,bh-2);px.clip();px.translate(ox+Math.round(CW*.3),by+bh-2);const z=PEOPLE[k]?Math.max(2,Math.floor((bh-4)/9)):Math.max(2,Math.floor(bh/14));px.scale(z,z);if(PEOPLE[k]){px.beginPath();px.rect(-8,-(bh-3)/z,16,(bh-3)/z);px.clip();human(k,0,7,0)}else SPR[k](0,-Math.round(bh/z/2)+1,0,t);px.restore()}
+  if(fxo.shock){const cx=Math.round(CW/2),cy=Math.round(gy*.52),jx=Math.round((Math.random()-.5)*3),jy=Math.round((Math.random()-.5)*3);R(0,0,CW,CH2,'#140a2e');
+    for(let i=0;i<90;i++){const a=i*.42+t*5,r=3+i*1.05;R(cx+Math.cos(a)*r,cy+Math.sin(a)*r*.8,2,2,['#5a3ad0','#b03ad0','#3a7ad0','#ffffff'][i%4])}
+    for(let i=0;i<10;i++){const a=i*Math.PI/5+t*1.5;for(let k=0;k<5;k++)R(cx+Math.cos(a)*(34+k*4),cy+Math.sin(a)*(28+k*3),1,1,'#ffe27a')}
+    const x=cx+jx,y=cy+jy;R(x-27,y-8,6,16,'#ff7a1a');R(x-23,y-5,5,10,'#ff7a1a');El(x,y,21,15,'#ff9f1c');R(x-12,y+10,24,3,'#ffd9a0');R(x-3,y-18,8,4,'#ff7a1a');
+    const ex=Math.round((Math.random()-.5)*2),ey=Math.round((Math.random()-.5)*2);El(x+4,y-5,6,6,'#ffffff');El(x+15,y-5,5,6,'#ffffff');R(x+4+ex,y-5+ey,2,2,'#1b2a41');R(x+15+ex,y-5+ey,2,2,'#1b2a41');
+    El(x+12,y+7,5,6,'#5a1a1a');R(x+10,y+9,5,3,'#ff7a8a');R(x-8,y-15,1,3,'#9fd8ff');R(x-13,y-11,1,3,'#9fd8ff');R(x+22,y-14,1,4,'#9fd8ff');
+    if(Math.sin(t*20)>0){R(x+19,y-17,1,5,'#ffffff');R(x+23,y-12,4,1,'#ffffff')}}
   if(fxo.flash&&q.lt<.5){px.fillStyle=`rgba(255,255,255,${Math.ceil((1-q.lt*2)*4)/4})`;px.fillRect(0,0,CW,CH2)}
   R(0,0,CW,Math.round(CH2*.045),'#0b1a2a');
   if(cutFade>0){px.fillStyle=`rgba(11,26,42,${Math.ceil(cutFade*4)/4})`;px.fillRect(0,0,CW,CH2)}
@@ -1601,7 +1624,7 @@ const DEX=[
  {id:'a_heart',cat:'art',n:'潮心',r:4,hab:'五片海的深处',st:[5,5,1],real:false,d:'海的颜色从这里来。一片海有一颗，被关起来的时候，那片海就会慢慢褪色。',art:(x,y)=>SPR.heart(x,y,0,0),got:()=>SAVE.story.post6,how:'第七章'},
  {id:'a_conch',cat:'art',n:'潮音螺',r:4,hab:'潮心井',st:[1,2,5],real:false,d:'对着它说话，守在潮心井的奶奶就能听见。她的回答有时候只有一句。',art:PIX.conch,got:()=>SAVE.conch,how:'第十一章'}];
 SAVE.stat=SAVE.stat||{};SAVE.sight=SAVE.sight||{};
-PEOPLE.aqiang={H:'#2c2c3a',T:'#f7f7f7',L:'#3a3a4a',D:'#ffd9b3',hat:'#ffffff'};
+PEOPLE.aqiang={H:'#2c2c3a',T:'#4a7ac8',L:'#3a3a4a',D:'#ffd9b3'};
 const emoPix=ch=>(x,y)=>{px.font='18px serif';px.textAlign='center';px.textBaseline='middle';px.fillStyle='#000';px.fillText(ch,x,y+1)};
 const manPix=k=>(x,y)=>human(k,x,y+9);
 DISH.forEach(d=>{const m=methodOf(d.id);DEX.push({id:d.id,cat:'dish',n:d.n,r:d.p<20?1:d.p<35?2:d.p<60?3:4,tag:'小馆的料理',art:emoPix(d.ic),got:()=>SAVE.dishes[d.id]>0,clue:'在小馆把这道菜端上桌',
@@ -1609,12 +1632,12 @@ DISH.forEach(d=>{const m=methodOf(d.id);DEX.push({id:d.id,cat:'dish',n:d.n,r:d.p
 [['kid','小鱼',3,()=>SAVE.story.pro,'渔村里的男孩。怕水、嘴硬、不会做饭，天天说“明天就把店卖掉”。舌头却灵得出奇，尝一口就知道缺什么。',manPix('kid')],
  ['achao','阿潮',2,()=>SAVE.story.post0,'村里的老渔民，嘴最毒的老主顾。每道菜都说难吃，却一天不落地来。',manPix('achao')],
  ['turtle','老龟',3,()=>SAVE.story.pre0,'珊瑚湾的海灵。说话极慢，一句话没说完，听的人已经游走了。',(x,y)=>SPR.turtle(x-2,y+2,0,0)],
- ['xiaoman','阿珍',2,()=>SAVE.story.post1,'自封经理的跑堂，口头禅是“我算过了”，可账从来没算对过。',manPix('xiaoman')],
+ ['xiaoman','阿珍',2,()=>SAVE.story.post3,'从远洋号上下来的厨娘，口头禅是“我算过了”，可账从来没算对过。她说留下来是因为小馆缺人掌勺。',manPix('xiaoman')],
  ['octo','墨墨',3,()=>SAVE.story.pre1,'八只手的杂货铺老板，永远在喊“亏了”，却总偷偷给小鱼算便宜。',(x,y)=>SPR.octo(x,y+2,0,0)],
  ['shark','大白',3,()=>SAVE.story.pre2,'深海里追着小鱼不放的鲨鱼。它不坏，只是饿。',(x,y)=>SPR.shark(x+2,y+1,0,0)],
  ['whale','鲸婆婆',4,()=>SAVE.story.pre3,'冰海的海灵，把谁都当小孩的话痨，爱唱歌，永远跑调。鲸鱼结界是她给的。',(x,y)=>SPR.whale(x+3,y+1,0,0)],
  ['haisheng','海生',3,()=>SAVE.story.post3,'远洋号的船长，阿潮的儿子。敢顶着风出海，却不敢叫一声爹。',manPix('haisheng')],
- ['aqiang','阿强',2,()=>restLv()>=3,'从远洋号上下来的厨子，只会说“可以”。他不敢看鱼的眼睛，所以火候稳稳当当，却从来做不出“刚好”。',manPix('aqiang')],
+ ['aqiang','阿强',2,()=>SAVE.story.post1,'话少力气大的跑堂，几乎只会说“可以”，一只手能端五摞碗。',manPix('aqiang')],
  ['doctor','老船医',3,()=>SAVE.story.guest,'爱讲航海故事的路痴，开口就是“说来话长”。他的故事没人信，偏偏都是真的。',manPix('doctor')],
  ['achen','阿澄',4,()=>SAVE.story.post9,'澄光商会的首领，奶奶年轻时的搭档。从不发火，句句在理：“你说得对。可是——”',manPix('achen')],
  ['granny','阿汐（奶奶）',4,()=>SAVE.story.post10,'小馆原来的主人，爱留纸条，报喜不报忧。她本来是海里的人，如今守着最后一颗潮心。',(x,y)=>SPR.granny(x,y+2,0,0)]
@@ -1627,22 +1650,24 @@ DISH.forEach(d=>{const m=methodOf(d.id);DEX.push({id:d.id,cat:'dish',n:d.n,r:d.p
  ['深潜者','🌊',3,()=>SAVE.end.dist>=500,'无限模式游到 500 米','再往前，连光都跟不上了。'],
  ['座无虚席','🪑',3,()=>(SAVE.stat.maxServe||0)>=12,'一场营业上菜 12 道','这一晚，小馆的灯亮到很晚。'],
  ['连击高手','✨',2,()=>(SAVE.stat.combo||0)>=30,'一局内连击达到 30','珍珠一颗接一颗，像在水里写了一行字。'],
- ['宴席满分','🍽️',4,()=>SAVE.stat.banq6,'宴席挑战六道全上','没有帮手，六位宾客，一道没落。'],
+ ['宴席满分','🍽️',4,()=>SAVE.stat.banq6,'宴席挑战十道全上','没有帮手，十位宾客，一道没落。'],
  ['迎难而上','💪',4,()=>SAVE.hard.st[0]>0,'在困难模式通关珊瑚湾','只有一颗星，也游到了终点。']
 ].forEach((a,i)=>DEX.push({id:'f_'+i,cat:'feat',n:a[0],r:a[2],tag:'事迹',got:a[3],clue:a[4],d:a[5]+'（'+a[4]+'）',art:emoPix(a[1])}));
 Object.keys(FISH).filter(k=>!FISH[k].x&&k!=='gold').forEach(k=>DEX.push({id:'x_'+k,cat:'fish',hid:1,n:'金鳞'+FISH[k].n,r:4,real:false,hab:'任何有'+FISH[k].n+'的海域',st:[3,3,4],d:'浑身金鳞的'+FISH[k].n+'，一百条里也未必有一条。老渔民说，见到它的那天运气会很好。',art:pixFish(k,{...FISH[k],c:['#fffbe0','#ffcf2e','#d99400'],glow:1}),got:()=>SAVE.dex['x_'+k]>0}));
 const DEXIMG={};
 function dexImg(c){if(DEXIMG[c.id])return DEXIMG[c.id];pcv.width=48;pcv.height=30;px.clearRect(0,0,48,30);c.art(24,15);return DEXIMG[c.id]=pcv.toDataURL()}
 let bookTab='fish',bookSel='';
+if(!SAVE.dexRead){SAVE.dexRead={};for(const c of DEX)if(c.got())SAVE.dexRead[c.id]=1}
+const dexNew=c=>c.got()&&!SAVE.dexRead[c.id];
 const BTABS=[['fish','鱼类'],['ing','食材'],['dish','料理'],['life','生灵'],['who','人物'],['sea','海域'],['art','器物'],['feat','事迹']];
 function showBook(){
   const base=DEX.filter(c=>!c.hid),hidGot=DEX.filter(c=>c.hid&&c.got()).length;$('bookProg').textContent=`第一卷 · 已收录 ${base.filter(c=>c.got()).length} 张`+(hidGot?` · 隐藏卡 ${hidGot} 张`:'');
-  const inCat=DEX.filter(c=>c.cat===bookTab&&(!c.hid||c.got())),list=bookTab==='feat'?inCat:inCat.filter(c=>c.got()).concat(inCat.filter(c=>!c.got()).slice(0,1));if(!list.some(c=>c.id===bookSel))bookSel=(list.find(c=>c.got())||list[0]).id;const cur=list.find(c=>c.id===bookSel),g=cur.got();
+  const inCat=DEX.filter(c=>c.cat===bookTab&&(!c.hid||c.got())),list=bookTab==='feat'?inCat:inCat.filter(c=>c.got()).concat(inCat.filter(c=>!c.got()).slice(0,1));if(!list.some(c=>c.id===bookSel))bookSel=(list.find(c=>c.got()&&!dexNew(c))||list.find(c=>c.got())||list[0]).id;const cur=list.find(c=>c.id===bookSel),g=cur.got();if(g&&!SAVE.dexRead[cur.id]){SAVE.dexRead[cur.id]=1;persist()}
   const bar=(n,lab)=>`<span class="pst"><em>${lab}</em>${'<i class="on"></i>'.repeat(n)}${'<i></i>'.repeat(5-n)}</span>`;
-  $('bookTabs').innerHTML=BTABS.map(t=>{const l=base.filter(c=>c.cat===t[0]);return`<button class="tab ${t[0]===bookTab?'on':''}" data-bt="${t[0]}">${t[1]} ${l.filter(c=>c.got()).length}</button>`}).join('');
+  $('bookTabs').innerHTML=BTABS.map(t=>{const l=base.filter(c=>c.cat===t[0]);return`<button class="tab ${t[0]===bookTab?'on':''}" data-bt="${t[0]}">${t[1]} ${l.filter(c=>c.got()).length}${DEX.some(c=>c.cat===t[0]&&dexNew(c))?'<i class="dot"></i>':''}</button>`}).join('');
   $('bookInfo').innerHTML=g?`<div class="pinfo" style="--rc:${RCOL[cur.r]}"><img src="${dexImg(cur)}" alt=""><div><h3>${cur.n}</h3><span class="ptag" style="background:${RCOL[cur.r]}">${'★'.repeat(cur.r)} ${RAR[cur.r]}</span><span class="ptag">${cur.hid?'隐藏卡':cur.tag||(cur.real?'现实中存在':'这片海的传说')}</span></div></div><p>${cur.d}</p>${cur.st?`<div class="pstats">${bar(cur.st[0],'力量')}${bar(cur.st[1],'耐力')}${bar(cur.st[2],'速度')}</div>`:''}${cur.ref?'<p class="note">'+(cur.ref===2?'百科内容已对照维基百科等公开资料核对':(cur.id==='saury'||cur.id==='bream')?'百科内容已按 Hastings 等《Fishes》(2014) 和维基百科核对':'百科内容已按 Hastings 等《Fishes: A Guide to Their Diversity》(2014) 核对')+'</p>':''}${cur.hab?`<p class="note">游戏里的栖息地：${cur.hab}${SAVE.dex[cur.id]?' · 累计获得 '+SAVE.dex[cur.id]+' 次':''}</p>`:''}`
     :`<div class="pinfo"><div class="pback big">？</div><div><h3>尚未收录</h3></div></div><p class="note">${bookTab==='feat'?'这一页还是空的。':'后面还有没翻开的页。'}${cur.clue||(cur.cat==='fish'||cur.cat==='ing'?'出海时也许会遇到。':'它会随着故事出现。')}</p>`;
-  $('bookGrid').innerHTML=list.map(c=>{const ok=c.got();return ok?`<button class="pcd ${c.id===bookSel?'sel':''}" data-card="${c.id}" style="--rc:${RCOL[c.r]}"><img src="${dexImg(c)}" alt=""><span class="pn">${c.n}</span><span class="pr">${'★'.repeat(c.r)}</span></button>`
+  $('bookGrid').innerHTML=list.map(c=>{const ok=c.got();return ok?`<button class="pcd ${c.id===bookSel?'sel':''}" data-card="${c.id}" style="--rc:${RCOL[c.r]}">${dexNew(c)?'<span class="nw">NEW</span>':''}<img src="${dexImg(c)}" alt=""><span class="pn">${c.n}</span><span class="pr">${'★'.repeat(c.r)}</span></button>`
     :`<button class="pcd unk ${c.id===bookSel?'sel':''}" data-card="${c.id}"><span class="pback">？</span><span class="pn">？？？</span><span class="pr">${c.cat==='feat'?'★'.repeat(c.r):'…'}</span></button>`}).join('');
   show('sBook')}
 $('sBook').addEventListener('click',e=>{const t=e.target.closest('[data-bt]'),c=e.target.closest('[data-card]');if(t){bookTab=t.dataset.bt;bookSel='';SFX.tap();showBook()}else if(c){bookSel=c.dataset.card;SFX.tap();showBook()}});
@@ -1686,7 +1711,7 @@ const DICT={};`按住屏幕向上游，松开慢慢下沉|Hold to swim up, let g
 挑战极限，成为海底高手！|Push your limits, sea master!|限界にチャレンジしよう！|Испытай себя, мастер глубин!|تحدَّ نفسك وكن بطل البحر!
 无限模式|Endless mode|エンドレスモード|Бесконечный режим|الوضع اللانهائي
 不停向前，刷新你的纪录！|Keep going and beat your record!|どこまでも進んで記録更新！|Плыви вперёд и побей рекорд!|اسبح بلا توقف وحطّم رقمك!
-商店 · 💎|Shop · 💎|ショップ · 💎|Магазин · 💎|المتجر · 💎
+商店 · ⚪|Shop · ⚪|ショップ · ⚪|Магазин · ⚪|المتجر · ⚪
 海边小馆|Kitchen|キッチン|Кухня|المطبخ
 玩法说明|How to play|あそびかた|Как играть|طريقة اللعب
 设置|Settings|せってい|Настройки|الإعدادات
@@ -1694,7 +1719,7 @@ const DICT={};`按住屏幕向上游，松开慢慢下沉|Hold to swim up, let g
 声音|Sound|サウンド|Звук|الصوت
 返回主菜单|Main menu|メニューへ|В главное меню|القائمة الرئيسية
 墨墨的杂货铺|Sea Shop|うみのショップ|Морской магазин|متجر البحر
-我的珍珠 💎|My pearls 💎|もっている真珠 💎|Мой жемчуг 💎|لآلئي 💎
+我的珍珠 ⚪|My pearls ⚪|もっている真珠 ⚪|Мой жемчуг ⚪|لآلئي ⚪
 保护道具（每局用掉一个）|Protection (one used per run)|おまもり（1プレイで1こ使う）|Защита (одна штука на заплыв)|الحماية (واحدة لكل جولة)
 帮手道具（每局用掉一个）|Helpers (one used per run)|おたすけ（1プレイで1こ使う）|Помощники (одна штука на заплыв)|المساعدات (واحدة لكل جولة)
 吊坠的变身（永久拥有）|Fish skins (yours forever)|スキン（ずっと使える）|Облики рыбки (навсегда)|أشكال السمكة (لك للأبد)
@@ -1885,7 +1910,7 @@ const RULES=[
  [/^(🔒 )?第(\d+)关 (.+)$/,m=>`${m[1]||''}Level ${m[2]}: ${tl(m[3])}`,m=>`${m[1]||''}ステージ${m[2]} ${tl(m[3])}`],
  [/^(\d+) \/ (\d+) 米$/,m=>`${m[1]} / ${m[2]} m`,m=>`${m[1]} / ${m[2]}m`],
  [/^(\d+) 米 · Lv\.(\d+)$/,m=>`${m[1]} m · Lv.${m[2]}`,m=>`${m[1]}m · Lv.${m[2]}`],
- [/^💎 (\d+) · (\d+) 分$/,m=>`💎 ${m[1]} · ${m[2]} pts`,m=>`💎 ${m[1]} · ${m[2]}点`],
+ [/^⚪ (\d+) · (\d+) 分$/,m=>`⚪ ${m[1]} · ${m[2]} pts`,m=>`⚪ ${m[1]} · ${m[2]}点`],
  [/^连击 (\d+)$/,m=>'Combo '+m[1],m=>'コンボ '+m[1]],
  [/^连击 (\d+)！\+(\d+)$/,m=>`Combo ${m[1]}! +${m[2]}`,m=>`コンボ ${m[1]}！+${m[2]}`],
  [/^捕获 (.+)！$/,m=>`Caught: ${tl(m[1])}!`,m=>`${tl(m[1])}をゲット！`],
@@ -1896,8 +1921,8 @@ const RULES=[
  [/^\S+×\d+( \S+×\d+)*$/,m=>fishList(m[0],', '),m=>fishList(m[0],'、')],
  [/^(.+) × (\d+)$/,m=>`${tl(m[1])} × ${m[2]}`,m=>`${tl(m[1])} × ${m[2]}`],
  [/^海边小馆 · 已学会 (\d+) \/ (\d+) 道$/,m=>`Kitchen · ${m[1]} / ${m[2]} recipes`,m=>`キッチン · レシピ ${m[1]} / ${m[2]}`],
- [/^(\S+) (.+)做好了！\+(\d+) 💎(（新菜谱）)?$/,m=>`${m[1]} ${tl(m[2])} is ready! +${m[3]} 💎${m[4]?' (new recipe)':''}`,m=>`${m[1]} ${tl(m[2])}ができた！+${m[3]} 💎${m[4]?'（新レシピ）':''}`],
- [/^\+(\d+) 💎(（双倍）)?（共 (\d+)）$/,m=>`+${m[1]} 💎${m[2]?' (double)':''} (total ${m[3]})`,m=>`+${m[1]} 💎${m[2]?'（2倍）':''}（合計 ${m[3]}）`]];
+ [/^(\S+) (.+)做好了！\+(\d+) ⚪(（新菜谱）)?$/,m=>`${m[1]} ${tl(m[2])} is ready! +${m[3]} ⚪${m[4]?' (new recipe)':''}`,m=>`${m[1]} ${tl(m[2])}ができた！+${m[3]} ⚪${m[4]?'（新レシピ）':''}`],
+ [/^\+(\d+) ⚪(（双倍）)?（共 (\d+)）$/,m=>`+${m[1]} ⚪${m[2]?' (double)':''} (total ${m[3]})`,m=>`+${m[1]} ⚪${m[2]?'（2倍）':''}（合計 ${m[3]}）`]];
 RULES.push([/^音乐：(开|关)$/,m=>'Music: '+(m[1]==='开'?'On':'Off'),m=>'BGM：'+(m[1]==='开'?'オン':'オフ'),m=>'Музыка: '+(m[1]==='开'?'вкл':'выкл'),m=>'الموسيقى: '+(m[1]==='开'?'تشغيل':'إيقاف')]);
 Object.assign(DICT,{'出海':['Set sail','出航','В море','أبحر'],'杂货铺':['Shop','ショップ','Магазин','المتجر'],'更多':['More','その他','Ещё','المزيد'],'出发':['Go','出発','Вперёд','انطلق']});
 RULES.push([/^海边小馆 · 已学会 (\d+) 道$/,m=>`Kitchen · ${m[1]} recipes learned`,m=>`キッチン · レシピ ${m[1]}`,m=>`Кухня · рецептов: ${m[1]}`,m=>`المطبخ · الوصفات: ${m[1]}`]);
@@ -1930,7 +1955,7 @@ const TITLE={zh:['小','鱼','快','跑'],en:['Fish','Dash'],ja:['おさかな',
  [m=>`${m[1]||''}Уровень ${m[2]}: ${tl(m[3])}`,m=>`${m[1]||''}المرحلة ${m[2]}: ${tl(m[3])}`],
  [m=>`${m[1]} / ${m[2]} м`,m=>`${m[1]} / ${m[2]} م`],
  [m=>`${m[1]} м · Lv.${m[2]}`,m=>`${m[1]} م · Lv.${m[2]}`],
- [m=>`💎 ${m[1]} · ${m[2]} очк.`,m=>`💎 ${m[1]} · ${m[2]} نقطة`],
+ [m=>`⚪ ${m[1]} · ${m[2]} очк.`,m=>`⚪ ${m[1]} · ${m[2]} نقطة`],
  [m=>'Комбо '+m[1],m=>'سلسلة '+m[1]],
  [m=>`Комбо ${m[1]}! +${m[2]}`,m=>`سلسلة ${m[1]}! +${m[2]}`],
  [m=>`Поймано: ${tl(m[1])}!`,m=>`اصطدت: ${tl(m[1])}!`],
@@ -1941,8 +1966,8 @@ const TITLE={zh:['小','鱼','快','跑'],en:['Fish','Dash'],ja:['おさかな',
  [m=>fishList(m[0],', '),m=>fishList(m[0],'، ')],
  [m=>`${tl(m[1])} × ${m[2]}`,m=>`${tl(m[1])} × ${m[2]}`],
  [m=>`Кухня · рецептов: ${m[1]} / ${m[2]}`,m=>`المطبخ · الوصفات: ${m[1]} / ${m[2]}`],
- [m=>`${m[1]} ${tl(m[2])} — готово! +${m[3]} 💎${m[4]?' (новый рецепт)':''}`,m=>`${m[1]} ${tl(m[2])} جاهز! +${m[3]} 💎${m[4]?' (وصفة جديدة)':''}`],
- [m=>`+${m[1]} 💎${m[2]?' (×2)':''} (всего ${m[3]})`,m=>`+${m[1]} 💎${m[2]?' (×2)':''} (المجموع ${m[3]})`]].forEach((x,i)=>RULES[i].push(x[0],x[1]));
+ [m=>`${m[1]} ${tl(m[2])} — готово! +${m[3]} ⚪${m[4]?' (новый рецепт)':''}`,m=>`${m[1]} ${tl(m[2])} جاهز! +${m[3]} ⚪${m[4]?' (وصفة جديدة)':''}`],
+ [m=>`+${m[1]} ⚪${m[2]?' (×2)':''} (всего ${m[3]})`,m=>`+${m[1]} ⚪${m[2]?' (×2)':''} (المجموع ${m[3]})`]].forEach((x,i)=>RULES[i].push(x[0],x[1]));
 if(RULES.some(r=>r.length!==5))console.error('i18n rules mismatch');
 HELP.ru=['Держи палец на экране — рыбка плывёт вверх. Отпусти — медленно опускается.','<b>Осьминог</b> и <b>медуза</b> отнимают звезду. Осьминог опаснее всего, когда его щупальца светятся.','Удар о <b>скалу</b> или <b>льдину</b> отнимает одну звезду.','<b>Акула</b> съедает рыбку сразу! Увидел красное предупреждение — уплывай из красной полосы.','Попал в <b>сеть</b>? Не бойся: быстро нажимай на экран, чтобы вырваться.','<b>Щит золотой рыбки</b> спасает от одной опасности, но не от акулы.','Не врезайся в <b>жёлтую стену</b>: без щита вернёшься к контрольной точке.','Рыбу в пунктирном кружке можно поймать: <b>нажми на неё</b>. На крупную рыбу нужно нажать несколько раз. Готовь улов на <b>Кухне</b> и получай жемчуг.','Собранный жемчуг попадает в кошелёк. В <b>Магазине</b> можно купить щиты, помощников и облики.','За прохождение уровня дают звёзды. Сыграй ещё раз и найди скрытую четвёртую звезду!'];
 HELP.ar=['اضغط على الشاشة لتسبح للأعلى، واتركها لتنزل ببطء.','لمس <b>الأخطبوط</b> أو <b>قنديل البحر</b> يُفقدك نجمة. الأخطبوط أخطر حين تضيء أذرعه.','الاصطدام بـ<b>صخرة</b> أو <b>قطعة جليد</b> يُفقدك نجمة كاملة.','<b>القرش</b> يأكل السمكة بلقمة واحدة! عندما ترى التحذير الأحمر اخرج من الشريط الأحمر.','علقت في <b>الشبكة</b>؟ لا تخف، اضغط على الشاشة بسرعة لتتحرر.','<b>درع السمكة الذهبية</b> يصدّ خطرًا واحدًا، لكنه لا يصدّ القرش.','لا تصطدم بـ<b>الجدار الأصفر</b>. بدون درع ستعود إلى نقطة الحفظ.','السمكة المحاطة بدائرة منقّطة يمكن صيدها: <b>المسها</b>. السمكة الكبيرة تحتاج لمسات أكثر. اطبخ صيدك في <b>المطبخ</b> لتكسب اللآلئ.','اللآلئ التي تجمعها تذهب إلى محفظتك. اشترِ من <b>المتجر</b> دروعًا ومساعدات وأشكالًا جديدة.','أكمل المرحلة لتكسب النجوم. العب مجددًا لتجد النجمة الرابعة المخفية!'];
@@ -2033,7 +2058,7 @@ function frame(ts){
     drawFish(VW*.5,y,Math.sin(menuT*1.4+1.5)*.15,menuT,{s:1.5,...skin()});drawFish(VW*.5-110,y+34,Math.sin(menuT*1.4+1)*.15,menuT+1,{s:.7,c0:'#bff0ff',c1:'#56b8f0',c2:'#2f8fd0'})}
   if(stQ)drawCut(dt);else ambOff();if(SV&&!SV.over)svTick(dt*(SAVE.spd||1));
   requestAnimationFrame(frame)}
-const _rm=refreshMenu;refreshMenu=()=>{_rm();$('bDev').hidden=!SAVE.dev;$('devPause').hidden=!SAVE.dev;$('bConch').hidden=!SAVE.conch;$('bBook').hidden=!SAVE.story.post0;$('bAlways').textContent='进关剧情：'+(SAVE.always?'每次都播':'只播一次');$('bMusic').textContent='音乐：'+(SAVE.music===0?'关':'开');const h=hardOpen(),e=endOpen(),hb=document.querySelector('[data-mode=hard]'),eb=document.querySelector('[data-mode=endless]');
+const _rm=refreshMenu;refreshMenu=()=>{_rm();$('bBook').classList.toggle('hasNew',typeof DEX!=='undefined'&&DEX.some(c=>!c.hid||c.got()?dexNew(c):false));$('bDev').hidden=!SAVE.dev;$('devPause').hidden=!SAVE.dev;$('bConch').hidden=!SAVE.conch;$('bBook').hidden=!SAVE.story.post0;$('bAlways').textContent='进关剧情：'+(SAVE.always?'每次都播':'只播一次');$('bMusic').textContent='音乐：'+(SAVE.music===0?'关':'开');const h=hardOpen(),e=endOpen(),hb=document.querySelector('[data-mode=hard]'),eb=document.querySelector('[data-mode=endless]');
   hb.classList.toggle('locked',!h);eb.classList.toggle('locked',!e);$('hardSub').textContent=h?'挑战极限，成为海底高手！':'🔒 通关普通模式全部关卡后解锁';if(!e)$('bestTxt').textContent='🔒 通关第 1 关后解锁'};
 resize();refreshMenu();applyLang();requestAnimationFrame(frame);
 if(!SAVE.story.pro){show('sStart');$('sStart').onclick=()=>{initAudio();playStory(STORY.pro,()=>{SAVE.story.pro=1;persist();show('sMenu')})}}
