@@ -271,7 +271,7 @@ h2{margin:0;font-weight:400;font-size:30px;color:#fff;text-shadow:0 3px 0 rgba(6
       <button class="btn" id="bHelp">玩法说明</button>
       <button class="btn" id="bSet">设置</button>
     </div>
-    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v1.1.0</p>
+    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v1.2.0</p>
     <button class="btn sm float" data-go="sMenu">返回主菜单</button>
   </section>
 
@@ -725,7 +725,6 @@ function update(dt){
     const up=(g.slowT>0?180:330)*k*(g.boss&&!g.boss.done?1-.13*(g.boss.carry||0):1),dn=(g.mode==='simple'?165:215)*k,tv=hold?-up:g.started?dn:0;
     F.vy+=(tv-F.vy)*Math.min(1,dt*7);F.y+=F.vy*dt;
     if(F.y<yMin+22){F.y=yMin+22;F.vy=0}if(g.orb){const o=g.orb;if(!o.y)o.y=F.y;o.y+=(F.y-o.y)*Math.min(1,dt*2.4);o.inv=Math.max(0,o.inv-dt)}if(F.y>yMax-18){F.y=yMax-18;if(g.inv<=0){hurt(1);F.vy=-300*k;if(!g.tips.floor){g.tips.floor=1;toast('碰到海底也会掉星！',2.2,1)}}else if(F.vy>0)F.vy=0}
-    if(g.combo>0){g.comboT-=dt;if(g.comboT<=0)g.combo=0}
     g.bubT-=dt;if(g.bubT<=0){g.bubT=.22;g.parts.push({x:fishSX-34,y:F.y,vx:-40,vy:-20,l:.9,c:'#fff',r:2+Math.random()*3,k:1})}
   }
   const fx=fishSX;
@@ -739,8 +738,9 @@ function update(dt){
       else if(e.t==='octo')hit=od<octoR(e,t)+12;else if(e.t==='jelly')hit=od<40;else if(e.t==='ice')hit=od<44;
       if(hit&&!(SAVE.god&&SAVE.dev)){g.orb.hp--;g.orb.inv=1.6;SFX.hit();g.shake=.25;burst(ox,oy,'#bff6ff',12);ftext('潮心被撞到了！',fx,F.y-56,'#ffb3b3');if(g.orb.hp<=0){die('orb');if(state!=='play')return;g.orb.hp=2}}}
     switch(e.t){
-    case'pearl':if(dist<(g.magnet?115:38)&&!g.trap){e.gone=1;if(g.boss&&g.boss.k==='chase'&&!g.boss.done)g.boss.gap=Math.min(100,g.boss.gap+1.05);g.pearls++;g.combo++;g.comboT=3.5;g.maxCombo=Math.max(g.maxCombo,g.combo);SFX.pearl(g.combo);burst(sx,y,'#fff',4,1);
-        const b=g.combo===5?50:g.combo===10?150:g.combo%20===0?500:0;if(b){g.bonus+=b;ftext(`连击 ${g.combo}！+${b}`,fx+30,F.y-56,'#ffe27a')}}break;
+    case'pearl':if(sx>fx)e.miss=0;else if(sx<fx-(g.magnet?120:50)&&!e.miss){e.miss=1;if(g.combo>=3)ftext('连击断了',fx+30,F.y-56,'#b8c7d9');g.combo=0}
+      if(dist<(g.magnet?115:38)&&!g.trap){e.gone=1;if(g.boss&&g.boss.k==='chase'&&!g.boss.done)g.boss.gap=Math.min(100,g.boss.gap+1.05);g.pearls++;g.combo++;g.comboT=3.5;g.maxCombo=Math.max(g.maxCombo,g.combo);SFX.pearl(g.combo);burst(sx,y,'#fff',4,1);
+        if(g.combo%10===0){g.pearls+=5;ftext(`连击 ${g.combo}！+5 ⚪`,fx+30,F.y-56,'#ffe27a');SFX.pearl(12)}}break;
     case'rock':{const hw=e.w/2-12,ry=e.top?fy(e.h)-12:fy(1-e.h)+12;
         if(Math.abs(dx)<hw+16&&(e.top?F.y-18<ry:F.y+18>ry))hurt(1)}break;
     case'octo':if(dist<octoR(e,t)+16)hurt(1);break;
@@ -1988,6 +1988,8 @@ if(RULES.some(r=>r.length!==5))console.error('i18n rules mismatch');
  HAB=h=>h.split('、').map(x=>{const m=x.match(/^任何有(.+)的海域$/);if(!m)return[T(x),T(x),T(x),T(x)];const f=T(m[1]);return[`any sea with ${f}`,`${f}がいる海ならどこでも`,`любое море, где есть ${f}`,`أي بحر فيه ${f}`]}),
  ST=s=>T(s),lc=s=>s.charAt(0).toLowerCase()+s.slice(1),
  X=(re,a)=>RULES.push([re,...a]);
+X(/^连击 (\d+)！\+(\d+) ⚪$/,[m=>`Combo ${m[1]}! +${m[2]} ⚪`,m=>`コンボ ${m[1]}！+${m[2]} ⚪`,m=>`Комбо ${m[1]}! +${m[2]} ⚪`,m=>`سلسلة ${m[1]}! +${m[2]} ⚪`]);
+X(/^连击断了$/,[m=>'Combo broken',m=>'コンボがとぎれた',m=>'Комбо прервано',m=>'انقطعت السلسلة']);
 X(/^版本 (v[\d.]+)$/,[m=>'Version '+m[1],m=>'バージョン '+m[1],m=>'Версия '+m[1],m=>'الإصدار '+m[1]]);
 X(/^采到 (\d+) 份(.+)$/,[m=>`Gather ${m[1]} × ${T(m[2])}`,m=>`${T(m[2])}を${m[1]}こ集める`,m=>`Собери: ${T(m[2])} ×${m[1]}`,m=>`اجمع ${T(m[2])}: ${m[1]}`]);
 X(/^游到 (\d+) 米，把潮心送回去$/,[m=>`Swim ${m[1]} m and bring the Tide Heart home`,m=>`${m[1]}m泳いで潮の心を送りとどける`,m=>`Проплыви ${m[1]} м и верни Сердце прилива`,m=>`اسبح ${m[1]} م وأعِد قلب المد`]);
