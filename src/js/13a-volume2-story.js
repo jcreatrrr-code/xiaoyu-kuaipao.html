@@ -11,12 +11,18 @@ Object.assign(SCN,{
  v2Ayao:{bg:'shore',atoll:1,dusk:1,cast:[['kid',.18,'g'],['haisheng',.36,'g'],['ayao',.66,'g',1],['ship',.62,'h']]},
  v2Mang:{bg:'sea',i:14,cast:[['fish',.36,.3]]},
  v2Old:{bg:'shore',atoll:1,cast:[['kid',.2,'g'],['xiaofan',.4,'g'],['laoduo',.7,'g',1]]},
+ v2Voy:{bg:'shore',deck:1,cast:[['kid',.14,'g'],['xiaoman',.34,'g'],['aqiang',.52,'g',1],['octo',.82,'g',1]]},v2Night:{bg:'shore',deck:1,night:1,stars:1,cast:[['kid',.34,'g'],['haisheng',.6,'g',1]]},
+ v2Sight:{bg:'shore',deck:1,ring:1,cast:[['kid',.3,'g'],['haisheng',.52,'g',1],['xiaoman',.72,'g',1]]},
  v2Storm:{bg:'shore',atoll:1,lhOut:1,night:1,cast:[['kid',.16,'g'],['xiaoman',.34,'g'],['ayao',.56,'g',1],['laoduo',.8,'g',1]]},
  v2Pier:{bg:'shore',atoll:1,lhDark:1,night:1,cast:[['kid',.3,'g'],['laoduo',.56,'g',1],['xiaofan',.76,'g',1]]}});
 Object.assign(STORY,{
  pro2:[['旁白','远洋号改装好了。船头挂上了小馆的招牌。','v2Dock'],['阿潮','老店我看着。……难吃的菜，我替你吃。','v2Dock'],['小鱼','您那叫替我吃吗？您那叫蹭饭。','v2Dock',{em:'…'}],
   ['阿珍','我算过了！船上一天的饭钱，比岸上贵三成——','v2Dock',{em:'!'}],['阿强','可以。','v2Dock'],['墨墨','杂货铺搬上船，运费谁出？亏了！亏大了！','v2Dock',{em:'!'}],['海生','……起锚。','v2Dock',{cut:1}],
-  ['旁白','船尾的浪花里，一片背鳍悄悄跟了上来。','v2Wake'],['大白','咕——。','v2Wake',{cut:1,snd:'growl'}]],
+  ['旁白','船尾的浪花里，一片背鳍悄悄跟了上来。','v2Wake'],['大白','咕——。','v2Wake',{cut:1,snd:'growl'}],
+  ['旁白','远洋号一路向南。海水一天比一天暖，天一天比一天高。','v2Voy'],['墨墨','……晕船……亏了……连早饭都亏出去了……','v2Voy',{em:'…'}],['阿珍','我算过了，再走五天就到。','v2Voy'],['阿强','可以。','v2Voy'],
+  ['旁白','夜里，小鱼睡不着，趴在船舷上看星星。','v2Night'],['海生','往南走，星星也会换。北边那颗老星，再过几天就看不见了。','v2Night'],['小鱼','那没有星星认路的时候，船怎么办？','v2Night',{em:'?'}],
+  ['海生','看罗盘，看海图。……听说南边的人，以前光看星星和浪，就能划到几百里外的岛。','v2Night'],
+  ['旁白','第七天早上，海平线上冒出一圈白色的沙环，像有人在海上画了一个圈。','v2Sight'],['小鱼','那就是……南方环礁？','v2Sight',{em:'!'}]],
  pre12:[['旁白','南方环礁。白天的海亮得晃眼，可潟湖的水是灰白色的。','v2Atoll'],['小鱼','这就是海图上那片海？说好的碧绿呢？','v2Atoll',{em:'?'}],
   ['小帆','喂——！船上那个！我看得见你！','v2Atoll',{em:'!',shake:1}],['小鱼','……谁？在哪？','v2Atoll',{em:'?'}],['小帆','你脖子上那个吊坠！我爷爷以前也有一枚！','v2Atoll',{cut:1}],
   ['小鱼','真的？那他现在——','v2Atoll'],['小帆','潟湖以前是碧色的。你要是下得了水，帮我看看底下的珊瑚还活着没有。','v2Lag']],
@@ -61,3 +67,10 @@ function atollShore(t,gy,hy,o){for(const f of LHX){const x=Math.round(CW*f);R(x-
     for(const[dx,dy]of[[-5,1],[5,1],[-3,-1],[3,-1],[0,-2]])R(tx+Math.min(dx,0),ty+dy,Math.abs(dx)+2,2,'#3fae6a');R(tx-1,ty+1,3,2,'#6a4520')}}
 function lhLamps(t,hy,o){if(o.lhDark||(!o.night&&!o.dusk))return;LHX.forEach((f,i)=>{let on=1;if(o.lhOut){const off=1.2+i*.7;on=t<off?(Math.sin(t*6+i)>-.6?1:0):t<off+.7?(Math.sin(t*38)>0?1:0):0}
   if(!on)return;const x=Math.round(CW*f);El(x,hy-11,5,3,'rgba(255,240,170,.35)');R(x-1,hy-12,3,2,'#fff6c0');R(x+2,hy-12,10,1,'rgba(255,240,170,.45)');R(x-11,hy-12,10,1,'rgba(255,240,170,.45)')})}
+/* 远洋号甲板：天、海、船舷和木甲板 */
+function deckScene(t,gy,hy,o){const sky=o.night?['#0e1838','#2a3a6a']:['#7fcbff','#dff4ff'];for(let i=0;i<6;i++)R(0,Math.floor(hy*i/6),CW,Math.ceil(hy/6)+1,mixc(sky[0],sky[1],i/5));
+  if(!o.night){El(CW*.8,hy*.35,5,5,'#fff27a');for(let i=0;i<3;i++){const cx=((i*47+t*4)%(CW+30))-15,cy=hy*(.2+i*.22);El(cx,cy,6,2,'#ffffff');El(cx+4,cy-1,4,2,'#ffffff')}}
+  R(0,hy,CW,gy-hy,'#2f8fc4');R(0,hy,CW,2,'#3fa9d8');for(let i=0;i<9;i++){const y=hy+2+(i*5)%Math.max(1,gy-hy-8),x=((i*23+t*(9+i%3))%(CW+8))-4;R(x,y,4,1,'#bfe6ff')}
+  if(o.ring){const cx=Math.round(CW*.66);El(cx,hy+1,16,2,'#f3e2b0');El(cx,hy+1,11,1,'#3fd0c0');R(cx-13,hy-3,1,3,'#8a5a2b');R(cx-15,hy-4,4,1,'#3fae6a');R(cx+10,hy-3,1,3,'#8a5a2b');R(cx+8,hy-4,4,1,'#3fae6a')}
+  R(0,gy-8,CW,2,'#8a5a2b');for(let x=2;x<CW;x+=7)R(x,gy-8,1,8,'#8a5a2b');R(0,gy,CW,CH2-gy,'#b07a44');for(let i=0;i<6;i++)R(0,gy+4+i*7,CW,1,'#8f5f33');
+  R(Math.round(CW*.93),0,2,gy-8,'#6b4226')}
