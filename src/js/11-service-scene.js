@@ -30,7 +30,7 @@ function svRender(){const v=SV;v.dirty=0;if(!SVE)return;
     e.querySelector('.tx').textContent=(s.d&&s.hand&&ph!=='burn'?'⭐ ':'')+(ph==='work'?(s.k==='cut'?'连点切菜！':'连点装盘！'):s.open?'还剩 '+s.left+' 份':ph==='perfect'?'出锅！':ph==='ok'?'快出锅！':ph==='burn'?'焦了，点一下清理':ph==='cook'&&s.hand?'招牌菜，盯着火候':ph==='cook'&&s.k==='umu'?'焖着，别打开':'');
     if(!TIME[s.k])e.querySelector('.dial').style.background=`conic-gradient(#4fe0b5 ${s.d?s.n/s.need*100:0}%,rgba(6,40,70,.15) 0)`});
   const ids=[...new Set(v.seats.filter(Boolean).map(s=>s.d))];
-  $('svMenu').innerHTML=ids.length?ids.map(id=>{const d=dById(id),m=startKind(id),ok=svPending(id)>0&&(v.banq||canMake(d,SAVE.fish))&&v.st.some(x=>x.k===m&&!x.d);
+  $('svMenu').innerHTML=ids.length?ids.map(id=>{const d=dById(id),m=startKind(id),ok=svPending(id)>0&&(v.banq||canMake(d,SAVE.fish))&&!!svFreeSt(m);
     return`<button class="mbtn ${svSigNeed(id)>0?'sig':''}" data-mk="${id}" ${ok?'':'disabled'}>${svSigNeed(id)>0?'⭐ ':''}${d.ic} ${d.n}<small>${STN[m][0]}${M2[id]?'→'+STN[M2[id][1]][0]:''} ${Object.entries(d.need).map(([k,n])=>FISH[k].n+'×'+n).join(' ')}</small></button>`}).join(''):'<span class="lbl">等客人点菜…</span>';
   svBars()}
 function svBars(){const v=SV;$('svSpd').textContent=(SAVE.spd||1)+'×';{const n=SAVE.fish.salt||0,e=$('svSalt');e.hidden=v.banq||!(n||SAVE.story.post5);e.textContent=n?`✨ 盐花 ×${n} · ${v.salt?'用':'不用'}`:'✨ 盐花 ×0';e.style.opacity=n?1:.55;e.style.background=n&&v.salt?'var(--sun)':'';e.style.color=n&&v.salt?'#6a4500':''}$('svTime').textContent='⏱ '+Math.max(0,Math.ceil(v.t))+' 秒';$('svEarn').textContent='⚪ '+(v.earn+v.tips);if(!SVE)return;

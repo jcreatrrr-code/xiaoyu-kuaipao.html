@@ -5,18 +5,19 @@ TH.push(
  {n:'星光海',top:'#1a2448',bot:'#04060f',far:'#141c3a',mid:'#0e1430',sand:'#3a3a50',rock:'#3a4060',rock2:'#262a40',weed:'#3a6a7a'},
  {n:'同席',top:'#3a6a9a',bot:'#0c2238',far:'#2f5a80',mid:'#234a6a',sand:'#d8cca8',rock:'#6a7a8a',rock2:'#4a5a6a',weed:'#5fb0a0'});
 LV.push(
- {name:'熔岩海岸',vol:2,fish:['mack','tuna','bream'],len:210,theme:20,nodes:['grouper'],gname:'石斑鱼',pool:{pearls:2,lava:8,rockB:2,rockT:1,octo:1,shield:1},goal:{k:'gather',n:[2,3]},extra:[20,30]},
+ {name:'熔岩海岸',vol:2,fish:['mack','tuna','bream'],len:210,theme:20,nodes:['grouper'],gname:'石斑鱼',pool:{pearls:2,lava:12,rockB:2,rockT:1,octo:1,shield:1},goal:{k:'gather',n:[2,3]},extra:[20,30]},
  {name:'浮石海',vol:2,fish:['sard','saury','mack'],len:210,theme:21,tool:'opot',nodes:['tako'],gname:'小章鱼',pool:{pearls:2,pumice:8,lava:1,jelly:1,shield:1},goal:{k:'gather',n:[2,3]},extra:[20,30]},
  {name:'星光海',vol:2,fish:['sard','yellow','saury'],len:220,theme:22,night:1,nodes:['parrot'],gname:'鹦嘴鱼',pool:{pearls:1,sline:9,jelly:1,shield:1},goal:{k:'gather',n:[2,3]},extra:[20,30]},
  {name:'同席',vol:2,fish:['sard','bream'],len:200,theme:23,boss:'light',gtxt:'把灯塔的光还给大海',pool:{pearls:2,lava:2,pumice:2,lamp:1,rockB:1,shield:1},goal:{k:'boss'},extra:[20,30]});
 Object.assign(FISH,{grouper:{n:'石斑鱼',c:['#f6e2c8','#a8643a','#5a3018'],s:1,x:1},tako:{n:'小章鱼',c:['#ffe0d8','#e0705a','#9a3a2a'],s:1,x:1},parrot:{n:'鹦嘴鱼',c:['#e0fff4','#3fc8a8','#2a7aa0'],s:1,x:1}});
-Object.assign(NODE,{grouper:{tool:'',hp:2,f:.86,no:''},tako:{tool:'opot',hp:1,f:.3,no:'小章鱼躲在浮石底下，要用章鱼罐'},parrot:{tool:'',hp:1,f:.5,no:''}});
+Object.assign(NODE,{grouper:{tool:'',hp:2,f:.86,no:''},tako:{tool:'opot',hp:1,f:.3,no:'小章鱼躲在浮石底下，要用章鱼罐',pot:1},parrot:{tool:'',hp:1,f:.5,no:''}});
 Object.assign(BOSSMSG,{light:'灯塔的光在一明一暗地跳！点灯塔游过去，在它暗下去的那一下再点一次，把光还给大海'});
 Object.assign(TIPS,{lava:'海面上出现黑影，就是熔岩块要掉下来了！别待在黑影正下方',pumice:'浮石会慢慢往下压，从它底下钻过去，别被挤到',sline:'太黑了！顺着星星连成的线游，线上没有礁石，还会加速'});
 /* 熔岩块：先在海面投下影子，再砸进海里，落到海底变成一块烫石头 */
 const LAVA={W:()=>G&&G.mode==='hard'?.75:.95,fall:1};
+SFX.boom=()=>{snd(110,.45,'sawtooth',.13,35);setTimeout(()=>snd(70,.5,'square',.08,30),90)};
 Object.assign(PAT,{
- lava(g,x,d){const hd=g.mode!=='simple',n=(hd?2:1)+(g.r()<d?1:0);for(let i=0;i<n;i++)g.E.push({t:'lava',x:x+i*170,r:g.r(20,28),q:g.r(.25,.95),k:0,y:0});arc(g,x-240,.5,.5,3);g.x+=(n-1)*170},
+ lava(g,x,d){const hd=g.mode!=='simple',n=(hd?3:2)+(g.r()<d?1:0);const sp=hd?125:150,q0=g.r(.3,.9);for(let i=0;i<n;i++)g.E.push({t:'lava',x:x+i*sp,r:g.r(24,34),q:clamp(q0+g.r(-.08,.08),.2,.95),k:0,y:0});arc(g,x-240,.5,.5,3);g.x+=(n-1)*sp},
  pumice(g,x,d){const hd=g.mode!=='simple',w=g.r(240,hd?440:360),h1=g.r(hd?.4:.32,hd?.52:.42),gap=hd?.24:.3;g.E.push({t:'pumice',x,w,h0:.06,h1});
    if(g.r()<.45+d*.4){const hb=g.r(.12,Math.max(.13,1-h1-gap));g.E.push({t:'rock',x:x+g.r(-w*.2,w*.2),w:g.r(90,130),h:hb,top:0});arc(g,x-w/2-60,h1+(1-h1-hb)/2,h1+(1-h1-hb)/2,6)}
    else arc(g,x-w/2-60,(h1+1)/2,(h1+1)/2,6)},
@@ -27,11 +28,18 @@ Object.assign(PAT,{
    for(const p of pts)g.E.push({t:'pearl',x:x+p[0],f:p[1],star:1});g.x+=(n-1)*150-100}});
 const a3SlY=(e,xr)=>{const p=e.pts;if(xr<=0)return p[0][1];for(let i=0;i<p.length-1;i++)if(xr<=p[i+1][0]){const k=(xr-p[i][0])/(p[i+1][0]-p[i][0]);return lerp(p[i][1],p[i+1][1],k)}return p[p.length-1][1]};
 const a3Pd=(e,sx)=>{const p=clamp(1-(sx-fishSX)/(VW*.85),0,1);return e.h0+(e.h1-e.h0)*(1-(1-p)*(1-p))};
+/* 熔岩海岸：火山隔几秒喷一次，震屏、泛红，前方连着砸下几块熔岩 */
+function a3Tick(g,dt){if(!g.L||g.L.theme!==20||g.boss)return;const hd=g.mode!=='simple';g.erF=Math.max(0,(g.erF||0)-dt*1.6);
+  if(g.erT==null)g.erT=3;g.erT-=dt;if(g.erT>0||g.t<2)return;g.erT=(hd?3.6:5.5)+Math.random()*2;g.erF=1;g.shake=Math.max(g.shake,.45);SFX.boom();
+  if(!g.tips.erupt){g.tips.erupt=1;toast('火山喷发了！看清海面上的黑影，一块接一块躲开',2.6,1)}
+  const n=hd?3+(Math.random()<.5?1:0):2,x0=g.scroll+fishSX+g.speed*(LAVA.W()+.3*LAVA.fall)+60;
+  for(let i=0;i<n;i++)g.E.push({t:'lava',x:x0+i*(hd?115:160)+Math.random()*30,r:24+Math.random()*10,q:.3,k:0,y:0,er:1})}
 function a3Hit(g,e,sx,y,dx,dt){const F=g.fish,H=yMax-yMin;
   if(e.t==='lava'){if(e.k===0&&sx-fishSX<g.speed*(LAVA.W()+e.q*LAVA.fall)+20){e.k=1;e.w=0}
     if(e.k===1){e.w+=dt;if(e.w>=LAVA.W()){e.k=2;e.y=yMin-40;burst(sx,yMin,'#ff9a5a',10)}}
     else if(e.k===2){e.y+=H/LAVA.fall*dt;if(Math.random()<.5)g.parts.push({x:sx+(Math.random()-.5)*16,y:e.y-e.r,vx:0,vy:-30,l:.6,c:'rgba(255,255,255,.8)',r:2+Math.random()*3,k:1});
-      if(e.y>=yMax-e.r*.6){e.y=yMax-e.r*.6;e.k=3;g.shake=Math.max(g.shake,.15);burst(sx,e.y,'#ffb070',14)}}
+      if(e.y>=yMax-e.r*.6){e.y=yMax-e.r*.6;e.k=3;g.shake=Math.max(g.shake,.22);burst(sx,e.y,'#ffb070',20)}}
+    if(e.k===3&&e.er&&(e.lt=(e.lt||0)+dt)>1.5){e.gone=1;burst(sx,e.y,'#8a6a5a',8);return}
     if(e.k>=2&&Math.hypot(dx,F.y-e.y)<e.r+18)hurt(1);return}
   if(e.t==='pumice'){const h=a3Pd(e,sx)*H;if(e.node)e.node.f=a3Pd(e,sx)+.07;if(Math.abs(dx)<e.w/2+12&&F.y<yMin+h+16)hurt(1);return}
   if(e.t==='sline'){const xr=fishSX-sx;if(xr>=0&&xr<=e.L&&Math.abs(F.y-fy(a3SlY(e,xr)))<34){if(!(g.boost>0)&&!g.tips.boost){g.tips.boost=1;ftext('顺着星线，加速！',fishSX,F.y-50,'#fff8c0')}g.boost=.35;e.lit=1}return}}
@@ -75,6 +83,7 @@ function a3BG(th,sc,t){
       ctx.fillStyle=`rgba(255,90,30,${.45+.2*Math.sin(t*3+n)})`;ctx.beginPath();ctx.moveTo(x-30,b-232);ctx.lineTo(x-60,b-120);ctx.lineTo(x-40,b-120);ctx.lineTo(x-10,b-200);ctx.fill();
       ctx.fillStyle='rgba(60,50,50,.35)';for(let i=0;i<5;i++){const q=(t*.2+i/5)%1;ctx.beginPath();ctx.arc(x+Math.sin(q*5+n)*30,b-240-q*240,20+q*44,0,TAU);ctx.fill()}}
     ctx.fillStyle='rgba(255,140,60,.8)';for(let i=0;i<14;i++){const x=(((i*131-sc*.3)%(VW+40))+VW+40)%(VW+40)-20,y=((t*40+i*67)%(yMax-yMin))+yMin;ctx.globalAlpha=.3+.3*Math.sin(t*5+i);ctx.fillRect(x,y,2,3)}ctx.globalAlpha=1;
+    if(G&&G.erF>0){ctx.fillStyle=`rgba(255,70,20,${.28*G.erF})`;ctx.fillRect(0,0,VW,PH);ctx.fillStyle=`rgba(255,160,60,${.9*G.erF})`;for(let i=0;i<10;i++){const q=1-G.erF;circ(VW*(.15+i*.08)+Math.sin(i*7)*40,yMin*.6+40-q*120+i%3*20,4+i%3*2)}}
     const gr=ctx.createLinearGradient(0,yMax-30,0,yMax+40);gr.addColorStop(0,'rgba(255,90,30,0)');gr.addColorStop(1,'rgba(255,90,30,.35)');ctx.fillStyle=gr;ctx.fillRect(0,yMax-30,VW,90)}
   if(th===21){ctx.fillStyle='rgba(200,190,170,.5)';const o=sc*.5;for(let n=Math.floor(o/90)-1;n*90-o<VW+60;n++){const x=n*90-o+hash(n+7)*40;circ(x,yMin+4+hash(n)*8,5+hash(n+2)*8)}}
   if(th===22||th===23){ctx.fillStyle='rgba(255,255,240,.8)';for(let i=0;i<34;i++){const x=(((i*83-sc*.04)%(VW+40))+VW+40)%(VW+40)-20,y=yMin*.2+((i*41)%Math.max(60,yMin*.8+120));ctx.globalAlpha=.3+.3*Math.sin(t*2+i);ctx.fillRect(x,y,2,2)}ctx.globalAlpha=1}}
@@ -130,3 +139,29 @@ function lightHud(B,t){const g=G,o=LT.geo(),n=B.L.length,hd=g.mode==='hard',L=Ma
     L2.forEach((x,i)=>ctx.fillText(x,VW/2,cy-28*U+i*30*U))}
   ctx.restore()}
 cv.addEventListener('pointermove',e=>{const B=G&&G.boss;if(state==='play'&&B&&B.k==='light'&&!B.done&&B.t>=0&&e.buttons)lightPt(e.clientX,e.clientY,false)});
+
+/* 章鱼罐：朝下点沉罐子 → 别动，等章鱼钻进去 → 朝上点提起来 */
+function a3PotStart(g,e){const hd=g.mode!=='simple';g.tcap={e,s:0,w:0,W:hd?2.2:1.6,win:0,Wn:hd?1:1.4,ok:0};g.fish.vy=0;e.inPot=1;SFX.tap();
+  if(!g.tips.tcap){g.tips.tcap=1;toast('用章鱼罐：先朝下点，把罐子沉下去；别乱点，等它钻进去；再朝上点，把罐子提起来',4,1)}}
+function a3PotUpd(g,dt){const c=g.tcap;g.fish.vy=0;g.inv=Math.max(g.inv,.2);c.ok=Math.max(0,c.ok-dt);
+  if(c.s===1){c.w+=dt;if(c.w>=c.W){c.s=2;c.win=c.Wn;SFX.shield()}}
+  else if(c.s===2){c.win-=dt;if(c.win<=0){c.s=1;c.w=0;SFX.hit();a3PotSay(g,'它从罐子里溜出来了，再等等','#ffb0a0')}}}
+function a3PotSay(g,txt,col){const e=g.tcap.e;ftext(txt,e.x-g.scroll-60,entY(e,g.t)-70,col||'#fff')}
+function a3PotTap(cx,cy){const g=G,c=g.tcap;if(!c)return;const r=cv.getBoundingClientRect(),ux=(cx-r.left)/S-fishSX,uy=(cy-r.top)/S-g.fish.y,d=Math.hypot(ux,uy);
+  let di=-1;if(d>24){for(let i=0;i<4;i++){const D=CAPD[i];if((ux*D[0]+uy*D[1])/d>.64)di=i}}a3PotGo(g,di)}
+function a3PotGo(g,di){const c=g.tcap;if(!c)return;const e=c.e;
+  if(c.s===0){if(di===2){c.s=1;c.w=0;SFX.tap();a3PotSay(g,'罐子沉下去了，别动……','#fff')}else{g.shake=.2;SFX.hit();a3PotSay(g,'先朝下点，把罐子沉下去','#ffe27a')}return}
+  if(c.s===1){c.w=0;g.shake=.15;SFX.hit();a3PotSay(g,'别急！它被吓得缩回去了','#ffb0a0');return}
+  if(di===0){g.tcap=null;e.inPot=0;e.gone=1;const f=FISH[e.k],sx=e.x-g.scroll,y=entY(e,g.t);g.caught[e.k]=(g.caught[e.k]||0)+1;g.nCaught++;g.bonus+=30;SFX.save();burst(sx,y,f.c[1],16);ftext('捕获 '+f.n+'！',sx-40,y-40,'#fff');
+    if(e.shiny){SAVE.dex['x_'+e.k]=(SAVE.dex['x_'+e.k]||0)+1;persist();setTimeout(()=>toast('是金鳞'+f.n+'！《奇珍书》多了一张隐藏卡',3.4),700)}}
+  else{c.s=1;c.w=0;g.shake=.2;SFX.hit();a3PotSay(g,'方向不对，它溜出来了','#ffb0a0')}}
+function a3PotDraw(g,t){const c=g.tcap,e=c.e,F=g.fish,ox=e.x-g.scroll,oy=entY(e,t),k=c.s===1?c.w/c.W:c.s===2?1:0,py=c.s===0?oy-70+Math.sin(t*3)*4:oy;ctx.save();
+  ctx.strokeStyle='rgba(240,220,180,.8)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(fishSX+10,F.y);ctx.quadraticCurveTo((fishSX+ox)/2,Math.min(F.y,py)-30,ox,py-26);ctx.stroke();
+  if(c.s>0){const q=1-k*.85;ctx.save();ctx.translate(ox+18*k,oy+6*k);ctx.scale(q,q);a3Node(e,t);ctx.restore()}else{ctx.save();ctx.translate(ox,oy);a3Node(e,t);ctx.restore()}
+  ctx.translate(ox,py);ctx.rotate(c.s>0?-1.2:0);ctx.fillStyle='#b0643a';ctx.beginPath();ctx.ellipse(0,0,22,18,0,0,TAU);ctx.fill();ctx.fillStyle='#8a4a2a';ctx.fillRect(-9,-26,18,10);ctx.fillStyle='#d88a5a';ctx.fillRect(-16,-6,32,3);ctx.fillStyle='#3a2014';ctx.beginPath();ctx.ellipse(0,-26,9,3,0,0,TAU);ctx.fill();
+  if(c.s===2){ctx.strokeStyle='#e0705a';ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-3,-26);ctx.quadraticCurveTo(-8+Math.sin(t*9)*3,-36,-2,-40);ctx.stroke()}
+  ctx.rotate(c.s>0?1.2:0);if(c.s>0){ctx.lineWidth=5;ctx.strokeStyle=c.s===1?'rgba(255,255,255,.9)':'#ffd23f';ctx.beginPath();ctx.arc(0,0,36,-Math.PI/2,-Math.PI/2+TAU*(c.s===1?k:c.win/c.Wn));ctx.stroke()}ctx.restore();
+  if(c.s!==1){const D=CAPD[c.s===0?2:0],ax=fishSX+D[0]*95,ay=clamp(F.y+D[1]*95,yMin+34,yMax-30);ctx.save();ctx.translate(ax,ay);ctx.rotate(Math.atan2(D[1],D[0]));const pu=1+Math.sin(t*14)*.08;ctx.scale(pu,pu);ctx.shadowColor='#4fe0b5';ctx.shadowBlur=18;ctx.fillStyle='#4fe0b5';ctx.strokeStyle='#fff';ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(30,0);ctx.lineTo(4,-24);ctx.lineTo(4,-10);ctx.lineTo(-26,-10);ctx.lineTo(-26,10);ctx.lineTo(4,10);ctx.lineTo(4,24);ctx.closePath();ctx.fill();ctx.shadowBlur=0;ctx.stroke();ctx.restore()}
+  ctx.save();ctx.textAlign='center';ctx.font=`bold ${18*U}px ${FONT}`;const tx=c.s===0?'朝下点：把罐子沉下去':c.s===1?'别动……等它钻进罐子':'它进去了！朝上点：提罐子';const tw=ctx.measureText(tl(tx)).width+28;
+  ctx.fillStyle='rgba(10,30,50,.75)';ctx.fillRect(VW/2-tw/2,yMax-78*U,tw,32*U);ctx.fillStyle=c.s===2?'#ffd23f':'#fff';ctx.fillText(tl(tx),VW/2,yMax-56*U);ctx.restore()}

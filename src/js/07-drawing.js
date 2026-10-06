@@ -204,7 +204,8 @@ function drawWorld(){
   if(g.L&&g.L.dark){const r=230,gr=ctx.createRadialGradient(fishSX,F.y,r*.5,fishSX,F.y,r);gr.addColorStop(0,'rgba(6,6,22,0)');gr.addColorStop(1,'rgba(6,6,22,.94)');ctx.fillStyle=gr;ctx.fillRect(0,0,VW,VT);
 }
   if(g.L&&g.L.night)a3Night(g,t);else a3SlDraw(g,t);
-  if(g.L&&g.L.nodes)for(const e of g.E){if(e.gone||e.t!=='node')continue;const sx=e.x-g.scroll;if(sx>-80&&sx<VW+80)drawNode(e,sx,entY(e,t),t)}
+  if(g.L&&g.L.nodes)for(const e of g.E){if(e.gone||e.t!=='node'||e.inPot)continue;const sx=e.x-g.scroll;if(sx>-80&&sx<VW+80)drawNode(e,sx,entY(e,t),t)}
+  if(g.tcap)a3PotDraw(g,t);
   if(g.sharks.length){const a=.25+.2*Math.sin(t*12),gr=ctx.createRadialGradient(VW/2,VT/2,Math.min(VW,VT)*.35,VW/2,VT/2,Math.max(VW,VT)*.75);gr.addColorStop(0,'rgba(255,0,0,0)');gr.addColorStop(1,`rgba(255,40,40,${a})`);ctx.fillStyle=gr;ctx.fillRect(0,0,VW,VT)}
   if(g.trap){const tr=g.trap,R=62*U,cx=VW/2,cy=Math.min(VT*.62,yMax-R*.4),pu=1+Math.sin(t*12)*.05,red=tr.t<=3&&Math.sin(t*16)>0;
     ctx.fillStyle='rgba(6,40,70,.35)';ctx.fillRect(0,0,VW,VT);
