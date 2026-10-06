@@ -4,15 +4,15 @@ Object.assign(WHO,{'小帆':['xiaofan'],'老舵':['laoduo'],'阿曜':['ayao']});
 Object.assign(SCN,{
  v2Dock:{bg:'shore',cast:[['kid',.14,'g'],['achao',.32,'g'],['xiaoman',.5,'g',1],['aqiang',.66,'g',1],['haisheng',.84,'g',1],['ship',.3,'h']]},
  v2Wake:{bg:'sea',i:13,cast:[['shark',.6,.3,1]]},
- v2Atoll:{bg:'shore',cast:[['kid',.24,'g'],['xiaofan',.66,'g',1],['ship',.3,'h']]},
+ v2Atoll:{bg:'shore',atoll:1,cast:[['kid',.24,'g'],['xiaofan',.66,'g',1],['ship',.3,'h']]},
  v2Lag:{bg:'sea',i:12,fd:1,cast:[['fish',.4,.3]]},
  v2Diner:{bg:'diner',cast:[['kid',.2,'g'],['xiaoman',.44,'g',1],['xiaofan',.7,'g',1]]},
  v2Fly:{bg:'sea',i:13,cast:[['fish',.36,.3]]},
- v2Ayao:{bg:'shore',dusk:1,cast:[['kid',.18,'g'],['haisheng',.36,'g'],['ayao',.66,'g',1],['ship',.62,'h']]},
+ v2Ayao:{bg:'shore',atoll:1,dusk:1,cast:[['kid',.18,'g'],['haisheng',.36,'g'],['ayao',.66,'g',1],['ship',.62,'h']]},
  v2Mang:{bg:'sea',i:14,cast:[['fish',.36,.3]]},
- v2Old:{bg:'shore',cast:[['kid',.2,'g'],['xiaofan',.4,'g'],['laoduo',.7,'g',1]]},
- v2Storm:{bg:'shore',night:1,cast:[['kid',.16,'g'],['xiaoman',.34,'g'],['ayao',.56,'g',1],['laoduo',.8,'g',1]]},
- v2Pier:{bg:'shore',night:1,cast:[['kid',.3,'g'],['laoduo',.56,'g',1],['xiaofan',.76,'g',1]]}});
+ v2Old:{bg:'shore',atoll:1,cast:[['kid',.2,'g'],['xiaofan',.4,'g'],['laoduo',.7,'g',1]]},
+ v2Storm:{bg:'shore',atoll:1,lhOut:1,night:1,cast:[['kid',.16,'g'],['xiaoman',.34,'g'],['ayao',.56,'g',1],['laoduo',.8,'g',1]]},
+ v2Pier:{bg:'shore',atoll:1,lhDark:1,night:1,cast:[['kid',.3,'g'],['laoduo',.56,'g',1],['xiaofan',.76,'g',1]]}});
 Object.assign(STORY,{
  pro2:[['旁白','远洋号改装好了。船头挂上了小馆的招牌。','v2Dock'],['阿潮','老店我看着。……难吃的菜，我替你吃。','v2Dock'],['小鱼','您那叫替我吃吗？您那叫蹭饭。','v2Dock',{em:'…'}],
   ['阿珍','我算过了！船上一天的饭钱，比岸上贵三成——','v2Dock',{em:'!'}],['阿强','可以。','v2Dock'],['墨墨','杂货铺搬上船，运费谁出？亏了！亏大了！','v2Dock',{em:'!'}],['海生','……起锚。','v2Dock',{cut:1}],
@@ -52,4 +52,12 @@ d54:['飞鱼、盐、青柠',['飞鱼去鳞去内脏洗净，擦干后抹盐。'
 d55:['飞鱼肉、米、椰浆、盐',['米洗好，用一半水一半椰浆代替清水。','飞鱼肉烤熟拆成小块，铺在米上。','按平常的方法煮饭，焖好后拌匀。']],
 d56:['活泥蟹、粗盐',['泥蟹刷洗干净，绑紧蟹钳。','炭火上烤十五到二十分钟，中间翻面。','蟹壳变红、蟹肉不透明就熟了。'],'处理活蟹要小心蟹钳，最好请卖蟹的店家帮忙绑好。'],
 d57:['泥蟹、椰浆、姜、葱',['泥蟹洗净切块。','姜片煸香，倒入椰浆煮开。','放蟹块盖上盖子焖十分钟，撒葱花。'],'这是南洋和东南亚常见的做法。']});
-CTIP.push('潮水退下去的时候，海底会升起来，别贴着底游。','按住游到水面再多按一会儿，就能跃出水面，越过浮网。','树根之间的缝很窄，提前对准再穿过去。','游到虚线上方，暗礁靠近时点一下，给小帆指路。');
+CTIP.push('潮水退下去的时候，海底会升起来，别贴着底游。','按住游到水面再多按一会儿，就能跃出水面，越过浮网。','树根之间的缝很窄，还会慢慢上下移动，看准了再穿过去。','游到虚线上方，暗礁靠近时点一下，给小帆指路。');
+/* 环礁的岸：椰子树和远处的灯塔（不画渔村的小屋） */
+const LHX=[.1,.46,.9];
+function atollShore(t,gy,hy,o){for(const f of LHX){const x=Math.round(CW*f);R(x-4,hy-1,9,2,'#e8d8a8');R(x-1,hy-9,3,8,'#f1f1f1');R(x-1,hy-7,3,1,'#e0503f');R(x-1,hy-4,3,1,'#e0503f');R(x-2,hy-11,5,2,'#5a6a7a')}
+  if(!o.night)lhLamps(t,hy,o);
+  for(const[f,s]of[[.05,1],[.95,-1]]){const x=Math.round(CW*f);for(let j=0;j<16;j++)R(x+Math.round(s*j*j/40),gy-j,2,1,'#8a5a2b');const tx=x+Math.round(s*6.4),ty=gy-16;
+    for(const[dx,dy]of[[-5,1],[5,1],[-3,-1],[3,-1],[0,-2]])R(tx+Math.min(dx,0),ty+dy,Math.abs(dx)+2,2,'#3fae6a');R(tx-1,ty+1,3,2,'#6a4520')}}
+function lhLamps(t,hy,o){if(o.lhDark||(!o.night&&!o.dusk))return;LHX.forEach((f,i)=>{let on=1;if(o.lhOut){const off=1.2+i*.7;on=t<off?(Math.sin(t*6+i)>-.6?1:0):t<off+.7?(Math.sin(t*38)>0?1:0):0}
+  if(!on)return;const x=Math.round(CW*f);El(x,hy-11,5,3,'rgba(255,240,170,.35)');R(x-1,hy-12,3,2,'#fff6c0');R(x+2,hy-12,10,1,'rgba(255,240,170,.45)');R(x-11,hy-12,10,1,'rgba(255,240,170,.45)')})}

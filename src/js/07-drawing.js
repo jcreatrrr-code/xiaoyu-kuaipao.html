@@ -10,7 +10,7 @@ function drawBG(th,sc,t){
   if(th===6){ctx.fillStyle='rgba(190,215,200,.35)';const o=sc*.25;for(let n=Math.floor(o/260);n*260-o<VW+80;n++){const x=n*260-o,h=180+hash(n+3)*220;ctx.fillRect(x,PH-170-h,34,h);ctx.fillRect(x-8,PH-170-h,50,14);if(hash(n)>.5)ctx.fillRect(x-8,PH-184,50,14)}}
   if(th===5){ctx.fillStyle='#6a649c';const o=sc*.3;for(let n=Math.floor(o/170);n*170-o<VW+120;n++){const x=n*170-o,h=70+hash(n+5)*130;ctx.beginPath();ctx.moveTo(x-46,0);ctx.lineTo(x,h);ctx.lineTo(x+46,0);ctx.fill()}}
   if(th===3){ctx.fillStyle='rgba(255,255,255,.55)';const o=sc*.2;for(let n=Math.floor(o/220);n*220-o<VW+120;n++){const x=n*220-o,h=50+hash(n)*90;ctx.beginPath();ctx.moveTo(x-70,0);ctx.lineTo(x,h);ctx.lineTo(x+70,0);ctx.fill()}}
-  if(th>=12)v2BG(th,sc,t);
+  if(th>=12){v2BG(th,sc,t);v2Sky(G,t)};
   hills(T.far,sc*.15,PH-170,70,.004,.011);
   if(th===1){const o=sc*.22,n=Math.floor((o+300)/1500),x=n*1500-o+400,b=PH-190;ctx.fillStyle=T.mid;ctx.beginPath();ctx.moveTo(x-170,b-70);ctx.lineTo(x+190,b-110);ctx.lineTo(x+150,b+40);ctx.lineTo(x-130,b+40);ctx.fill();ctx.fillRect(x-10,b-250,12,170);ctx.fillRect(x-70,b-200,130,9)}
   hills(T.mid,sc*.4,PH-112,48,.006,.017);
@@ -87,7 +87,7 @@ function drawNet(x,y,t){
   ctx.strokeStyle='#f5e6c0';ctx.lineWidth=2;for(let i=-120;i<=120;i+=17){ctx.beginPath();ctx.moveTo(i-60,-60);ctx.lineTo(i+60,60);ctx.moveTo(i+60,-60);ctx.lineTo(i-60,60);ctx.stroke()}ctx.restore();
   ctx.strokeStyle='#c79a4a';ctx.lineWidth=6;ctx.beginPath();ctx.arc(0,0,58,0,TAU);ctx.stroke();ctx.fillStyle='#ff6b5a';for(let i=0;i<6;i++)circ(Math.cos(i*TAU/6)*58,Math.sin(i*TAU/6)*58,6);ctx.restore()}
 function drawEntity(e,sx,y,g,T){const t=g.t;switch(e.t){
-  case'pearl':{const gr=ctx.createRadialGradient(sx-4,y-4,1,sx,y,14);gr.addColorStop(0,'#fff');gr.addColorStop(1,'#ffc9e6');ctx.fillStyle=gr;ctx.shadowColor='#fff';ctx.shadowBlur=10;circ(sx,y,13);ctx.shadowBlur=0;
+  case'pearl':{const gr=ctx.createRadialGradient(sx-4,y-4,1,sx,y,14);gr.addColorStop(0,'#fff');gr.addColorStop(1,e.air?'#ffd23f':'#ffc9e6');ctx.fillStyle=gr;ctx.shadowColor=e.air?'#ffe27a':'#fff';ctx.shadowBlur=10;circ(sx,y,13);ctx.shadowBlur=0;
     const tw=(Math.sin(t*5+e.x)+1)/2;ctx.fillStyle=`rgba(255,255,255,${tw})`;ctx.fillRect(sx+7,y-14,2,8);ctx.fillRect(sx+4,y-11,8,2)}break;
   case'rock':drawRock(sx,e,T);break;
   case'fnet':drawFnet(e,sx,g,t);break;

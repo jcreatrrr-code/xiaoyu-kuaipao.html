@@ -14,16 +14,16 @@ async (args)=>{const [mode,li,secs]=args;const T=window.__T,K=window.__K;K.SAVE.
   if(ty===null)ty=(d.yMin+d.yMax)/2;
   const roots=g.E.filter(e=>e.root&&!e.gone).map(e=>({e,sx:e.x-g.scroll-d.fishSX})).filter(o=>o.sx>-40&&o.sx<170).sort((a,b)=>a.sx-b.sx);
   if(roots.length>=2){const x0=roots[0].e.x,pair=roots.filter(o=>o.e.x===x0);if(pair.length===2){const tp=pair.find(o=>o.e.top).e,bt=pair.find(o=>!o.e.top).e;ty=(fy(tp.h)+fy(1-bt.h))/2}}
-  for(const e of g.E){if(e.gone||e.t!=='fnet')continue;const sx=e.x+(e.dx||0)-g.scroll-d.fishSX;if(sx>-70&&sx<230&&!g.leap)ty=Math.max(ty,fy(e.h)+60)}
+  for(const e of g.E){if(e.gone||e.t!=='fnet')continue;const sx=e.x+(e.dx||0)-g.scroll-d.fishSX;if(sx>-e.w/2-40&&sx<e.w/2+260&&!g.leap)ty=d.yMin}
   for(const e of g.E){if(e.gone||e.t!=='rock'||e.root)continue;const sx=e.x-g.scroll-d.fishSX;if(sx>-80&&sx<160){if(e.top)ty=Math.max(ty,fy(e.h)+50);else ty=Math.min(ty,fy(1-e.h)-50)}}
   for(const e of g.E){if(e.gone||(e.t!=='jelly'&&e.t!=='octo'))continue;const sx=e.x-g.scroll-d.fishSX;if(sx>-60&&sx<150){const ey=T.entY(e,g.t);if(Math.abs(ty-ey)<90)ty=ey+(ey>(d.yMin+d.yMax)/2?-100:100)}}
   if(g.L.tide){const fl=d.yMax-T.tideH(g.t+.6)*(d.yMax-d.yMin);ty=Math.min(ty,fl-55)}
-  const B=g.boss;if(B&&B.k==='guide'&&!B.done){const z=d.yMin+(d.yMax-d.yMin)*.38;ty=Math.min(ty,z-50);const cx=d.fishSX+150;
-    if(B.t>0&&B.cd<=0&&B.reefs.some(r=>!r.ok&&!r.hit&&Math.abs(r.x-cx)<30)&&g.fish.y<z){T.tap(d.VW-12,d.yMax-6);taps++}}
-  ty=Math.max(d.yMin+40,Math.min(d.yMax-40,ty));
+  const B=g.boss;if(B&&B.k==='guide'&&!B.done){const z=fy(.46);ty=Math.min(ty,z-50);const cx=d.fishSX+150;
+    if(B.t>0&&B.reefs.some(r=>!r.ok&&!r.hit&&Math.abs(r.x-cx)<30)&&g.fish.y<z){T.tap(d.VW-12,d.yMax-6);taps++}}
+  ty=Math.max(ty===d.yMin?d.yMin:d.yMin+40,Math.min(d.yMax-40,ty));
   if(g.trap){if(fr%6==0)T.press();}else{ if(g.fish.y>ty)T.press();else T.release(); }
   T.update(1/60);fr++; if(fr>60*secs)break;}
- const g=T.G;return {mode,li,state:T.state,cause:g.cause,stars:K.SAVE[mode].st[li],m:Math.floor(g.scroll/60),pearls:g.pearls,life:g.life,got:Object.keys(g.caught).filter(k=>['coco','flyfish','mudcrab'].includes(k)).map(k=>k+':'+g.caught[k]).join(','),rest,taps,boss:g.boss?{n:g.boss.n,hp:g.boss.hp,tries:g.boss.tries||0}:null}}
+ const g=T.G;return {mode,li,state:T.state,cause:g.cause,stars:K.SAVE[mode].st[li],m:Math.floor(g.scroll/60),pearls:g.pearls,life:g.life,got:Object.keys(g.caught).filter(k=>['coco','flyfish','mudcrab'].includes(k)).map(k=>k+':'+g.caught[k]).join(','),rest,taps,leaps:g.leapN||0,boss:g.boss?{n:g.boss.n,hp:g.boss.hp,tries:g.boss.tries||0}:null}}
 """
 async def main():
     bad=0

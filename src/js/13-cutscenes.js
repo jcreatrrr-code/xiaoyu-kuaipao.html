@@ -59,6 +59,7 @@ function bgShore(t,gy,hy,o){
   for(let i=0;i<9;i++){const y=hy+1+(i*5)%(gy-hy-1),x=((i*23+t*(4+i%3))%(CW+8))-4;R(x,y,4,1,'#bfe6ff')}
   if(o.ice){for(let i=0;i<5;i++){const x=((i*29-t*1.5)%(CW+20)+CW+20)%(CW+20)-10;R(x,hy+3+(i*7)%(gy-hy-6),8+i%3*3,2,'#ffffff')}R(0,gy,CW,CH2-gy,'#e6f4fb');R(0,gy,CW,2,'#ffffff');return}
   R(0,gy,CW,CH2-gy,o.dusk?'#e0b080':'#f3d9a0');R(0,gy,CW,1,'#fff3d6');for(let i=0;i<14;i++)R((i*37)%CW,gy+3+(i*11)%30,2,1,'#d9b98a');
+  if(o.atoll){atollShore(t,gy,hy,o);return}
   for(let i=0;i<3;i++){R(4+i*6,hy+4,1,gy-hy-2,'#6b4226')}R(2,hy+4,18,2,'#8a5a2b');
   const hxp=Math.round(CW*.74);R(hxp-11,gy-15,23,15,'#fff3d6');for(let i=0;i<6;i++)R(hxp-13+i*2,gy-16-i,27-i*4,1,'#e0503f');R(hxp-3,gy-9,6,9,'#8a5a2b');R(hxp+5,gy-11,5,4,'#7fcbff');R(hxp-10,gy-11,5,4,'#7fcbff');
   R(hxp-6,gy-22,13,5,'#27406e');R(hxp-3,gy-21,5,3,'#ffa01f');R(hxp-5,gy-20,2,1,'#ffa01f');R(hxp+3,gy-20,1,1,'#ffffff')}
@@ -100,7 +101,7 @@ function drawCut(dt){
     if(PEOPLE[k]){y=yf==='d'?hy-2:yf==='w'?gy-5:gy+5;if(isSp&&!spk)spk=[k,x,y-18,fl];human(k,x,y-(talk&&Math.sin(t*14)>0?1:0),fl);if(yf==='w')R(x-8,gy-9,16,4,'#2f8fc4')}
     else{y=yf==='g'?gy:yf==='c'?gy-10:yf==='h'?hy+3:Math.round(gy*2*yf);if(typeof yf==='number'&&k!=='pendant')y+=Math.round(Math.sin(t*2+i*2)*1.5);if(talk)y-=Math.sin(t*14)>0?1:0;if(isSp&&!spk)spk=[k,x,y-(k==='whale'?12:k==='shark'?9:9),fl];SPR[k](x,y,fl,t)}});
   if(fxo.shake&&q.lt<.45)px.restore();
-  if(sc.night){px.fillStyle='rgba(8,14,44,.62)';px.fillRect(0,0,CW,CH2);const hxp=Math.round(CW*.74);R(hxp+5,gy-11,5,4,'#ffe27a');R(hxp-10,gy-11,5,4,'#ffe27a');for(let i=0;i<26;i++){const rx=((i*37+t*90)%(CW+20))-10,ry=((i*53+t*160)%CH2);R(rx,ry,1,3,'rgba(200,220,255,.5)')}
+  if(sc.night){px.fillStyle='rgba(8,14,44,.62)';px.fillRect(0,0,CW,CH2);const hxp=Math.round(CW*.74);if(sc.atoll)lhLamps(t,hy,sc);else{R(hxp+5,gy-11,5,4,'#ffe27a');R(hxp-10,gy-11,5,4,'#ffe27a')}for(let i=0;i<26;i++){const rx=((i*37+t*90)%(CW+20))-10,ry=((i*53+t*160)%CH2);R(rx,ry,1,3,'rgba(200,220,255,.5)')}
     if(sc.glow){const gx=Math.round(CW*.3),gy2=Math.round((hy+gy)/2),p=Math.round(Math.sin(t*3)*1);El(gx,gy2,9+p,3+p,'rgba(159,240,255,.35)');El(gx,gy2,5,2,'#9ff0ff');El(gx,gy2,2,1,'#ffffff')}
     if(Math.sin(t*1.7)>.985){R(0,0,CW,CH2,'rgba(255,255,255,.5)');if(!q.th){q.th=1;CSND.thunder()}}else q.th=0}
   if(spk&&fxo.em&&q.lt>.05){const bob=q.lt<.3?Math.round((.3-q.lt)*10):0,ex=spk[1]+7,ey=spk[2]-6-bob;R(ex-4,ey-5,9,9,'#ffffff');R(ex-5,ey-4,11,7,'#ffffff');R(ex-2,ey+4,2,2,'#ffffff');

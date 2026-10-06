@@ -25,7 +25,7 @@ async def main():
         await pg.click('[data-vol="1"]');await pg.wait_for_timeout(100);await scan('levels v1')
         await pg.goto(GAME);await pg.click('#bBook');await pg.wait_for_timeout(100)
         print('book:',await pg.evaluate("document.getElementById('bookProg').textContent"))
-        for bt in ['ing','dish','who','sea']:
+        for bt in ['fish','ing','dish','who','sea']:
             await pg.click(f'[data-bt={bt}]');await pg.wait_for_timeout(60)
             for cid in await pg.evaluate("[...document.querySelectorAll('#bookGrid [data-card]')].map(e=>e.dataset.card).filter(c=>['coco','flyfish','mudcrab','d52','d54','p_xiaofan','p_laoduo','p_ayao','s_12','s_13','s_14','s_15'].includes(c))"):
                 await pg.click(f'[data-card="{cid}"]');await pg.wait_for_timeout(40);await scan('book '+cid)
