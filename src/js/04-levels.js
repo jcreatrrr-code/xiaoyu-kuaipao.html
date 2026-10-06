@@ -73,10 +73,10 @@ function buildLevel(li,mode){
     g.E.push({t:'cp',x:cx})}
   if(L.goal.k==='rescue'||L.friends){const n=L.friends?L.friends[hard?1:0]:L.goal.n[hard?1:0]+(hard?2:1);for(let k=0;k<n;k++)g.E.push({t:'friend',x:900+(len-1800)*(k+.5)/n+g.gap()*.5,f:g.r(.3,.7)})}
   if(!hard&&(SAVE.simple.st[li]>0||SAVE.hard.st[li]>0)){let c=0;g.E=g.E.filter(e=>!((e.t==='net'||e.t==='wall')&&(c++%2===0)))}
-  if(L.nodes){const n=(L.goal.n?L.goal.n[hard?1:0]:2)+2,m=L.nodes.length;for(let k=0;k<n;k++)L.nodes.forEach((nk,q)=>g.E.push({t:'node',k:nk,x:800+((L.boss?len-1700:len)-1600)*(k+(q+.4)/m)/n,f:(k+q)%2?(nk==='grape'?.14:.9):(nk==='grape'?.86:.1),hp:NODE[nk].hp}))}
+  if(L.nodes){const n=(L.goal.n?L.goal.n[hard?1:0]:2)+2,m=L.nodes.length;for(let k=0;k<n;k++)L.nodes.forEach((nk,q)=>g.E.push({t:'node',k:nk,x:800+((L.boss?len-1700:len)-1600)*(k+(q+.4)/m)/n,f:NODE[nk].f!=null?NODE[nk].f:(k+q)%2?(nk==='grape'?.14:.9):(nk==='grape'?.86:.1),hp:NODE[nk].hp}))}
   if(L.boss){const bx=len-1500;g.E=g.E.filter(e=>e.x<bx-150);g.E.push({t:'boss',x:bx})}
   if(L.helpers)[['鲸婆婆','whale',.14],['墨墨','gold',.36],['大白','clear',.58],['石蟹','doors',.8]].forEach(h=>g.E.push({t:'help',x:len*h[2],who:h[0],k:h[1]}));
-  g.E.push({t:'fin',x:len});return g}
+  if(L.vol===2)v2Build(L,g);g.E.push({t:'fin',x:len});return g}
 function buildEndless(){
   const lv=x=>Math.floor(x/60/200);
   return{mode:'endless',r:rng((Math.random()*1e9)|0),x:700,i:0,E:[],last:'',

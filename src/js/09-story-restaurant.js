@@ -97,7 +97,7 @@ function playStory(lines,done){lines=lines.map(l=>{const t=tl(l[1]);return t===l
 $('sStory').onclick=e=>{if(!stQ)return;if(e.target.id==='stSkip')return;{const l=stQ.lines[stQ.i];if(stQ.n<l[1].length){stQ.n=l[1].length;stQ.k=-1;$('stText').textContent=l[1];return}stQ.i++}SFX.tap();
   if(stQ.i>=stQ.lines.length){const d=stQ.done;stQ=null;show('');d()}else stShow()};
 const seenLines=k=>STORY[k].filter(l=>l[1]!=='获得了鲸鱼结界。'&&l[1].indexOf('获得了潮音螺')<0&&l[1].indexOf('获得了《奇珍书》')<0);
-function launch(mode,li){const k='pre'+li,first=!SAVE.story[k];if(LV[li].tool&&!SAVE.tools[LV[li].tool]){toast(TOOLN[LV[li].tool][2],2.8);return}if(LV[li].dark&&first){SAVE.rusty={chisel:1,scissors:1};}if(LV[li].need==='banq'&&!SAVE.banq){playStory(STORY.banq,()=>{SAVE.story.banq=1;persist();startServe(1)});return}if(!first&&!SAVE.always){startGame(mode,li);return}
+function launch(mode,li){if(li===VOL1&&!SAVE.story.pro2){playStory(STORY.pro2,()=>{SAVE.story.pro2=1;persist();launch(mode,li)});return}const k='pre'+li,first=!SAVE.story[k];if(LV[li].tool&&!SAVE.tools[LV[li].tool]){toast(TOOLN[LV[li].tool][2],2.8);return}if(LV[li].dark&&first){SAVE.rusty={chisel:1,scissors:1};}if(LV[li].need==='banq'&&!SAVE.banq){playStory(STORY.banq,()=>{SAVE.story.banq=1;persist();startServe(1)});return}if(!first&&!SAVE.always){startGame(mode,li);return}
   playStory(first?STORY[k]:seenLines(k),()=>{SAVE.story[k]=1;if(li===3&&first)SAVE.inv.whale=(SAVE.inv.whale||0)+1;persist();startGame(mode,li)})}
 {let skT=0;const sk=$('stSkip'),off=()=>{clearTimeout(skT);sk.classList.remove('hold')};
  sk.addEventListener('pointerdown',()=>{sk.classList.add('hold');skT=setTimeout(()=>{off();if(stQ){const d=stQ.done;stQ=null;show('');SFX.tap();d()}},650)});
@@ -107,7 +107,7 @@ function showGallery(){$('galList').innerHTML=GAL.map(([k,n])=>SAVE.story[k]?`<b
 $('galList').onclick=e=>{const b=e.target.closest('[data-gal]');if(b){SFX.tap();playStory(seenLines(b.dataset.gal),showGallery)}};
 $('bStory').onclick=()=>{SFX.tap();showGallery()};
 const CTIP=['跟着珍珠走，先学会游。','沉船那边渔网多，被罩住了就快速连点。','深海看到红色水带，立刻游出去。','冰海的冰块会上下漂，看准空当再过。','黄色的墙别硬撞，带着结界才撞得开。','钟乳洞里发光的才是食材。盐花只取够用的。','遗迹的门认按钮。扇贝要等它张开。','海藻林里发绿、会眨眼的珍珠别碰。','逆潮海沟里，朝箭头的反方向用力。','沉灯之城的光圈会来回扫，等它移开再过。','带着潮心的时候，转弯要早、要缓，它跟在你身后。','最后一程，大家都会来帮你。'];
-function conchHint(){const n=chN();if(n>=LV.length)return'第一卷走完了。把小馆照看好——南方的那张海图，我也在看。';const L=LV[n];
+function conchHint(){const n=chN();if(n>=LV.length)return'眼下能去的海都去过了。照看好船上的小馆，后面的海图还没亮。';const L=LV[n];
   if(L.tool&&!SAVE.tools[L.tool])return`下一站是${L.name}。先去墨墨那里买${TOOLN[L.tool][1]}，没有它办不成事。`;
   if(!DISH.some(d=>unlocked(d)&&canMake(d,SAVE.fish))&&SAVE.wallet<60)return'珍珠不够的时候，就出海多捕几条鱼，回来开店营业。';
   return`${L.name}：`+CTIP[n]}
@@ -123,9 +123,10 @@ for(const m of['simple','hard'])for(const a of['st','s4'])while(SAVE[m][a].lengt
 SAVE.tools=SAVE.tools||{};SAVE.rusty=SAVE.rusty||{};
 const hasTool=t=>SAVE.tools[t]||SAVE.rusty[t]>0;
 const TOOLS=[{id:'lamp',ic:'🔦',n:'探洞灯',d:'照亮钟乳洞，没有它进不了洞',p:600},{id:'chisel',ic:'⛏️',n:'凿子',d:'凿下月光盐花',p:400},{id:'scissors',ic:'✂️',n:'海葡萄剪',d:'剪下海葡萄',p:300},{id:'knife',ic:'🔪',n:'贝刀',d:'撬开潮汐扇贝，没有它完成不了遗迹的任务',p:350,ch:6},
- {id:'tongs',ic:'🥢',n:'长夹子',d:'夹起海藻迷林里的海胆',p:400,ch:7},{id:'trap',ic:'🧺',n:'虾笼',d:'捞住逆潮海沟的逆潮虾',p:400,ch:8},{id:'lure',ic:'🏮',n:'诱鱼灯',d:'引出沉灯之城的鱿鱼',p:450,ch:9},{id:'bottle',ic:'🫙',n:'琉璃瓶',d:'接住潮心井的潮心露',p:500,ch:10}];
-const TOOLN={lamp:['🔦','探洞灯','洞里一片漆黑，先去墨墨的杂货铺买探洞灯'],knife:['🔪','贝刀','遗迹里的扇贝要用贝刀撬，先去墨墨的杂货铺买一把'],tongs:['🥢','长夹子','海胆扎手，先去墨墨的杂货铺买长夹子'],trap:['🧺','虾笼','逆潮虾要用虾笼，先去墨墨的杂货铺买一个'],lure:['🏮','诱鱼灯','鱿鱼要用诱鱼灯引出来，先去墨墨的杂货铺买一盏'],bottle:['🫙','琉璃瓶','潮心露要用琉璃瓶接，先去墨墨的杂货铺买一个']};
-const hardOpen=()=>SAVE.simple.st.slice(0,LV.length).every(x=>x>0),endOpen=()=>SAVE.simple.st[0]>0||SAVE.hard.st[0]>0;
+ {id:'tongs',ic:'🥢',n:'长夹子',d:'夹起海藻迷林里的海胆',p:400,ch:7},{id:'trap',ic:'🧺',n:'虾笼',d:'捞住逆潮海沟的逆潮虾',p:400,ch:8},{id:'lure',ic:'🏮',n:'诱鱼灯',d:'引出沉灯之城的鱿鱼',p:450,ch:9},{id:'bottle',ic:'🫙',n:'琉璃瓶',d:'接住潮心井的潮心露',p:500,ch:10},
+ {id:'scoop',ic:'🥅',n:'抄网',d:'接住跳出水面的飞鱼，没有它进不了飞鱼水道',p:450,ch:13},{id:'hook',ic:'🪝',n:'蟹钩',d:'从根缝里勾出泥蟹，没有它进不了红树林',p:500,ch:14}];
+const TOOLN={lamp:['🔦','探洞灯','洞里一片漆黑，先去墨墨的杂货铺买探洞灯'],knife:['🔪','贝刀','遗迹里的扇贝要用贝刀撬，先去墨墨的杂货铺买一把'],tongs:['🥢','长夹子','海胆扎手，先去墨墨的杂货铺买长夹子'],trap:['🧺','虾笼','逆潮虾要用虾笼，先去墨墨的杂货铺买一个'],lure:['🏮','诱鱼灯','鱿鱼要用诱鱼灯引出来，先去墨墨的杂货铺买一盏'],bottle:['🫙','琉璃瓶','潮心露要用琉璃瓶接，先去墨墨的杂货铺买一个'],scoop:['🥅','抄网','飞鱼要用抄网接，先去墨墨的杂货铺买一张'],hook:['🪝','蟹钩','泥蟹躲在根缝里，先去墨墨的杂货铺买一把蟹钩']};
+const hardOpen=()=>SAVE.simple.st.slice(0,VOL1).every(x=>x>0),endOpen=()=>SAVE.simple.st[0]>0||SAVE.hard.st[0]>0;
 const UNL={d1:[0,1],d2:[0,1],d25:[0,1],d3:[0,2],d10:[0,2],d11:[0,3],d12:[0,3],
  d14:[1,1],d4:[1,1],d33:[1,2],d15:[1,2],d5:[1,3],d28:[1,3],d13:[1,3],d32:[1,4],d16:[1,4],
  d17:[2,2],d27:[2,2],d7:[2,3],d26:[2,3],d19:[2,3],d6:[2,4],d34:[2,4],d20:[2,4],d18:[2,4],d8:[2,5],d21:[2,5],d22:[2,5],

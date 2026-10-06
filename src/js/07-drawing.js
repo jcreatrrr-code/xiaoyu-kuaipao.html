@@ -10,6 +10,7 @@ function drawBG(th,sc,t){
   if(th===6){ctx.fillStyle='rgba(190,215,200,.35)';const o=sc*.25;for(let n=Math.floor(o/260);n*260-o<VW+80;n++){const x=n*260-o,h=180+hash(n+3)*220;ctx.fillRect(x,PH-170-h,34,h);ctx.fillRect(x-8,PH-170-h,50,14);if(hash(n)>.5)ctx.fillRect(x-8,PH-184,50,14)}}
   if(th===5){ctx.fillStyle='#6a649c';const o=sc*.3;for(let n=Math.floor(o/170);n*170-o<VW+120;n++){const x=n*170-o,h=70+hash(n+5)*130;ctx.beginPath();ctx.moveTo(x-46,0);ctx.lineTo(x,h);ctx.lineTo(x+46,0);ctx.fill()}}
   if(th===3){ctx.fillStyle='rgba(255,255,255,.55)';const o=sc*.2;for(let n=Math.floor(o/220);n*220-o<VW+120;n++){const x=n*220-o,h=50+hash(n)*90;ctx.beginPath();ctx.moveTo(x-70,0);ctx.lineTo(x,h);ctx.lineTo(x+70,0);ctx.fill()}}
+  if(th>=12)v2BG(th,sc,t);
   hills(T.far,sc*.15,PH-170,70,.004,.011);
   if(th===1){const o=sc*.22,n=Math.floor((o+300)/1500),x=n*1500-o+400,b=PH-190;ctx.fillStyle=T.mid;ctx.beginPath();ctx.moveTo(x-170,b-70);ctx.lineTo(x+190,b-110);ctx.lineTo(x+150,b+40);ctx.lineTo(x-130,b+40);ctx.fill();ctx.fillRect(x-10,b-250,12,170);ctx.fillRect(x-70,b-200,130,9)}
   hills(T.mid,sc*.4,PH-112,48,.006,.017);
@@ -63,7 +64,7 @@ function drawShark(x,y,t){
   ctx.strokeStyle='#33506e';ctx.lineWidth=5;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-76,-28);ctx.lineTo(-46,-38);ctx.stroke();
   ctx.lineWidth=3;for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-22+i*11,-14);ctx.lineTo(-26+i*11,8);ctx.stroke()}
   ctx.restore()}
-function drawRock(sx,e,T){
+function drawRock(sx,e,T){if(e.root)return drawRoot(sx,e,T);
   const hw=e.w/2;ctx.fillStyle=T.rock;ctx.beginPath();
   if(e.top){const y=fy(e.h);ctx.moveTo(sx-hw-12,-10);ctx.bezierCurveTo(sx-hw,y*.6,sx-hw+4,y-10,sx,y);ctx.bezierCurveTo(sx+hw-4,y-10,sx+hw,y*.6,sx+hw+12,-10)}
   else{const y=fy(1-e.h),b=yMax+46;ctx.moveTo(sx-hw-14,b);ctx.bezierCurveTo(sx-hw,lerp(b,y,.6),sx-hw+4,y+10,sx,y);ctx.bezierCurveTo(sx+hw-4,y+10,sx+hw,lerp(b,y,.6),sx+hw+14,b)}
@@ -89,6 +90,7 @@ function drawEntity(e,sx,y,g,T){const t=g.t;switch(e.t){
   case'pearl':{const gr=ctx.createRadialGradient(sx-4,y-4,1,sx,y,14);gr.addColorStop(0,'#fff');gr.addColorStop(1,'#ffc9e6');ctx.fillStyle=gr;ctx.shadowColor='#fff';ctx.shadowBlur=10;circ(sx,y,13);ctx.shadowBlur=0;
     const tw=(Math.sin(t*5+e.x)+1)/2;ctx.fillStyle=`rgba(255,255,255,${tw})`;ctx.fillRect(sx+7,y-14,2,8);ctx.fillRect(sx+4,y-11,8,2)}break;
   case'rock':drawRock(sx,e,T);break;
+  case'fnet':drawFnet(e,sx,g,t);break;
   case'octo':drawOcto(sx,y,octoR(e,t),octoWarn(e,t),t,e);break;
   case'jelly':drawJelly(sx,y,t,e);break;
   case'net':if(!e.hold)drawNet(sx,y,t);break;
@@ -126,11 +128,12 @@ function drawEntity(e,sx,y,g,T){const t=g.t;switch(e.t){
     ctx.fillStyle='#fff';ctx.font=`${30*Math.max(1,U*.8)}px ${FONT}`;ctx.textAlign='center';ctx.fillText(tl('终点'),sx-44,yMin+44);ctx.restore()}break;
 }}
 function drawNode(e,sx,y,t){ctx.save();ctx.translate(sx,y);ctx.shadowColor=e.k==='salt'?'#bfe6ff':'#9fffc0';ctx.shadowBlur=22+Math.sin(t*4+e.x)*6;
+  const own=drawNode2(e,t);
   if(e.k==='scallop'){const op=nodeOpen(e,t),a=op?.55:.06,up=e.f<.5?-1:1;ctx.shadowBlur=op?22:0;ctx.scale(1,up);
     for(const sg of[1,-1]){ctx.save();ctx.rotate(-sg*a*.9+(sg<0?Math.PI:0)*0);ctx.scale(1,sg);ctx.fillStyle=sg>0?'#ffb38a':'#ffc9a8';ctx.beginPath();ctx.moveTo(-26,0);ctx.quadraticCurveTo(0,-30-(sg>0?0:0),26,0);ctx.closePath();ctx.fill();ctx.strokeStyle='#e0784a';ctx.lineWidth=2;for(let i=-2;i<=2;i++){ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(i*9,-17+Math.abs(i)*3);ctx.stroke()}ctx.restore()}
     if(op){ctx.fillStyle='#fff7ef';circ(0,0,8);ctx.fillStyle='#ffe0c0';circ(0,0,4)}ctx.shadowBlur=0;ctx.scale(1,up);
     if(op){ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=2.5;ctx.setLineDash([8,7]);ctx.lineDashOffset=t*30;ctx.beginPath();ctx.arc(0,0,40+Math.sin(t*5)*2,0,TAU);ctx.stroke();ctx.setLineDash([])}ctx.restore();return}
-  if(e.k==='urchin'){ctx.strokeStyle='#3a2a70';ctx.lineWidth=3;ctx.lineCap='round';for(let i=0;i<14;i++){const a=i*TAU/14+Math.sin(t*2+i)*.05;ctx.beginPath();ctx.moveTo(Math.cos(a)*10,Math.sin(a)*10);ctx.lineTo(Math.cos(a)*27,Math.sin(a)*27);ctx.stroke()}ctx.fillStyle='#7a5ad0';circ(0,0,15);ctx.fillStyle='#b9a0f0';circ(-4,-5,5)}
+  if(own){}else if(e.k==='urchin'){ctx.strokeStyle='#3a2a70';ctx.lineWidth=3;ctx.lineCap='round';for(let i=0;i<14;i++){const a=i*TAU/14+Math.sin(t*2+i)*.05;ctx.beginPath();ctx.moveTo(Math.cos(a)*10,Math.sin(a)*10);ctx.lineTo(Math.cos(a)*27,Math.sin(a)*27);ctx.stroke()}ctx.fillStyle='#7a5ad0';circ(0,0,15);ctx.fillStyle='#b9a0f0';circ(-4,-5,5)}
   else if(e.k==='shrimp'){ctx.rotate(Math.sin(t*4+e.x)*.25);ctx.strokeStyle='#ff8f8a';ctx.lineWidth=11;ctx.lineCap='round';ctx.beginPath();ctx.arc(0,4,15,Math.PI*1.05,Math.PI*2.2);ctx.stroke();ctx.fillStyle='#d0504a';circ(13,-2,3);ctx.strokeStyle='#d0504a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(15,-6);ctx.lineTo(30,-18);ctx.moveTo(15,-4);ctx.lineTo(32,-8);ctx.stroke()}
   else if(e.k==='squid'){ctx.fillStyle='#f6ecfa';ctx.beginPath();ctx.moveTo(0,-26);ctx.lineTo(13,2);ctx.lineTo(-13,2);ctx.closePath();ctx.fill();ctx.strokeStyle='#d8c0e6';ctx.lineWidth=4;ctx.lineCap='round';for(let i=-2;i<=2;i++){ctx.beginPath();ctx.moveTo(i*5,3);ctx.quadraticCurveTo(i*5+Math.sin(t*5+i)*5,14,i*6,22);ctx.stroke()}ctx.fillStyle='#1b2a41';circ(-5,-4,2.5);circ(5,-4,2.5)}
   else if(e.k==='dew'){ctx.fillStyle='#9ff0ff';ctx.beginPath();ctx.moveTo(0,-24);ctx.bezierCurveTo(18,0,14,18,0,18);ctx.bezierCurveTo(-14,18,-18,0,0,-24);ctx.fill();ctx.fillStyle='#ffffff';circ(-4,4,4)}
@@ -144,6 +147,7 @@ function drawWorld(){
   for(const s of g.sharks)if(s.ph===0){const a=.16+.14*Math.sin(t*14);ctx.fillStyle=`rgba(255,60,60,${a})`;ctx.fillRect(0,s.y-58,VW,116);
     ctx.fillStyle='#5f7fa3';const fxx=VW-30-Math.sin(t*10)*8;ctx.beginPath();ctx.moveTo(fxx-34,s.y+26);ctx.lineTo(fxx+4,s.y-36);ctx.lineTo(fxx+26,s.y+26);ctx.fill()}
   for(const e of g.E){if(e.gone)continue;const sx=e.x+(e.dx||0)-g.scroll;if(sx<-200||sx>VW+200)continue;drawEntity(e,sx,entY(e,t),g,T)}
+  if(g.L&&g.L.tide)drawTide(g,t);v2Surface(g,t);
   if(g.boss&&!g.boss.done&&g.boss.k!=='feed')bossDraw2(g.boss,t);
   if(g.boss&&g.boss.done&&g.boss.k==='feed'){const B=g.boss;if(B.fedAt==null)B.fedAt=t;const k=t-B.fedAt;if(k<3.4){const[bx,by]=bossPos();
     let x=bx,y=by,rot=0,sx=1,sy=1;if(k<1.3){const p=Math.sin(k*9)*.06;sx=1.08+p;sy=1.18-p;y+=Math.sin(k*5)*6}else if(k<2.1){rot=-(k-1.3)/.8*TAU;sy=1.1}else{const q=k-2.1;sx=-1;x+=q*q*520;y-=q*30}
