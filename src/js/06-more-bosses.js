@@ -189,6 +189,6 @@ function finish(){
   if(!ok){g.cause='goal';showEnd(false);return}
   const prev=SAVE[g.mode].st[g.li]>0,s2=g.pearls>=L.extra[hi],s3=g.life>=(hi?1:2),s4=prev&&g.noDmg&&s2;
   if(g.noDmg)SAVE.stat.nodmg=1;const sv=SAVE[g.mode];sv.st[g.li]=Math.max(sv.st[g.li],1+s2+s3);if(s4)sv.s4[g.li]=1;persist();SFX.win();
-  const end0=()=>showEnd(true,[1,s2,s3,s4],prev),k='post'+g.li,end=()=>{if(g.li===VOL1+11&&!SAVE.feast2&&!SAVE.story.feast2){state='over';hud.hidden=true;startFeast2()}else end0()};
+  const end0=()=>showEnd(true,[1,s2,s3,s4],prev),k='post'+g.li,end=()=>{if(g.li===VOL1+11&&!SAVE.feast2&&!SAVE.story.feast2){state='over';hud.hidden=true;startFeast2()}else if(g.li===VOL1+1&&!SAVE.story.fish0){state='over';hud.hidden=true;playStory(STORY.fish0,()=>{SAVE.story.fish0=1;persist();end0()})}else end0()};
   if(!SAVE.story[k]||SAVE.always){state='over';hud.hidden=true;$('toast').className='';playStory(SAVE.story[k]?seenLines(k):STORY[k],()=>{SAVE.story[k]=1;if(g.li===10)SAVE.conch=1;persist();end()})}else end()}
 

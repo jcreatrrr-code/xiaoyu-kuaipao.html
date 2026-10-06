@@ -100,7 +100,7 @@ for(const k in TLC)delete TLC[k];
 "商会的灯塔底下，光会把鱼往上拽。":"Under the Guild's lighthouse, the light pulls fish upward.",
 "灯下成千上万条鱼围着光打转，回不了家。":"Under the lamp, thousands of fish circle the light and can't get home.",
 "龙虾笼":"Lobster pot","放在石缝边引出龙虾，没有它进不了火山岛":"Set it by rock cracks to lure out lobsters. Needed for Volcano Isle",
-"钓竿":"Fishing rod","一竿一条钓鲣鱼，没有它进不了灯塔环":"Catch skipjack one at a time. Needed for Lighthouse Ring",
+"钓竿":"Fishing rod","一竿一条钓鲣鱼，没有它进不了灯塔环。船尾钓鱼时也用得上：收线更快，线能多绷一会儿":"Catch skipjack one at a time. Needed for Lighthouse Ring. At the stern it also reels faster and holds a tight line longer",
 "龙虾躲在石缝里，先去墨墨的杂货铺买一个龙虾笼":"Lobsters hide in rock cracks. Buy a lobster pot at Momo's shop first",
 "鲣鱼要用钓竿钓，先去墨墨的杂货铺买一根":"Skipjack need a fishing rod. Buy one at Momo's shop first"};
  for(const k in EN3)if(!DICT[k]){const v=EN3[k];DICT[k]=[v,v,v,v]}}

@@ -40,10 +40,11 @@ function drawShopScene(dt){
 function frame(ts){
   const dt=Math.min(.034,(ts-last)/1000||0);last=ts;musTick();
   if(G){if(state==='play'||state==='dying')update(dt);if(G){drawWorld();if(state==='play'||state==='dying')updateHUD()}}
-  if(!G){menuT+=dt;drawBG(0,menuT*45,menuT);const y=VT*.8+Math.sin(menuT*1.4)*18;
+  if(!G&&!FS){menuT+=dt;drawBG(0,menuT*45,menuT);const y=VT*.8+Math.sin(menuT*1.4)*18;
     drawFish(VW*.5,y,Math.sin(menuT*1.4+1.5)*.15,menuT,{s:1.5,...skin()});drawFish(VW*.5-110,y+34,Math.sin(menuT*1.4+1)*.15,menuT+1,{s:.7,c0:'#bff0ff',c1:'#56b8f0',c2:'#2f8fd0'})}
   if(!stQ&&$('sShop').classList.contains('on'))drawShopScene(dt);
-  if(stQ)drawCut(dt);else ambOff();if(SV&&!SV.over)svTick(dt*(SAVE.spd||1));
+  if(FS&&!stQ)fishFrame(dt);
+  if(stQ)drawCut(dt);else if(!FS)ambOff();if(SV&&!SV.over)svTick(dt*(SAVE.spd||1));
   requestAnimationFrame(frame)}
 const _rm=refreshMenu;refreshMenu=()=>{_rm();$('bBook').classList.toggle('hasNew',typeof DEX!=='undefined'&&DEX.some(c=>!c.hid||c.got()?dexNew(c):false));$('bDev').hidden=!SAVE.dev;$('devPause').hidden=!SAVE.dev;$('bConch').hidden=!SAVE.conch;$('bBook').hidden=!SAVE.story.post0;$('bAlways').textContent='进关剧情：'+(SAVE.always?'每次都播':'只播一次');$('bMusic').textContent='音乐：'+(SAVE.music===0?'关':'开');const h=hardOpen(),e=endOpen(),hb=document.querySelector('[data-mode=hard]'),eb=document.querySelector('[data-mode=endless]');
   hb.classList.toggle('locked',!h);eb.classList.toggle('locked',!e);$('hardSub').textContent=h?'挑战极限，成为海底高手！':'🔒 通关普通模式全部关卡后解锁';if(!e)$('bestTxt').textContent='🔒 通关第 1 关后解锁'};

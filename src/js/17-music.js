@@ -98,7 +98,7 @@ function mStep(tr,step,t,e8,sparse,tense){
   if(!sparse){if(tr.tom&&(pos===0||pos===5||pos===6))mTom(t);if(tr.arp)mNote(tr.root+12+ch[(pos+1)%3],t+e8/2,e8*.45,'triangle',.022);if(tr.drip&&pos===6&&bar%2===1)mNote(tr.root+36+ch[(bar>>1)%3],t,e8*1.4,'sine',.035)}
   const tok=seq[i];if(tok!=='.'&&tok!=='-'&&!(sparse&&bar%4>=2)){let n=1;while(n<8&&seq[(i+n)%seq.length]==='-')n++;
     const m=tr.root+tr.mo+ +tok;if(tr.bell){mNote(m,t,e8*n*1.6,'sine',.1);mNote(m+12,t,e8*.8,'sine',.03)}else if(tr.pluck){mNote(m,t,e8*Math.min(n,2)*.55,'square',.035);mNote(m,t,e8*n*.8,'triangle',.07)}else{mNote(m,t,e8*n*1.05,'triangle',.1);mNote(m,t,e8*n*.9,'sine',.04)}}}
-function musWant(){if(G&&G.boss&&!G.boss.done&&G.boss.k==='team'&&state!=='over')return null;if(stQ){const c=SCN[stQ.lines[stQ.i][2]]||{};return c.night?null:c.bg==='sea'?'lv'+c.i:c.bg==='diner'?'kit':'menu'}if(G)return state==='over'?null:'lv'+G.theme;const on=document.querySelector('.scr.on');return on&&(on.id==='sKit'||on.id==='sServe')?'kit':'menu'}
+function musWant(){if(FS&&!stQ)return'fish';if(G&&G.boss&&!G.boss.done&&G.boss.k==='team'&&state!=='over')return null;if(stQ){const c=SCN[stQ.lines[stQ.i][2]]||{};return c.night?null:c.bg==='sea'?'lv'+c.i:c.bg==='diner'?'kit':'menu'}if(G)return state==='over'?null:'lv'+G.theme;const on=document.querySelector('.scr.on');return on&&(on.id==='sKit'||on.id==='sServe')?'kit':'menu'}
 function musTick(){
   if(!AC||!MUS.out||AC.state!=='running')return;
   if(--MUS.chk<=0){MUS.chk=12;const w=SAVE.music===0?null:musWant();if(w!==MUS.cur){MUS.cur=w;MUS.step=0;MUS.next=AC.currentTime+.25}
