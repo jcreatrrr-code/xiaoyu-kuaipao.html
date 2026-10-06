@@ -26,19 +26,22 @@ async def main():
         if r['served']>=9 or r['staff']!='waiter,chef':ok=False;print('  !! staff alone should not win the feast')
         # 章鱼罐
         await pg.add_init_script("(()=>{window.__cjk=new Set();const P=CanvasRenderingContext2D.prototype,o=P.fillText;P.fillText=function(s,...a){if(typeof s==='string'&&/[\\u3400-\\u9fff]/.test(s))window.__cjk.add(s);return o.call(this,s,...a)}})()")
-        for lang in ['zh','en']:
-            await pg.goto(GAME);await pg.wait_for_timeout(300)
-            res=await pg.evaluate("""async lang=>{const T=window.__T,K=window.__K;K.SAVE.lang=lang;K.SAVE.tools.opot=1;T.startGame('simple',21);const g=T.G;g.started=true;g.inv=1e9;
+        POT="""async ([lang,mode])=>{const T=window.__T,K=window.__K;K.SAVE.lang=lang;K.SAVE.tools.opot=1;T.startGame('simple',21);const g=T.G;g.started=true;g.inv=1e9;
               const e=g.E.find(e=>e.t==='node'&&e.k==='tako');g.scroll=e.x-T.dims().fishSX-60;T.update(1/60);
               const sx=e.x-g.scroll,y=T.entY(e,g.t),r=document.querySelector('canvas').getBoundingClientRect(),S=T.dims().S;window.__tap(r.left+sx*S,r.top+y*S);
-              const log=[];const c=()=>g.tcap?g.tcap.s:'none';log.push(c());
-              const sc0=g.scroll;T.potgo(0);log.push(c());T.potgo(2);log.push(c());
-              for(let i=0;i<30;i++)T.update(1/60);T.potgo(-1);log.push(c()+':'+g.tcap.w.toFixed(2));
-              for(let i=0;i<200&&g.tcap&&g.tcap.s!==2;i++){T.update(1/60);await new Promise(r=>requestAnimationFrame(r))}log.push(c());
-              await new Promise(r=>setTimeout(r,120));
-              const frozen=Math.abs(g.scroll-sc0)<1;T.potgo(0);log.push(c());return {log,caught:g.caught.tako||0,gone:!!e.gone,frozen}}""",lang)
-            print(lang,'pot:',res)
-            if res['log']!=[0,0,1,'1:0.00',2,'none'] or res['caught']!=1 or not res['frozen']:ok=False;print('  !! octopus pot steps wrong')
+              const c=()=>g.tcap?g.tcap.s:'none',log=[c()],sc0=g.scroll,fr=async n=>{for(let i=0;i<n;i++){T.update(1/60);await new Promise(r=>requestAnimationFrame(r))}};
+              if(mode==='wrong0'){T.potgo(0);log.push(c())}
+              else{T.potgo(2);log.push(c());
+                if(mode==='rush'){await fr(10);T.potgo(-1);log.push(c())}
+                else{for(let i=0;i<200&&g.tcap&&g.tcap.s!==2;i++)await fr(1);log.push(c());const frozen=Math.abs(g.scroll-sc0)<1;
+                  if(mode==='slow'){for(let i=0;i<300&&g.tcap;i++)T.update(1/60);log.push(c())}else if(mode==='wrong2'){T.potgo(2);log.push(c())}else{T.potgo(0);log.push(c());log.push(frozen)}}}
+              const ink=+(g.ink||0).toFixed(1);await fr(160);return {log,caught:g.caught.tako||0,gone:!!e.gone,ink,inkAfter:+(g.ink||0).toFixed(1)}}"""
+        want={'ok':([0,1,2,'none',True],1,0),'wrong0':([0,'none'],0,2.5),'rush':([0,1,'none'],0,2.5),'slow':([0,1,2,'none'],0,2.5),'wrong2':([0,1,2,'none'],0,2.5)}
+        for lang in ['zh','en']:
+            for mode,(lg,ca,ink) in want.items():
+                await pg.goto(GAME);await pg.wait_for_timeout(250)
+                res=await pg.evaluate(POT,[lang,mode]);print(lang,mode,res)
+                if res['log']!=lg or res['caught']!=ca or not res['gone'] or (ink and not(2.0<=res['ink']<=2.5)) or res['inkAfter']>0:ok=False;print('  !! octopus pot',mode,'wrong')
         bad=[s for s in await pg.evaluate("[...window.__cjk]") if s!='小鱼快跑']
         print('en canvas cjk:',bad[:5])
         # 熔岩海岸：火山喷发

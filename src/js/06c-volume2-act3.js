@@ -29,7 +29,7 @@ Object.assign(PAT,{
 const a3SlY=(e,xr)=>{const p=e.pts;if(xr<=0)return p[0][1];for(let i=0;i<p.length-1;i++)if(xr<=p[i+1][0]){const k=(xr-p[i][0])/(p[i+1][0]-p[i][0]);return lerp(p[i][1],p[i+1][1],k)}return p[p.length-1][1]};
 const a3Pd=(e,sx)=>{const p=clamp(1-(sx-fishSX)/(VW*.85),0,1);return e.h0+(e.h1-e.h0)*(1-(1-p)*(1-p))};
 /* 熔岩海岸：火山隔几秒喷一次，震屏、泛红，前方连着砸下几块熔岩 */
-function a3Tick(g,dt){if(!g.L||g.L.theme!==20||g.boss)return;const hd=g.mode!=='simple';g.erF=Math.max(0,(g.erF||0)-dt*1.6);
+function a3Tick(g,dt){if(g.ink>0)g.ink-=dt;if(!g.L||g.L.theme!==20||g.boss)return;const hd=g.mode!=='simple';g.erF=Math.max(0,(g.erF||0)-dt*1.6);
   if(g.erT==null)g.erT=3;g.erT-=dt;if(g.erT>0||g.t<2)return;g.erT=(hd?3.6:5.5)+Math.random()*2;g.erF=1;g.shake=Math.max(g.shake,.45);SFX.boom();
   if(!g.tips.erupt){g.tips.erupt=1;toast('火山喷发了！看清海面上的黑影，一块接一块躲开',2.6,1)}
   const n=hd?3+(Math.random()<.5?1:0):2,x0=g.scroll+fishSX+g.speed*(LAVA.W()+.3*LAVA.fall)+60;
@@ -140,21 +140,23 @@ function lightHud(B,t){const g=G,o=LT.geo(),n=B.L.length,hd=g.mode==='hard',L=Ma
   ctx.restore()}
 cv.addEventListener('pointermove',e=>{const B=G&&G.boss;if(state==='play'&&B&&B.k==='light'&&!B.done&&B.t>=0&&e.buttons)lightPt(e.clientX,e.clientY,false)});
 
-/* 章鱼罐：朝下点沉罐子 → 别动，等章鱼钻进去 → 朝上点提起来 */
+/* 章鱼罐：朝下点沉罐子 → 别动，等章鱼钻进去 → 朝上点提起来；只有一次机会，错一步章鱼就喷墨逃走 */
 function a3PotStart(g,e){const hd=g.mode!=='simple';g.tcap={e,s:0,w:0,W:hd?2.2:1.6,win:0,Wn:hd?1:1.4,ok:0};g.fish.vy=0;e.inPot=1;SFX.tap();
-  if(!g.tips.tcap){g.tips.tcap=1;toast('用章鱼罐：先朝下点，把罐子沉下去；别乱点，等它钻进去；再朝上点，把罐子提起来',4,1)}}
+  if(!g.tips.tcap){g.tips.tcap=1;toast('章鱼罐只有一次机会：先朝下点沉罐子，别乱点等它钻进去，再朝上点提起来。错一步，它就喷你一脸墨跑掉',4.5,1)}}
 function a3PotUpd(g,dt){const c=g.tcap;g.fish.vy=0;g.inv=Math.max(g.inv,.2);c.ok=Math.max(0,c.ok-dt);
   if(c.s===1){c.w+=dt;if(c.w>=c.W){c.s=2;c.win=c.Wn;SFX.shield()}}
-  else if(c.s===2){c.win-=dt;if(c.win<=0){c.s=1;c.w=0;SFX.hit();a3PotSay(g,'它从罐子里溜出来了，再等等','#ffb0a0')}}}
+  else if(c.s===2){c.win-=dt;if(c.win<=0)a3PotFail(g,'提慢了！章鱼喷了你一脸墨')}}
+function a3PotFail(g,txt){const e=g.tcap.e,sx=e.x-g.scroll,y=entY(e,g.t);g.tcap=null;e.inPot=0;e.gone=1;g.combo=0;SFX.hit();g.shake=.35;burst(sx,y,'#14141e',24);g.inkT=txt;
+  g.ink=2.5;g.inkB=Array.from({length:9},(_,i)=>[VW*(.18+.64*Math.random()),yMin+(yMax-yMin)*(.15+.7*Math.random()),(70+Math.random()*60)*Math.max(1,VW/520)])}
 function a3PotSay(g,txt,col){const e=g.tcap.e;ftext(txt,e.x-g.scroll-60,entY(e,g.t)-70,col||'#fff')}
 function a3PotTap(cx,cy){const g=G,c=g.tcap;if(!c)return;const r=cv.getBoundingClientRect(),ux=(cx-r.left)/S-fishSX,uy=(cy-r.top)/S-g.fish.y,d=Math.hypot(ux,uy);
   let di=-1;if(d>24){for(let i=0;i<4;i++){const D=CAPD[i];if((ux*D[0]+uy*D[1])/d>.64)di=i}}a3PotGo(g,di)}
 function a3PotGo(g,di){const c=g.tcap;if(!c)return;const e=c.e;
-  if(c.s===0){if(di===2){c.s=1;c.w=0;SFX.tap();a3PotSay(g,'罐子沉下去了，别动……','#fff')}else{g.shake=.2;SFX.hit();a3PotSay(g,'先朝下点，把罐子沉下去','#ffe27a')}return}
-  if(c.s===1){c.w=0;g.shake=.15;SFX.hit();a3PotSay(g,'别急！它被吓得缩回去了','#ffb0a0');return}
+  if(c.s===0){if(di===2){c.s=1;c.w=0;SFX.tap();a3PotSay(g,'罐子沉下去了，别动……','#fff')}else a3PotFail(g,'方向错了！章鱼喷了你一脸墨');return}
+  if(c.s===1){a3PotFail(g,'太心急！章鱼喷了你一脸墨');return}
   if(di===0){g.tcap=null;e.inPot=0;e.gone=1;const f=FISH[e.k],sx=e.x-g.scroll,y=entY(e,g.t);g.caught[e.k]=(g.caught[e.k]||0)+1;g.nCaught++;g.bonus+=30;SFX.save();burst(sx,y,f.c[1],16);ftext('捕获 '+f.n+'！',sx-40,y-40,'#fff');
     if(e.shiny){SAVE.dex['x_'+e.k]=(SAVE.dex['x_'+e.k]||0)+1;persist();setTimeout(()=>toast('是金鳞'+f.n+'！《奇珍书》多了一张隐藏卡',3.4),700)}}
-  else{c.s=1;c.w=0;g.shake=.2;SFX.hit();a3PotSay(g,'方向不对，它溜出来了','#ffb0a0')}}
+  else a3PotFail(g,'方向错了！章鱼喷了你一脸墨')}
 function a3PotDraw(g,t){const c=g.tcap,e=c.e,F=g.fish,ox=e.x-g.scroll,oy=entY(e,t),k=c.s===1?c.w/c.W:c.s===2?1:0,py=c.s===0?oy-70+Math.sin(t*3)*4:oy;ctx.save();
   ctx.strokeStyle='rgba(240,220,180,.8)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(fishSX+10,F.y);ctx.quadraticCurveTo((fishSX+ox)/2,Math.min(F.y,py)-30,ox,py-26);ctx.stroke();
   if(c.s>0){const q=1-k*.85;ctx.save();ctx.translate(ox+18*k,oy+6*k);ctx.scale(q,q);a3Node(e,t);ctx.restore()}else{ctx.save();ctx.translate(ox,oy);a3Node(e,t);ctx.restore()}
@@ -165,3 +167,6 @@ function a3PotDraw(g,t){const c=g.tcap,e=c.e,F=g.fish,ox=e.x-g.scroll,oy=entY(e,
     ctx.beginPath();ctx.moveTo(30,0);ctx.lineTo(4,-24);ctx.lineTo(4,-10);ctx.lineTo(-26,-10);ctx.lineTo(-26,10);ctx.lineTo(4,10);ctx.lineTo(4,24);ctx.closePath();ctx.fill();ctx.shadowBlur=0;ctx.stroke();ctx.restore()}
   ctx.save();ctx.textAlign='center';ctx.font=`bold ${18*U}px ${FONT}`;const tx=c.s===0?'朝下点：把罐子沉下去':c.s===1?'别动……等它钻进罐子':'它进去了！朝上点：提罐子';const tw=ctx.measureText(tl(tx)).width+28;
   ctx.fillStyle='rgba(10,30,50,.75)';ctx.fillRect(VW/2-tw/2,yMax-78*U,tw,32*U);ctx.fillStyle=c.s===2?'#ffd23f':'#fff';ctx.fillText(tl(tx),VW/2,yMax-56*U);ctx.restore()}
+function a3InkDraw(g,t){const a=Math.min(1,g.ink/.5);ctx.save();ctx.globalAlpha=.94*a;ctx.fillStyle='#0d0d18';
+  for(const b of g.inkB){circ(b[0],b[1],b[2]);for(let i=0;i<5;i++){const an=i*1.3+b[0];circ(b[0]+Math.cos(an)*b[2]*.9,b[1]+Math.sin(an)*b[2]*.9,b[2]*.35)}ctx.fillRect(b[0]-b[2]*.12,b[1],b[2]*.24,b[2]*1.1+(2.5-g.ink)*30);circ(b[0],b[1]+b[2]*1.1+(2.5-g.ink)*30,b[2]*.14)}
+  ctx.globalAlpha=a;ctx.textAlign='center';ctx.font=`bold ${22*U}px ${FONT}`;ctx.fillStyle='#ffd0c0';ctx.lineWidth=5*U;ctx.strokeStyle='#0d0d18';ctx.strokeText(tl(g.inkT||''),VW/2,(yMin+yMax)/2);ctx.fillText(tl(g.inkT||''),VW/2,(yMin+yMax)/2);ctx.restore()}
