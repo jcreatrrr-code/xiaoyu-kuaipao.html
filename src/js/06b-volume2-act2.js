@@ -5,26 +5,36 @@ TH.push(
  {n:'灯塔环',top:'#3a4a7a',bot:'#0e1430',far:'#2a3260',mid:'#1f2650',sand:'#a8a088',rock:'#6a6a80',rock2:'#45455a',weed:'#5a8a8a'},
  {n:'灯下鱼群',top:'#34507a',bot:'#0c1630',far:'#25406a',mid:'#1c3258',sand:'#b8b090',rock:'#5a6a80',rock2:'#3a465a',weed:'#4f9a90'});
 LV.push(
- {name:'星路海',vol:2,fish:['saury','yellow','bream'],len:210,theme:16,nodes:['turbo'],gname:'夜光螺',pool:{pearls:2,fork:9,rockB:1,rockT:1,jelly:1,shield:1},goal:{k:'gather',n:[2,3]},extra:[20,30]},
+ {name:'星路海',vol:2,fish:['saury','yellow','bream'],len:210,theme:16,nodes:['turbo'],gname:'夜光螺',pool:{pearls:2,fork:9,rockB:2,rockT:2,jelly:2,shield:1},goal:{k:'gather',n:[2,3]},extra:[20,30]},
  {name:'火山岛',vol:2,fish:['mack','eel','tuna'],len:210,theme:17,tool:'lpot',nodes:['lobster'],gname:'龙虾',pool:{pearls:2,vent:8,rockB:2,rockT:2,octo:1,shield:1},goal:{k:'gather',n:[2,3]},extra:[20,30]},
  {name:'灯塔环',vol:2,fish:['sard','mack','saury'],len:210,theme:18,tool:'rod',nodes:['skipjack'],gname:'鲣鱼',pool:{pearls:2,lamp:7,rockB:1,rockT:1,jelly:1,shield:1},goal:{k:'gather',n:[2,3]},extra:[20,30]},
- {name:'灯下鱼群',vol:2,fish:['sard','saury'],len:200,theme:19,boss:'herd',gtxt:'把鱼群赶回潟湖',pool:{pearls:2,lamp:2,vent:1,rockB:2,jelly:1,shield:1},goal:{k:'boss'},extra:[20,30]});
+ {name:'灯下鱼群',vol:2,fish:['sard','saury'],len:200,theme:19,boss:'herd',gtxt:'把鱼群赶回潟湖',pool:{pearls:2,lamp:2,lampv:3,vent:1,rockB:2,jelly:1,shield:1},goal:{k:'boss'},extra:[20,30]});
 Object.assign(FISH,{turbo:{n:'夜光螺',c:['#fff4e0','#c89a5a','#7a5a30'],s:1,x:1},lobster:{n:'龙虾',c:['#ffe0d0','#d0603a','#8a3020'],s:1,x:1},skipjack:{n:'鲣鱼',c:['#e8f0ff','#4a6aa0','#2a3a60'],s:1,x:1}});
 Object.assign(NODE,{turbo:{tool:'',hp:1,f:.88,no:''},lobster:{tool:'lpot',hp:2,f:.9,no:'龙虾躲在石缝里，需要龙虾笼'},skipjack:{tool:'rod',hp:1,f:.22,no:'鲣鱼要用钓竿一条一条钓'}});
 Object.assign(BOSSMSG,{herd:'鱼群被灯光困住了！拖着小鱼去赶，把鱼群赶进潟湖口'});
-Object.assign(TIPS,{fork:'前面分成上下两条路！跟着星星的倒影游，走错的那条尽头只剩一道窄缝',vent:'海底的热泉冒小泡泡时，马上要喷热水了，别待在它上面',lamp:'别游进灯光的虚线圈里！被吸住了就按箭头方向点屏幕挣脱'});
-const FORK={L:640,th:.07,a:.5,b:.78,gh:()=>G&&G.mode==='hard'?66:84};
+Object.assign(TIPS,{fork:'前面分成上下两条路！跟着星星的倒影游，走错的那条尽头只剩一道窄缝',vent:'海底的热泉冒小泡泡时，马上要喷热水了，别待在它上面',lamp:'别游进灯光的虚线圈里！有的灯大得躲不开，被吸住了就按箭头方向点屏幕挣脱'});
+const FORK={L:640,th:.07,a:.5,b:.78,gh:()=>G&&G.mode==='hard'?66:84,W:()=>G&&G.mode==='hard'?96:120};
+/* 岔路弯道：前半段石墙往对的那条路拱，后半段对的那条路外侧再长出一块石头，整条路是个 S 形 */
+const a2C=(e,xr)=>e.c+(e.up?-1:1)*(e.A||0)*(xr>0&&xr<e.L*.5?Math.sin(Math.PI*xr/(e.L*.5)):0),
+ a2D=(e,xr)=>{if(!e.A||xr<=e.L*.5||xr>=e.L)return 0;const B=Math.max(0,(e.up?e.c:1-e.c)-FORK.th-FORK.W()/(yMax-yMin));return B*Math.sin(Math.PI*(xr-e.L*.5)/(e.L*.5))},
+ a2Lane=(e,xr)=>{const c=a2C(e,xr),D=a2D(e,xr);return e.up?[D,c-FORK.th]:[c+FORK.th,1-D]};
 Object.assign(PAT,{
- fork(g,x,d){const c=g.r(.38,.62),up=g.r()<.5,L=FORK.L;g.E.push({t:'fork',x,c,up,L,gs:g.r(.25,.75)});
-   const ok=up?(c-FORK.th)/2:(1+c+FORK.th)/2,no=up?(1+c+FORK.th)/2:(c-FORK.th)/2;arc(g,x-280,c,c,3);arc(g,x+60,ok,ok,8);arc(g,x+60,no,no,3);
+ fork(g,x,d){const c=g.r(.42,.58),up=g.r()<.5,L=FORK.L,e={t:'fork',x,c,up,L,gs:g.r(.25,.75),A:g.mode==='simple'?.11:.13};g.E.push(e);
+   const no=up?(1+c+FORK.th)/2:(c-FORK.th)/2;arc(g,x-280,c,c,3);for(let i=0;i<10;i++){const xr=60+i*55,[a,b]=a2Lane(e,xr);g.E.push({t:'pearl',x:x+xr,f:(a+b)/2})}arc(g,x+60,no,no,3);
    if(g.mode!=='simple')g.E.push({t:'jelly',x:x+L*.3,f:no,amp:.05,ph:g.r(0,6),sp:1});g.x+=L-200},
  vent(g,x,d){const hd=g.mode!=='simple',n=(hd?3:2)+(g.r()<d?1:0),p0=g.r(0,3);let top=g.r()<.5;for(let i=0;i<n;i++){g.E.push({t:'vent',x:x+i*210,ph:p0+i*1.15,top,h:hd?.5:.45});top=g.r()<.65?!top:top}arc(g,x-200,.5,.5,4);g.x+=(n-1)*210},
- lamp(g,x,d){const hd=g.mode!=='simple',top=g.r()<.55;g.E.push({t:'lamp',x,top,f:top?.04:.96,rx:g.r(230,310),ry:g.r(hd?.44:.38,hd?.54:.48)});const f=top?.84:.16;arc(g,x-170,f,f,6);
-   if(hd||g.r()<d*.8){g.E.push({t:'lamp',x:x+600,top:!top,f:top?.96:.04,rx:g.r(200,260),ry:g.r(.3,.38)});arc(g,x+300,.5,.5,3);g.x+=600}}});
+ lamp(g,x,d){const hd=g.mode!=='simple',top=g.r()<.55,must=(g.lampN=(g.lampN||0)+1)%3===0;
+   if(must){g.E.push({t:'lamp',x,top,f:top?.04:.96,rx:g.r(210,250),ry:1.2,must:1});arc(g,x-420,.5,.5,4);g.x+=200;return}
+   g.E.push({t:'lamp',x,top,f:top?.04:.96,rx:g.r(260,340),ry:g.r(hd?.5:.44,hd?.62:.56)});const f=top?.86:.14;arc(g,x-170,f,f,6);
+   if(hd||g.r()<d*.8){g.E.push({t:'lamp',x:x+620,top:!top,f:top?.96:.04,rx:g.r(220,280),ry:g.r(.36,.46)});arc(g,x+310,.5,.5,3);g.x+=620}},
+ /* 灯下鱼群：灯光底下的热泉，时不时喷一下 */
+ lampv(g,x,d){const top=g.r()<.5;g.E.push({t:'lamp',x,top,f:top?.04:.96,rx:g.r(240,300),ry:g.r(.42,.5)});
+   const p0=g.r(0,3);for(let i=0;i<2;i++)g.E.push({t:'vent',x:x-170+i*340,ph:p0+i*1.6,top:!top,h:.42});const f=top?.8:.2;arc(g,x-420,f,f,4);g.x+=260}});
 const a2Slit=e=>{const cy=fy(e.c),h=fy(FORK.th)-yMin,t=e.up?cy+h:yMin,b=e.up?yMax:cy-h,gh=FORK.gh();return{t,b,h:gh,y:t+gh/2+8+(b-t-gh-16)*e.gs}};
 function a2Hit(g,e,sx,y,dx,dist,dt,k){const F=g.fish;
-  if(e.t==='fork'){const cy=fy(e.c),ins=fishSX>sx&&fishSX<sx+e.L;
+  if(e.t==='fork'){const xr=fishSX-sx,cy=fy(a2C(e,xr)),ins=xr>0&&xr<e.L;
     if(ins&&Math.abs(F.y-cy)<fy(FORK.th)-yMin+16)hurt(1);
+    {const D=a2D(e,xr)*(yMax-yMin);if(D>8&&(e.up?F.y<yMin+D+14:F.y>yMax-D-14))hurt(1)}
     if(fishSX>sx&&fishSX<sx+40&&e.lane==null)e.lane=F.y<cy?1:0;
     if(e.lane!=null&&e.lane!==(e.up?1:0)){if(!e.warn&&fishSX>sx+60){e.warn=1;g.combo=0;toast('走错路了！前面只剩一道窄缝，小心游过去',2.4,1)}
       const s=a2Slit(e);if(fishSX>sx+e.L*FORK.a-14&&fishSX<sx+e.L*FORK.b+14&&Math.abs(F.y-s.y)>s.h/2-15)hurt(1)}
@@ -55,10 +65,13 @@ function a2CapDraw(g,t){const c=g.lcap,F=g.fish,e=c.e,lx=e.x-g.scroll,ly=fy(e.f)
   ctx.save();ctx.fillStyle='#fff';for(let i=0;i<c.need;i++){ctx.globalAlpha=i<c.k?1:.35;circ(fishSX+(i-(c.need-1)/2)*16,F.y-62,5)}ctx.restore()}
 const a2Vent=(e,t)=>{const P=G&&G.mode==='hard'?2.8:3.4,c=(t+e.ph)%P;return c>P-1.1?2:c>P-2.1?1:0};
 function a2Draw(e,sx,g,t,T){
-  if(e.t==='fork'){const cy=fy(e.c),h=fy(FORK.th)-yMin,okY=e.up?(yMin+cy-h)/2:(cy+h+yMax)/2;ctx.save();ctx.fillStyle=T.rock;ctx.beginPath();ctx.moveTo(sx,cy);ctx.quadraticCurveTo(sx+30,cy-h,sx+70,cy-h);ctx.lineTo(sx+e.L-40,cy-h);ctx.quadraticCurveTo(sx+e.L,cy,sx+e.L-40,cy+h);ctx.lineTo(sx+70,cy+h);ctx.quadraticCurveTo(sx+30,cy+h,sx,cy);ctx.fill();
-    ctx.fillStyle=T.rock2;for(let i=0;i<Math.floor(e.L/60);i++)circ(sx+80+i*60+hash(e.x+i)*20,cy+(hash(i+e.x*.1)-.5)*h,6+hash(i)*5);
+  if(e.t==='fork'){const cy=fy(e.c),h=fy(FORK.th)-yMin,okY=e.up?(yMin+cy-h)/2:(cy+h+yMax)/2,H=yMax-yMin,tp=xr=>Math.min(1,xr/60,(e.L-xr)/40)**.6;ctx.save();ctx.fillStyle=T.rock;ctx.beginPath();
+    for(let xr=0;xr<=e.L;xr+=16)ctx.lineTo(sx+xr,fy(a2C(e,xr))-h*tp(xr));for(let xr=e.L;xr>=0;xr-=16)ctx.lineTo(sx+xr,fy(a2C(e,xr))+h*tp(xr));ctx.fill();
+    if(a2D(e,e.L*.75)*H>8){const y0=e.up?yMin-40:yMax+46;ctx.beginPath();ctx.moveTo(sx+e.L*.5,y0);for(let xr=e.L*.5;xr<=e.L;xr+=16){const D=a2D(e,xr)*H;ctx.lineTo(sx+xr,e.up?yMin+D:yMax-D)}ctx.lineTo(sx+e.L,y0);ctx.fill();
+      ctx.fillStyle=T.rock2;for(let i=0;i<4;i++){const xr=e.L*(.6+i*.09),D=a2D(e,xr)*H;circ(sx+xr,e.up?yMin+D-14:yMax-D+14,5+hash(e.x+i)*4)}}
+    ctx.fillStyle=T.rock2;for(let i=0;i<Math.floor(e.L/60);i++){const xr=80+i*60+hash(e.x+i)*20;if(xr<e.L-30)circ(sx+xr,fy(a2C(e,xr))+(hash(i+e.x*.1)-.5)*h,6+hash(i)*5)}
     const big=g.mode==='simple',r=(big?16:11)+Math.sin(t*4)*2,hx=sx-70;ctx.translate(hx,okY);ctx.rotate(t*.6);ctx.shadowColor='#fff8c0';ctx.shadowBlur=22;ctx.fillStyle='#fff8d0';ctx.beginPath();for(let i=0;i<8;i++){const a=i*Math.PI/4,q=i%2?r*.35:r;ctx.lineTo(Math.cos(a)*q,Math.sin(a)*q)}ctx.fill();ctx.restore();
-    ctx.save();ctx.globalAlpha=.25+.1*Math.sin(t*3);ctx.fillStyle='#fff8d0';ctx.fillRect(hx+20,okY-2,Math.max(0,sx+e.L*.5-hx-20),4);ctx.restore();
+    ctx.save();ctx.globalAlpha=.25+.1*Math.sin(t*3);ctx.fillStyle='#fff8d0';ctx.fillRect(hx+20,okY-2,Math.max(0,sx+10-hx-20),4);ctx.restore();
     {const S=a2Slit(e),x0=sx+e.L*FORK.a,x1=sx+e.L*FORK.b;ctx.fillStyle=T.rock;ctx.fillRect(x0,S.t-30,x1-x0,S.y-S.h/2-S.t+30);ctx.fillRect(x0,S.y+S.h/2,x1-x0,S.b+30-S.y-S.h/2);ctx.fillStyle=T.rock2;for(let i=0;i<4;i++){circ(x0+18+i*(x1-x0-36)/3,S.y-S.h/2-14,5);circ(x0+18+i*(x1-x0-36)/3,S.y+S.h/2+14,5)}}
     const wy=e.up?(cy+h+yMax)/2:(yMin+cy-h)/2,wx=sx+e.L*.3;ctx.save();ctx.strokeStyle='rgba(20,30,60,.55)';ctx.lineWidth=4;for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(wx,wy,14+i*12,t*3+i,t*3+i+4.2);ctx.stroke()}ctx.restore();return}
   if(e.t==='vent'){const s=a2Vent(e,t),b=yMax+30,top=fy(1-e.h);ctx.save();if(e.top){ctx.translate(0,yMin+yMax);ctx.scale(1,-1)}ctx.fillStyle=T.rock;ctx.beginPath();ctx.moveTo(sx-46,b);ctx.lineTo(sx-14,b-44);ctx.lineTo(sx+14,b-44);ctx.lineTo(sx+46,b);ctx.fill();ctx.fillStyle='#ff7a3a';ctx.globalAlpha=.6+.3*Math.sin(t*5);ctx.fillRect(sx-10,b-48,20,6);ctx.globalAlpha=1;
@@ -89,15 +102,16 @@ const HD={A:()=>({x0:16,x1:VW-16,y0:yMin+8,y1:yMax-8}),
   return{a,vert,U0,U1,V0,V1,uw,lu:U0+(uw-U0)*.4,lv:(V0+V1)/2,R:Math.min(uw-U0,V1-V0)*.15,
    toL:(x,y)=>vert?[a.y0+a.y1-y,x]:[x,y],toS:(u,v)=>vert?[v,a.y0+a.y1-u]:[u,v]}}};
 function herdMk(g,hd,fin){const B={k:'herd',mini:1,fin,tries:0,
-  reset(){const hd=G.mode==='hard',o=HD.geo(),N=hd?28:24;this.n=0;this.need=hd?20:16;this.T=hd?75:85;this.t=-3;this.ba=0;
+  reset(){const hd=G.mode==='hard',o=HD.geo(),N=hd?28:24;this.n=0;this.need=hd?20:16;this.T=hd?75:85;this.t=this.seen?-3:-9;this.seen=1;this.ba=0;
     this.pu=o.U0+30;this.pv=o.lv;this.tu=this.pu;this.tv=this.pv;this.mc=.5;
     this.f=Array.from({length:N},(_,i)=>{const q=i/N*TAU,r=o.R*(.5+Math.random()*.6);return{u:o.lu+Math.cos(q)*r,v:o.lv+Math.sin(q)*r,vu:0,vv:0,in:0,ph:Math.random()*6}})}};
   B.reset();return B}
 function herdMouth(B,o){const L=o.V1-o.V0,h=L*(G.mode==='hard'?.26:.34),c=o.V0+L*B.mc;return[c-h/2,c+h/2]}
-function herdPt(cx,cy){const B=G.boss,r=cv.getBoundingClientRect(),[u,v]=HD.geo().toL((cx-r.left)/S,(cy-r.top)/S);B.tu=u;B.tv=v}
+function herdPt(cx,cy){const B=G.boss;if(B.t<-3){B.t=-3;B.pu=B.tu=HD.geo().U0+60;B.pv=B.tv=HD.geo().lv;return}const r=cv.getBoundingClientRect(),[u,v]=HD.geo().toL((cx-r.left)/S,(cy-r.top)/S);B.tu=u;B.tv=v}
 function herdUpd(B,dt){const g=G,hd=g.mode==='hard',o=HD.geo(),lu=o.lu,lv=o.lv,R=o.R,uw=o.uw;B.t+=dt;g.fish.y=(yMin+yMax)/2;g.fish.vy=0;
   if(hd)B.mc=.5+Math.sin(B.t*.35)*.2;B.ba+=dt*(hd?.75:0);const[m0,m1]=herdMouth(B,o);
-  {const du=B.tu-B.pu,dv=B.tv-B.pv,d=Math.hypot(du,dv),s=Math.min(d,560*dt);if(d>1){B.pu+=du/d*s;B.pv+=dv/d*s;B.pdu=du}B.pu=clamp(B.pu,o.U0+10,uw-14);B.pv=clamp(B.pv,o.V0+10,o.V1-10)}
+  if(B.t<-3){const k=clamp((B.t+6.2)/2.4,0,1),e=1-(1-k)*(1-k);B.pu=B.tu=lerp(o.U0-(o.vert?240:100),o.U0+60,e);B.pv=B.tv=lv+Math.sin(B.t*2)*18;B.pdu=1}
+  else{const du=B.tu-B.pu,dv=B.tv-B.pv,d=Math.hypot(du,dv),s=Math.min(d,560*dt);if(d>1){B.pu+=du/d*s;B.pv+=dv/d*s;B.pdu=du}B.pu=clamp(B.pu,o.U0+10,uw-14);B.pv=clamp(B.pv,o.V0+10,o.V1-10)}
   const live=B.f.filter(f=>!f.in);let cu=0,cv2=0;for(const f of live){cu+=f.u;cv2+=f.v}cu/=live.length||1;cv2/=live.length||1;const FR=hd?140:150;
   for(const f of live){let au=0,av=0;const pu=f.u-B.pu,pv=f.v-B.pv,pd=Math.hypot(pu,pv)||1;
     if(pd<FR){const k=(1-pd/FR)*(hd?1000:1100);au+=pu/pd*k;av+=pv/pd*k}
@@ -114,6 +128,15 @@ function herdUpd(B,dt){const g=G,hd=g.mode==='hard',o=HD.geo(),lu=o.lu,lv=o.lv,R
   if(B.n>=B.need){for(const f of B.f)f.in=1;bossWin(B,'鱼群游回了潟湖！');g.fish.y=(yMin+yMax)/2;g.inv=2;return}
   if(B.t>=B.T)die('herd')}
 function herdDraw(B,t){}
+/* 进 Boss 前的小动画：鱼群围着灯打转，小鱼游过来，决定帮它们回潟湖。点屏幕可跳过 */
+function herdIntro(B,t,o){const a=o.a,cy=(a.y0+a.y1)/2,fs=(VW<500?15:18)*U,box=(y,h)=>{ctx.fillStyle='rgba(6,40,70,.66)';ctx.fillRect(0,y,VW,h)};ctx.textAlign='center';
+  const[lx,ly]=o.toS(o.lu,o.lv);ctx.strokeStyle=`rgba(255,240,170,${.35+.25*Math.sin(t*4)})`;ctx.lineWidth=3;ctx.setLineDash([6,8]);ctx.lineDashOffset=t*30;ctx.beginPath();ctx.arc(lx,ly,o.R*1.5,0,TAU);ctx.stroke();ctx.setLineDash([]);
+  ctx.font=`${fs}px ${FONT}`;ctx.fillStyle='#fff';
+  if(B.t<-6.2){const y=o.vert?a.y0+(a.y1-a.y0)*.28:a.y1-72*U;box(y,64*U);ctx.fillStyle='#fff';ctx.globalAlpha=clamp((B.t+9)*2,0,1);ctx.fillText(tl('灯塔底下，一大群鱼围着灯光打转，'),VW/2,y+26*U);ctx.fillText(tl('怎么也游不出去。'),VW/2,y+50*U);ctx.globalAlpha=1}
+  else if(B.t>-4.6){const[px,py]=o.toS(B.pu,B.pv),L=[tl('它们被困住了！'),tl('我来帮它们游回潟湖！')],w=Math.max(...L.map(x=>ctx.measureText(x).width))+28*U,h=58*U,bx=clamp(px,w/2+8,VW-w/2-8),by=py-50*U-h;
+    ctx.fillStyle='#fff';ctx.beginPath();if(ctx.roundRect)ctx.roundRect(bx-w/2,by,w,h,14*U);else ctx.rect(bx-w/2,by,w,h);ctx.fill();ctx.beginPath();ctx.moveTo(px-8,by+h-1);ctx.lineTo(px,by+h+12*U);ctx.lineTo(px+8,by+h-1);ctx.fill();
+    ctx.fillStyle='#1b2a41';L.forEach((x,i)=>ctx.fillText(x,bx,by+24*U+i*24*U))}
+  ctx.font=`${12*U}px ${FONT}`;ctx.fillStyle='rgba(255,255,255,.7)';ctx.fillText(tl('点屏幕跳过'),VW/2,o.vert?a.y0+24*U:a.y0+20*U)}
 function herdHud(B,t){const g=G,o=HD.geo(),a=o.a,R=o.R,uw=o.uw,[m0,m1]=herdMouth(B,o),hd=g.mode==='hard';ctx.save();
   {const gr=ctx.createLinearGradient(0,0,0,VT);gr.addColorStop(0,'#1c3a66');gr.addColorStop(1,'#0b1a38');ctx.fillStyle=gr;ctx.fillRect(0,0,VW,VT)}
   ctx.fillStyle='rgba(255,255,240,.5)';for(let i=0;i<40;i++){ctx.globalAlpha=.2+.2*Math.sin(t*1.5+i);ctx.fillRect((i*97)%VW,a.y0+(i*61)%(a.y1-a.y0),2,2)}ctx.globalAlpha=1;
@@ -127,10 +150,11 @@ function herdHud(B,t){const g=G,o=HD.geo(),a=o.a,R=o.R,uw=o.uw,[m0,m1]=herdMouth
   ctx.fillStyle='#4a4a62';circ(o.lu,o.lv,16);ctx.fillStyle='#fff3b0';ctx.shadowColor='#ffe27a';ctx.shadowBlur=24;circ(o.lu,o.lv,9);ctx.shadowBlur=0;
   for(const f of B.f){if(f.in)continue;ctx.save();ctx.translate(f.u,f.v);ctx.rotate(Math.atan2(f.vv,f.vu));ctx.fillStyle=f.lit>0?'#fff3b0':'#cfe0f0';ctx.beginPath();ctx.ellipse(0,0,9,3.6,0,0,TAU);ctx.fill();ctx.beginPath();ctx.moveTo(-8,0);ctx.lineTo(-14,-4);ctx.lineTo(-14,4);ctx.fill();ctx.restore()}
   ctx.save();ctx.translate(B.pu,B.pv);if((B.pdu||1)<0)ctx.scale(-1,1);drawFish(0,0,0,t,{s:.75,...skin()});ctx.restore();
-  ctx.strokeStyle='rgba(255,255,255,.16)';ctx.lineWidth=2;ctx.setLineDash([4,8]);ctx.beginPath();ctx.arc(B.pu,B.pv,hd?140:150,0,TAU);ctx.stroke();ctx.setLineDash([]);ctx.restore();
+  if(B.t>=-3){ctx.strokeStyle='rgba(255,255,255,.16)';ctx.lineWidth=2;ctx.setLineDash([4,8]);ctx.beginPath();ctx.arc(B.pu,B.pv,hd?140:150,0,TAU);ctx.stroke();ctx.setLineDash([])}ctx.restore();
+  if(B.t<-3){herdIntro(B,t,o);ctx.restore();return}
   ctx.fillStyle='#fff';ctx.textAlign='center';const tl0=Math.max(0,Math.ceil(B.T-Math.max(0,B.t))),y0=o.vert?a.y1-46*U:a.y0+22*U;ctx.font=`${18*U}px ${FONT}`;ctx.lineWidth=4*U;ctx.strokeStyle='rgba(6,40,70,.7)';
   const s1=tl('回家的鱼 '+B.n+' / '+B.need),s2=tl('还剩 '+tl0+' 秒');ctx.strokeText(s1,VW/2,y0);ctx.fillText(s1,VW/2,y0);ctx.fillStyle=tl0<=10?'#ff9f8f':'#fff';ctx.strokeText(s2,VW/2,y0+26*U);ctx.fillText(s2,VW/2,y0+26*U);
   if(B.t<0){ctx.fillStyle='rgba(6,40,70,.6)';ctx.fillRect(0,(a.y0+a.y1)/2-70*U,VW,140*U);ctx.fillStyle='#fff';ctx.font=`${(VW<500?14:17)*U}px ${FONT}`;
     const L=[tl('按住屏幕拖动小鱼，鱼群会躲着你走'),tl('别让鱼群回到灯光里，把它们赶进潟湖口'),tl(Math.ceil(-B.t)+' 秒后开始')];L.forEach((x,i)=>ctx.fillText(x,VW/2,(a.y0+a.y1)/2-28*U+i*30*U))}
   ctx.restore()}
-cv.addEventListener('pointermove',e=>{const B=G&&G.boss;if(state==='play'&&B&&B.mini&&!B.done&&(e.buttons||e.pointerType==='mouse'))herdPt(e.clientX,e.clientY)});
+cv.addEventListener('pointermove',e=>{const B=G&&G.boss;if(state==='play'&&B&&B.mini&&!B.done&&B.t>=-3&&(e.buttons||e.pointerType==='mouse'))herdPt(e.clientX,e.clientY)});

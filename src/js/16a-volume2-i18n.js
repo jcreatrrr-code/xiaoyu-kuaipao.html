@@ -119,9 +119,14 @@ for(const k in TLC)delete TLC[k];
 "鱼群被灯光困住了！拖着小鱼去赶，把鱼群赶进潟湖口":"The shoal is trapped by the light! Drag Xiaoyu to herd it into the lagoon mouth",
 "前面分成上下两条路！跟着星星的倒影游，走错的那条尽头只剩一道窄缝":"The way splits into an upper and a lower path! Follow the star's reflection. The wrong one ends in a narrow gap",
 "别游进灯光的虚线圈里！被吸住了就按箭头方向点屏幕挣脱":"Stay out of the dotted ring of light! If it catches you, tap in the arrow's direction to break free",
+"别游进灯光的虚线圈里！有的灯大得躲不开，被吸住了就按箭头方向点屏幕挣脱":"Stay out of the dotted ring of light! Some lamps are too big to dodge. If one catches you, tap in the arrow's direction to break free",
 "灯光的虚线圈就是吸力范围。被吸住了，看箭头朝哪边，就往哪边点屏幕。":"The dotted ring shows how far the lamp pulls. If you're caught, tap toward wherever the arrow points.",
 "赶鱼群：鱼群会躲着小鱼走。绕到鱼群后面，把它们往潟湖口推。":"Herding: the shoal swims away from Xiaoyu. Get behind it and push it toward the lagoon mouth."};
  for(const k in EN4)if(!DICT[k]){const v=EN4[k];DICT[k]=[v,v,v,v]}}
 RULES.push([/^回家的鱼 (\d+) \/ (\d+)$/,m=>`Fish home ${m[1]} / ${m[2]}`],[/^还剩 (\d+) 秒$/,m=>`${m[1]}s left`],[/^(\d+) 秒后开始$/,m=>`Starting in ${m[1]}s`]);
 for(let i=RULES.length-3;i<RULES.length;i++){const r=RULES[i];while(r.length<5)r.push(r[1])}
 for(const k in TLC)delete TLC[k];
+/* v2.1.2：海天使皮肤、赶鱼前的小动画、躲不开的灯 */
+{const EN5={"海天使":"Sea angel","会发光的海天使，游过的地方会留下荧光":"A glowing sea angel. It leaves a trail of light wherever it swims",
+ "灯塔底下，一大群鱼围着灯光打转，":"Under the lighthouse, a big shoal is circling the light","怎么也游不出去。":"and can't find its way out.","它们被困住了！":"They're trapped!","我来帮它们游回潟湖！":"I'll help them back to the lagoon!","点屏幕跳过":"Tap to skip","1 秒后开始":"Starting in 1s","2 秒后开始":"Starting in 2s","3 秒后开始":"Starting in 3s"};
+ for(const k in EN5)if(!DICT[k]){const v=EN5[k];DICT[k]=[v,v,v,v]}}
