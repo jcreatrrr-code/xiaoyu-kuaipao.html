@@ -20,12 +20,14 @@ async (args)=>{const [mode,li,secs]=args;const T=window.__T,K=window.__K;K.SAVE.
   if(g.L.tide){const fl=d.yMax-T.tideH(g.t+.6)*(d.yMax-d.yMin);ty=Math.min(ty,fl-55)}
   const B=g.boss;if(B&&B.k==='guide'&&!B.done){const z=fy(.46);ty=Math.min(ty,z-50);const cx=d.fishSX+150;
     const nx=B.reefs.find(r=>!r.ok&&!r.hit);if(B.t>0&&nx&&nx.x-cx<200&&nx.c!==T.gci(B)&&fr%10==0){const U=1/d.S,nc=(mode==='hard'||B.made>=3)?3:2,sp=58*U;T.tap(d.VW/2-(nc-1)*sp/2+nx.c*sp,d.yMax+28*U);taps++}}
-  for(const e of g.E){if(e.gone||e.t!=='vent')continue;const sx=e.x-g.scroll-d.fishSX;if(sx>-60&&sx<240){const top=fy(1-e.h);if(T.a2v(e,g.t+.5)>0||T.a2v(e,g.t)>0||sx<120)ty=Math.min(ty,top-60)}}
-  for(const e of g.E){if(e.gone||e.t!=='lamp'||e.off)continue;const sx=e.x-g.scroll-d.fishSX;if(sx>-120&&sx<300){if(e.top)ty=Math.max(ty,fy(.62));else ty=Math.min(ty,fy(.38))}}
+  for(const e of g.E){if(e.gone||e.t!=='vent')continue;const sx=e.x-g.scroll-d.fishSX;if(sx>-60&&sx<240){const top=fy(1-e.h);if(e.top){const bt=fy(e.h);if(T.a2v(e,g.t+.5)>0||T.a2v(e,g.t)>0||sx<120)ty=Math.max(ty,bt+60)}else if(T.a2v(e,g.t+.5)>0||T.a2v(e,g.t)>0||sx<120)ty=Math.min(ty,top-60)}}
+  for(const e of g.E){if(e.gone||e.t!=='lamp'||e.off)continue;const sx=e.x-g.scroll-d.fishSX;if(sx>-e.rx-40&&sx<e.rx+260){const ry=e.ry*(d.yMax-d.yMin);if(e.top)ty=Math.max(ty,fy(e.f)+ry+70);else ty=Math.min(ty,fy(e.f)-ry-70)}}
   for(const e of g.E){if(e.gone||e.t!=='fork')continue;const sx=e.x-g.scroll-d.fishSX;if(sx>-e.L&&sx<420){const cy=fy(e.c),h=T.fork.th*(d.yMax-d.yMin);ty=e.up?(d.yMin+cy-h)/2:(cy+h+d.yMax)/2}}
-  if(B&&B.k==='herd'&&!B.done){const nx=B.cur.find(r=>!r.done),tg=nx?fy(nx.c):(d.yMin+d.yMax)/2,df=tg-B.sy;const R=T.hd.R();ty=Math.abs(df)<18?(B.sy<(d.yMin+d.yMax)/2?B.sy+R*1.35:B.sy-R*1.35):df>0?B.sy-R/2:B.sy+R/2}
+  if(B&&B.mini&&!B.done){const o=T.hd.geo(),L0=o.V1-o.V0,c=o.V0+L0*B.mc,Mu=o.uw+40,Mv=c,L=B.f.filter(f=>!f.in);if(L.length){let cu=0,cv=0;for(const f of L){cu+=f.u;cv+=f.v}cu/=L.length;cv/=L.length;
+    let far=null,fd=0;for(const f of L){const q=Math.hypot(f.u-cu,f.v-cv);if(q>fd){fd=q;far=f}}
+    if(fd>110){B.tu=far.u+(far.u-cu)/fd*70;B.tv=far.v+(far.v-cv)/fd*70}else{const du=cu-Mu,dv=cv-Mv,q=Math.hypot(du,dv)||1;B.tu=cu+du/q*95;B.tv=cv+dv/q*95}}}
   ty=Math.max(ty===d.yMin?d.yMin:d.yMin+40,Math.min(d.yMax-40,ty));
-  if(g.trap){if(fr%6==0)T.press();}else{ if(g.fish.y>ty)T.press();else T.release(); }
+  if(g.lcap){if(fr%12==0)T.capgo(g.lcap.di)}else if(g.trap){if(fr%6==0)T.press();}else{ if(g.fish.y>ty)T.press();else T.release(); }
   T.update(1/60);fr++; if(fr>60*secs)break;}
  const g=T.G;return {mode,li,state:T.state,cause:g.cause,stars:K.SAVE[mode].st[li],m:Math.floor(g.scroll/60),pearls:g.pearls,life:g.life,got:Object.keys(g.caught).filter(k=>['turbo','lobster','skipjack'].includes(k)).map(k=>k+':'+g.caught[k]).join(','),rest,taps,leaps:g.leapN||0,boss:g.boss?{n:g.boss.n,hp:g.boss.hp,tries:g.boss.tries||0}:null}}
 """
