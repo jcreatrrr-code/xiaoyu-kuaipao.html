@@ -12,7 +12,7 @@ LV.push(
  {name:'风暴夜',vol:2,fish:['sard','mack'],len:200,theme:15,leap:1,boss:'guide',gtxt:'把小帆的独木舟带回船边',pool:{pearls:2,fnet:2,roots:1,rockB:2,rockT:1,jelly:2,shield:1},goal:{k:'boss'},extra:[20,30]});
 Object.assign(FISH,{coco:{n:'椰子',c:['#fff8e6','#a8743f','#6a4520'],s:1,x:1},flyfish:{n:'飞鱼',c:['#eaf6ff','#5f9fe0','#2f5fa8'],s:1,x:1},mudcrab:{n:'泥蟹',c:['#f0e0c0','#5f6a3a','#3a4020'],s:1,x:1}});
 Object.assign(NODE,{coco:{tool:'',hp:1,f:.1,no:''},flyfish:{tool:'scoop',hp:1,timed:1,f:.05,wait:'等飞鱼跳出水面再点',no:'飞鱼要等它跳出水面，用抄网接'},mudcrab:{tool:'hook',hp:2,f:.9,no:'泥蟹躲在根缝里，需要蟹钩'}});
-Object.assign(BOSSMSG,{guide:'风暴来了！游到虚线上方，暗礁靠近时点一下，给小帆指路'});
+Object.assign(BOSSMSG,{guide:'风暴来了！暗礁上的浮标会亮灯。游到虚线上方，等吊坠变成和浮标一样的颜色时点一下，给小帆指路'});
 Object.assign(TIPS,{fnet:'水面上挂着浮网！贴着水面冲出去跳过它，或者从底下绕过',tide:'落潮了，海底的礁盘会露出来，别贴着底游！',leap:'贴着水面多游一会儿，小鱼就会跃出水面！空中的金珍珠一颗算两颗',roots:'红树林的根缝很窄，还会上下移动，跟着珍珠穿过去'});
 Object.assign(PAT,{
  fnet(g,x,d){const hd=g.mode==='hard',w=g.r(110,hd?250:200)+40*(d||0),h=g.r(.3,.78);g.E.push({t:'fnet',x,w,h});arc(g,x-w/2-150,.55,.55,3);
@@ -78,33 +78,38 @@ function drawNode2(e,t){
   if(e.k==='mudcrab'){ctx.fillStyle='#5f6a3a';ctx.beginPath();ctx.ellipse(0,0,20,13,0,0,TAU);ctx.fill();ctx.strokeStyle='#3a4020';ctx.lineWidth=4;ctx.lineCap='round';for(const s of[-1,1]){for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(s*14,2+i*4);ctx.lineTo(s*26,10+i*5);ctx.stroke()}ctx.fillStyle='#7a8a4a';circ(s*24,-12,7)}ctx.fillStyle='#1b2a41';circ(-5,-10,2.5);circ(5,-10,2.5);return 1}
   return 0}
 /* ---------- 风暴引航 Boss：浪把独木舟推向暗礁，小鱼游到水面附近点一下发光，把船叫回航道 ---------- */
-const GD={cx:()=>fishSX+150,sy:()=>surfY()-8,zone:()=>fy(SURF+.16),win:hd=>hd?42:58};
-function guideMk(g,hd,fin){return{k:'guide',hp:3,n:0,need:hd?12:8,reefs:[],t:-2.5,sp:1,cd:0,glow:0,wave:6,wt:0,swerve:0,done:0,fin,
-  reset(){this.hp=3;this.n=0;this.reefs=[];this.t=-2;this.sp=1;this.cd=0;this.glow=0;this.wave=6;this.wt=0}}}
-function guideUpd(B,dt){const g=G,F=g.fish,hd=g.mode==='hard',k=clamp((yMax-yMin)/544,.85,1.45),cx=GD.cx();B.t+=dt;B.cd=Math.max(0,B.cd-dt);B.glow=Math.max(0,B.glow-dt);B.swerve=Math.max(0,B.swerve-dt);
+const GC=[['红','#ff5a5a'],['绿','#4fe07a'],['黄','#ffd23f']],gNc=B=>G.mode==='hard'||B.made>=3?3:2,gCi=B=>Math.floor(B.ct/(G.mode==='hard'?.38:.5))%gNc(B);
+const GD={cx:()=>fishSX+150,sy:()=>surfY()-8,zone:()=>fy(SURF+.16),win:hd=>hd?80:95};
+function guideMk(g,hd,fin){return{k:'guide',hp:3,n:0,need:hd?12:8,reefs:[],made:0,ct:0,t:-2.5,sp:1,cd:0,glow:0,wave:6,wt:0,swerve:0,done:0,fin,
+  reset(){this.hp=3;this.n=0;this.reefs=[];this.made=0;this.t=-2;this.sp=1;this.cd=0;this.glow=0;this.wave=6;this.wt=0}}}
+function guideUpd(B,dt){const g=G,F=g.fish,hd=g.mode==='hard',k=clamp((yMax-yMin)/544,.85,1.45),cx=GD.cx();B.t+=dt;B.cd=Math.max(0,B.cd-dt);B.glow=Math.max(0,B.glow-dt);B.swerve=Math.max(0,B.swerve-dt);B.ct+=dt;
   if(B.t<0)return;
-  if(B.n+B.reefs.length<B.need){B.sp-=dt;if(B.sp<=0){B.sp=hd?1.6+Math.random()*1:2.2+Math.random()*1.2;B.reefs.push({x:VW+60,ok:0})}}
-  for(const r of B.reefs){r.x-=(hd?200:170)*dt;
+  if(B.n+B.reefs.length<B.need){B.sp-=dt;if(B.sp<=0){B.sp=hd?1.6+Math.random()*1:2.2+Math.random()*1.2;B.reefs.push({x:VW+60,ok:0,c:Math.floor(Math.random()*gNc(B))});B.made++}}
+  for(const r of B.reefs){r.x-=(hd?140:110)*dt;
     if(!r.ok&&!r.hit&&r.x<cx-GD.win(hd)){r.hit=1;B.hp--;g.shake=.5;SFX.hit();CSND.crash();ftext('独木舟撞上暗礁了！',cx-60,GD.sy()+50,'#ffb3b3');if(B.hp<=0){die('canoe');return}}}
   B.reefs=B.reefs.filter(r=>r.x>-80);
   B.wave-=dt;if(B.wave<=0&&!B.wt){B.wt=2.2;B.wave=hd?4:5.5;toast('大浪要压下来了！',1.2,1)}
   if(B.wt){B.wt=Math.max(0,B.wt-dt);if(B.wt<1.2&&F.y<GD.zone()+40&&!g.trap&&!g.leap)F.y+=260*k*dt}
   if(B.n>=B.need&&!B.reefs.some(r=>!r.ok&&!r.hit))bossWin(B,'小帆的独木舟平安回到了船边！')}
 function guideTap(B,ux,uy){const g=G,F=g.fish,hd=g.mode==='hard',cx=GD.cx();if(B.t<0)return false;
-  const r=B.reefs.find(q=>!q.ok&&!q.hit&&Math.abs(q.x-cx)<GD.win(hd)+30);if(!r)return false;
+  const r=B.reefs.find(q=>!q.ok&&!q.hit&&Math.abs(q.x-cx)<GD.win(hd));if(!r)return false;
   if(F.y>GD.zone()){if(!r.hint){r.hint=1;ftext('游上去，让小帆看得见！',fishSX,F.y-56,'#ffe27a')}return false}
+  if(B.cd>0)return false;if(gCi(B)!==r.c){B.cd=.3;SFX.tap();ftext('颜色不对！浮标亮的是'+GC[r.c][0]+'灯',fishSX-20,F.y-56,'#ffb3b3');return false}
   r.ok=1;B.n++;B.glow=.5;B.swerve=.6;SFX.save();burst(cx,GD.sy(),'#ffe9a8',18);g.bonus+=40;ftext(B.n%2?'往右压桨！':'往左压桨！',cx-40,GD.sy()+40,'#bff6e6');
   return false}
 function guideDraw(B,t){const g=G,F=g.fish,cx=GD.cx(),hd=g.mode==='hard',sy=GD.sy()+6;ctx.save();
-  for(const r of B.reefs){const top=GD.sy()-4,inW=!r.ok&&!r.hit&&Math.abs(r.x-cx)<GD.win(hd)+30;ctx.fillStyle=r.ok?'rgba(120,140,160,.5)':'#55606f';ctx.beginPath();ctx.moveTo(r.x-46,yMax+40);ctx.lineTo(r.x-22,top+30);ctx.lineTo(r.x-6,top);ctx.lineTo(r.x+12,top+18);ctx.lineTo(r.x+40,yMax+40);ctx.fill();
-    if(!r.ok&&!r.hit){ctx.strokeStyle=inW?'#ffd23f':'rgba(255,120,120,.8)';ctx.lineWidth=inW?5:3;ctx.setLineDash([8,6]);ctx.lineDashOffset=-t*30;ctx.beginPath();ctx.arc(r.x,top+4,30+(inW?Math.sin(t*12)*4:0),0,TAU);ctx.stroke();ctx.setLineDash([])}}
+  for(const r of B.reefs){const top=GD.sy()-4,inW=!r.ok&&!r.hit&&Math.abs(r.x-cx)<GD.win(hd);ctx.fillStyle=r.ok?'rgba(120,140,160,.5)':'#55606f';ctx.beginPath();ctx.moveTo(r.x-46,yMax+40);ctx.lineTo(r.x-22,top+30);ctx.lineTo(r.x-6,top);ctx.lineTo(r.x+12,top+18);ctx.lineTo(r.x+40,yMax+40);ctx.fill();
+    if(!r.ok&&!r.hit){ctx.strokeStyle=inW?'#ffd23f':'rgba(255,120,120,.8)';ctx.lineWidth=inW?5:3;ctx.setLineDash([8,6]);ctx.lineDashOffset=-t*30;ctx.beginPath();ctx.arc(r.x,top+4,30+(inW?Math.sin(t*12)*4:0),0,TAU);ctx.stroke();ctx.setLineDash([])}
+    if(!r.hit){const bc=GC[r.c][1],on=r.ok||Math.sin(t*6)>-.7;ctx.strokeStyle='#ddd';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(r.x-6,top);ctx.lineTo(r.x-6,top-22);ctx.stroke();if(on){ctx.fillStyle=bc;ctx.shadowColor=bc;ctx.shadowBlur=18;circ(r.x-6,top-30,12);ctx.shadowBlur=0}}}
   const sw=B.swerve>0?Math.sin(B.swerve/.6*Math.PI)*18:0,by=GD.sy()+Math.sin(t*2.6)*6;ctx.translate(cx,by-sw);ctx.rotate(Math.sin(t*2.6)*.12);
   ctx.fillStyle='#7a4a24';ctx.beginPath();ctx.moveTo(-46,0);ctx.quadraticCurveTo(0,18,46,0);ctx.lineTo(40,-6);ctx.lineTo(-40,-6);ctx.fill();ctx.fillStyle='#a8743f';ctx.fillRect(-30,8,60,4);
   ctx.fillStyle='#ffd9b3';circ(4,-20,7);ctx.fillStyle='#ff9f1c';ctx.fillRect(-2,-14,12,10);ctx.strokeStyle='#5a3a22';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(10,-12);ctx.lineTo(26,12);ctx.stroke();ctx.restore();
+  {const pc=GC[gCi(B)][1];ctx.save();ctx.strokeStyle=pc;ctx.shadowColor=pc;ctx.shadowBlur=14;ctx.lineWidth=4;ctx.beginPath();ctx.arc(fishSX,F.y,34+Math.sin(t*6)*2,0,TAU);ctx.stroke();ctx.restore()}
   if(B.glow>0){ctx.save();ctx.globalAlpha=B.glow*1.6;const gr=ctx.createRadialGradient(fishSX,F.y,4,fishSX,F.y,170);gr.addColorStop(0,'rgba(255,240,180,.9)');gr.addColorStop(1,'rgba(255,240,180,0)');ctx.fillStyle=gr;ctx.fillRect(fishSX-170,F.y-170,340,340);ctx.restore()}
   if(B.wt&&B.wt<1.2){ctx.fillStyle='rgba(220,235,255,.18)';ctx.fillRect(0,yMin,VW,GD.zone()-yMin+40)}
   if(Math.sin(t*.9)>.985||Math.sin(t*1.7+1)>.992){ctx.fillStyle='rgba(230,240,255,.35)';ctx.fillRect(0,0,VW,VT)}
   ctx.strokeStyle='rgba(255,255,255,.25)';ctx.setLineDash([6,8]);ctx.beginPath();ctx.moveTo(0,GD.zone());ctx.lineTo(VW,GD.zone());ctx.stroke();ctx.setLineDash([])}
 function guideHud(B,t){const w=Math.min(VW-40*U,300*U),x0=(VW-w)/2,y0=yMax+12*U,h=20*U;ctx.save();ctx.textAlign='center';ctx.font=`${14*U}px ${FONT}`;
   ctx.fillStyle='rgba(6,40,70,.55)';ctx.fillRect(x0-4*U,y0-4*U,w+8*U,h+8*U);const sg=w/B.need;for(let i=0;i<B.need;i++){ctx.fillStyle=i<B.n?'#4fe0b5':'rgba(255,255,255,.25)';ctx.fillRect(x0+i*sg+2*U,y0,sg-4*U,h)}
-  ctx.fillStyle='#fff';ctx.fillText(tl('独木舟')+' '+'❤'.repeat(Math.max(0,B.hp))+' · '+tl('还差')+' '+Math.max(0,B.need-B.n)+' '+tl('处暗礁'),VW/2,y0+h+18*U);ctx.restore()}
+  ctx.fillStyle='#fff';ctx.fillText(tl('独木舟')+' '+'❤'.repeat(Math.max(0,B.hp))+' · '+tl('还差')+' '+Math.max(0,B.need-B.n)+' '+tl('处暗礁'),VW/2,y0+h+18*U);
+  const nc=gNc(B),ci=gCi(B),yy=y0-22*U;ctx.textAlign='right';ctx.fillText(tl('吊坠'),VW/2-nc*12*U,yy+5*U);for(let i=0;i<nc;i++){ctx.fillStyle=GC[i][1];ctx.globalAlpha=i===ci?1:.35;circ(VW/2-(nc-1)*12*U+i*24*U,yy,(i===ci?10:7)*U)}ctx.restore()}
