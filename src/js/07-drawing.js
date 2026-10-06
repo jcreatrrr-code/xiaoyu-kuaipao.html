@@ -217,6 +217,7 @@ function drawWorld(){
   if(g.boss&&!g.boss.done&&g.boss.k!=='feed')bossHud2(g.boss,t);
   if(g.boss&&!g.boss.done&&g.boss.k==='feed'){const B=g.boss,w=Math.min(VW-40*U,300*U),x0=(VW-w)/2,y0=yMin+8*U,h=22*U,sg=w/B.need;ctx.fillStyle='rgba(6,40,70,.55)';ctx.fillRect(x0-4*U,y0-4*U,w+8*U,h+8*U);
     for(let i=0;i<B.need;i++){ctx.fillStyle=i<B.hun?'#4fe0b5':'rgba(255,255,255,.25)';ctx.fillRect(x0+i*sg+2*U,y0,sg-4*U,h)}ctx.fillStyle='#fff';ctx.font=`${14*U}px ${FONT}`;ctx.textAlign='center';ctx.fillText('大白的肚子  '+B.hun+' / '+B.need,VW/2,y0+h+18*U)}
+  if(g.ink>0)a3InkDraw(g,t);
   if(g.flash>0){ctx.fillStyle=`rgba(255,255,255,${g.flash})`;ctx.fillRect(0,0,VW,VT)}
 }
 function updateHUD(){
