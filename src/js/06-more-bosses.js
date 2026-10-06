@@ -35,7 +35,7 @@ function bossUpd(B,dt){if(B.k==='guide')return guideUpd(B,dt);if(B.k==='herd')re
     while(B.obs.length&&B.obs[0].x<TLINE()){B.obs.shift();B.i++;ftext('没叫对帮手！',fishSX+20,F.y-56,'#ffb3b3');g.inv=0;hurt(1);if(state!=='play'||B!==g.boss||B.i===0)return}
     B.ot=(B.ot===undefined?2.5:B.ot)-dt;if(B.ot<=0&&B.orbs<5&&!g.E.some(e=>e.t==='torb'&&!e.gone&&e.x>g.scroll)){B.ot=3.2;g.E.push({t:'torb',x:g.scroll+VW+60,f:.2+Math.random()*.6})}
     if(B.i>=B.total&&!B.obs.length){if(B.orbs>=5)bossWin(B,'五颗潮心都接住了！大家一起把它们送了回去');else if(!B.msg){B.msg=1;toast('难关都过了！把剩下的潮心接住',2.6)}}}}
-function bossTap2(B,ux,uy){if(B.k==='guide')return guideTap(B,ux,uy);if(B.k==='herd')return false;if(B.k!=='team'||B.t<0)return false;const g=G;
+function bossTap2(B,ux,uy){if(B.k==='guide')return guideTap(B,ux,uy);if(B.k==='herd'){B.tx=ux;B.ty=uy;return true}if(B.k!=='team'||B.t<0)return false;const g=G;
   for(let i=0;i<4;i++){const[bx,by,r]=teamBtn(i);if(Math.hypot(ux-bx,uy-by)>r*1.25)continue;const h=HELPERS[i],o=B.obs[0];if(B.cd[h[1]]>0)return true;
     if(o&&o.ty===h[1]){const fr=B.bt/(30/B.bpm),beat=(B.half%2===1?fr<.3:fr>.7);burst(o.x,(yMin+yMax)/2,'#ffd23f',26);ftext(h[2]+(beat?'：合拍！+30':'：交给我！'),Math.min(o.x,VW-170),yMin+74,beat?'#bff6e6':'#ffe27a');if(beat)g.bonus+=30;SFX.save();if(h[1]==='wall')CSND.crash();g.shake=.2;B.obs.shift();B.i++}
     else{B.cd[h[1]]=1.8;SFX.hit();ftext(o?'不是'+h[2]+'的活儿！':'还没到时候',bx-40,by-60,'#ffb3b3')}
@@ -98,6 +98,7 @@ function update(dt){
   if(g.parts.length>160)g.parts.splice(0,g.parts.length-160);
   g.parts=g.parts.filter(p=>p.l>0);for(const x of g.texts){x.t-=dt;x.y-=40*dt}g.texts=g.texts.filter(x=>x.t>0);
   if(state==='dying'){g.dead-=dt;F.y=Math.max(yMin+20,F.y-50*dt);if(g.dead<=0)showEnd(false);return}
+  if(g.boss&&!g.boss.done&&g.boss.mini){if(g.boss.fin)g.boss.fin.x=g.scroll+VW+4000;bossUpd(g.boss,dt);return}
   const ph=yMax-yMin,k=clamp(ph/544,.85,1.45),endless=g.mode==='endless';
   if(endless){
     const lv=Math.floor(g.scroll/60/200);if(lv!==g.lvl){g.lvl=lv;g.theme=lv%5;g.flash=.4;toast(`难度提升！Lv.${lv+1} · ${TH[g.theme].n}`,2.2)}
@@ -105,7 +106,7 @@ function update(dt){
     g.pruneT+=dt;if(g.pruneT>2){g.pruneT=0;const lim=g.scroll-500;g.E=g.gen.E=g.E.filter(e=>!e.gone&&e.x+(e.dx||0)>lim)}
   }else g.speed=(g.mode==='hard'?205:150)*(g.L.spd||1);
   if(g.buff.slow)g.speed*=.85;if(g.boss&&!g.boss.done&&g.boss.k==='chase'&&g.boss.t>0)g.speed*=1.35;
-  if(g.trap){const tr=g.trap;tr.t-=dt;if(g.mode!=='simple')tr.p=Math.max(0,tr.p-1.5*dt);F.vy=0;
+  if(g.lcap)a2CapUpd(g,dt);else if(g.trap){const tr=g.trap;tr.t-=dt;if(g.mode!=='simple')tr.p=Math.max(0,tr.p-1.5*dt);F.vy=0;
     if(tr.t<=0){if(g.mode==='simple'){tr.e.gone=1;g.trap=null;g.life=Math.max(0,g.life-1);g.noDmg=false;g.combo=0;g.inv=1.8;SFX.hit();
         if(g.life<=0)die('net');else toast('渔网松开了，下次点快一点！',2)}else die('net')}
   }else{

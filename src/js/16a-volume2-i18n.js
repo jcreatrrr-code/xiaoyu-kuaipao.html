@@ -111,3 +111,17 @@ for(const k in TLC)delete TLC[k];
 for(const d of DISH){if(+d.id.slice(1)<52)continue;const m=methodOf(d.id),z=`用${Object.entries(d.need).map(([k,n])=>FISH[k].n+(n>1?'×'+n:'')).join('、')}做成，在${STN[m][1]}上完成。小馆里一份卖 ${d.p} 珍珠，已经上过 0 次。`;
  if(DICT[z])continue;const v=`Made with ${Object.entries(d.need).map(([k,n])=>tl0(FISH[k].n,'en')+(n>1?' ×'+n:'')).join(', ')}, finished at the ${tl0(STN[m][1],'en').toLowerCase()}. Sells for ${d.p} pearls a plate at the diner. Times served: 0.`;DICT[z]=[v,v,v,v]}
 for(const k in TLC)delete TLC[k];
+/* v2.1.1：岔路窄缝、灯光挣脱、赶鱼小游戏 */
+{const EN4={"走错路了！前面只剩一道窄缝，小心游过去":"Wrong way! There's only a narrow gap ahead. Squeeze through carefully",
+"被灯光吸住了！看箭头，朝箭头的方向点屏幕，连点对几下就能挣脱":"Caught by the light! Tap the screen in the direction of the arrow. Get a few right to break free",
+"被吸到灯心，掉了一颗星":"Pulled into the lamp. Lost a star","潟湖口":"Lagoon mouth",
+"按住屏幕拖动小鱼，鱼群会躲着你走":"Hold and drag Xiaoyu. The shoal swims away from you","别让鱼群回到灯光里，把它们赶进潟湖口":"Keep them out of the light and herd them into the lagoon mouth",
+"鱼群被灯光困住了！拖着小鱼去赶，把鱼群赶进潟湖口":"The shoal is trapped by the light! Drag Xiaoyu to herd it into the lagoon mouth",
+"前面分成上下两条路！跟着星星的倒影游，走错的那条尽头只剩一道窄缝":"The way splits into an upper and a lower path! Follow the star's reflection. The wrong one ends in a narrow gap",
+"别游进灯光的虚线圈里！被吸住了就按箭头方向点屏幕挣脱":"Stay out of the dotted ring of light! If it catches you, tap in the arrow's direction to break free",
+"灯光的虚线圈就是吸力范围。被吸住了，看箭头朝哪边，就往哪边点屏幕。":"The dotted ring shows how far the lamp pulls. If you're caught, tap toward wherever the arrow points.",
+"赶鱼群：鱼群会躲着小鱼走。绕到鱼群后面，把它们往潟湖口推。":"Herding: the shoal swims away from Xiaoyu. Get behind it and push it toward the lagoon mouth."};
+ for(const k in EN4)if(!DICT[k]){const v=EN4[k];DICT[k]=[v,v,v,v]}}
+RULES.push([/^回家的鱼 (\d+) \/ (\d+)$/,m=>`Fish home ${m[1]} / ${m[2]}`],[/^还剩 (\d+) 秒$/,m=>`${m[1]}s left`],[/^(\d+) 秒后开始$/,m=>`Starting in ${m[1]}s`]);
+for(let i=RULES.length-3;i<RULES.length;i++){const r=RULES[i];while(r.length<5)r.push(r[1])}
+for(const k in TLC)delete TLC[k];
