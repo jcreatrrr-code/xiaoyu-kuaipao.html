@@ -24,7 +24,7 @@ const TIPS2={node:'发光的是要带回小馆的食材，用手指点它！',ro
 const LEAPSAFE={rock:1,octo:1,jelly:1,net:1,fnet:1,ice:1,mimic:1};
 const SURF=.3,surfY=()=>fy(SURF),LEAP={T:1.5,fs:SURF+.04,fp:.03};
 const tideH=t=>.2*(.5-.5*Math.cos(t*TAU/11));
-function v2Build(L,g){a2Build(L,g);if(L.tide)for(const e of g.E)if(e.t==='pearl'||e.t==='wild')e.f=Math.min(e.f,.74);
+function v2Build(L,g){a2Build(L,g);a3Build(L,g);if(L.tide)for(const e of g.E)if(e.t==='pearl'||e.t==='wild')e.f=Math.min(e.f,.74);
   if(!L.leap)return;const m=v=>SURF+(1-SURF)*v;g.E=g.E.filter(e=>!(e.t==='rock'&&e.top&&!e.root));
   for(const e of g.E){if(e.f!=null&&!e.air)e.f=m(e.f);if(e.amp!=null&&e.t!=='net')e.amp*=1-SURF;
     if(e.t==='fnet')e.h=m(e.h);else if(e.t==='rock')e.h=e.top?m(e.h):e.h*(1-SURF)}}
@@ -53,7 +53,7 @@ function v2BG(th,sc,t){
   if(th===13){ctx.fillStyle='rgba(30,70,120,.25)';for(let i=0;i<3;i++){const x=VW-((t*90+i*260+sc*.1)%(VW+200))+100,y=yMin+30+i*22;ctx.beginPath();ctx.ellipse(x,y,22,6,0,0,TAU);ctx.fill();ctx.beginPath();ctx.moveTo(x-4,y);ctx.lineTo(x+10,y-16);ctx.lineTo(x+14,y);ctx.fill()}}
   if(th===14){ctx.strokeStyle='rgba(60,40,25,.55)';ctx.lineCap='round';const o=sc*.3;for(let n=Math.floor(o/140)-1;n*140-o<VW+60;n++){const x=n*140-o,h=120+hash(n+2)*160;ctx.lineWidth=10;
     for(const s of[-1,1]){ctx.beginPath();ctx.moveTo(x,0);ctx.quadraticCurveTo(x+s*30,h*.6,x+s*44,h);ctx.stroke()}}}
-  a2BG(th,sc,t);
+  a2BG(th,sc,t);a3BG(th,sc,t);
   if(th===15){ctx.strokeStyle='rgba(200,220,255,.18)';ctx.lineWidth=1.5;for(let i=0;i<40;i++){const x=((i*97+t*60)%(VW+80))-40,y=((i*53+t*700)%(PH+60))-30;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-6,y+18);ctx.stroke()}}}
 function v2Sky(g,t){if(!g||!g.L||!g.L.leap)return;const y=surfY(),st=g.theme===15;ctx.save();const gr=ctx.createLinearGradient(0,0,0,y);
   gr.addColorStop(0,st?'#141c2c':'#bfe9ff');gr.addColorStop(1,st?'#3a4a62':'#eaf8ff');ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(VW,0);

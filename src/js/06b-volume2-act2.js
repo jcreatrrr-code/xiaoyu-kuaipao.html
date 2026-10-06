@@ -85,7 +85,7 @@ function a2Node(e,t){
   if(e.k==='turbo'){ctx.rotate(Math.sin(t*1.5+e.x)*.1);ctx.fillStyle='#c89a5a';ctx.beginPath();ctx.arc(0,2,18,0,TAU);ctx.fill();ctx.fillStyle='#e8c890';ctx.beginPath();ctx.arc(-3,-2,11,0,TAU);ctx.fill();ctx.fillStyle='#fff8e8';circ(-5,-4,5);ctx.strokeStyle='#7a5a30';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,2,18,.4,2.6);ctx.stroke();return 1}
   if(e.k==='lobster'){ctx.fillStyle='#d0603a';ctx.beginPath();ctx.ellipse(0,0,22,9,0,0,TAU);ctx.fill();ctx.fillStyle='#b0482a';for(let i=0;i<3;i++)ctx.fillRect(-18+i*9,-8,5,16);ctx.strokeStyle='#d0603a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(18,-4);ctx.quadraticCurveTo(40,-24+Math.sin(t*3)*4,46,-6);ctx.moveTo(18,2);ctx.quadraticCurveTo(42,-10,48,8);ctx.stroke();ctx.fillStyle='#1b2a41';circ(16,-5,2);return 1}
   if(e.k==='skipjack'){const a=t*1.8+e.x*.01;ctx.translate(Math.cos(a)*14,Math.sin(a)*6);ctx.fillStyle='#4a6aa0';ctx.beginPath();ctx.ellipse(0,0,22,9,0,0,TAU);ctx.fill();ctx.fillStyle='#e8f0ff';ctx.beginPath();ctx.ellipse(2,4,16,4,0,0,TAU);ctx.fill();ctx.strokeStyle='#2a3a60';ctx.lineWidth=1.5;for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-8+i*7,2);ctx.lineTo(-4+i*7,7);ctx.stroke()}ctx.fillStyle='#2a3a60';ctx.beginPath();ctx.moveTo(-20,0);ctx.lineTo(-30,-9);ctx.lineTo(-30,9);ctx.fill();ctx.fillStyle='#1b2a41';circ(14,-2,2);return 1}
-  return 0}
+  return a3Node(e,t)}
 function a2Build(L,g){const lp=g.E.filter(e=>e.t==='lamp');if(lp.length)g.E=g.E.filter(e=>!(e.t==='rock'||e.t==='jelly'||e.t==='octo')||!lp.some(l=>Math.abs(e.x-l.x)<l.rx+90));
   const fk=g.E.filter(e=>e.t==='fork');if(!fk.length)return;g.E=g.E.filter(e=>{if(e.t==='fork'||e.t==='pearl'||e.t==='node'||e.t==='cp'||e.t==='fin'||e.t==='boss')return true;return!fk.some(f=>e.x>f.x-60&&e.x<f.x+f.L+60&&!(e.t==='jelly'&&e.x===f.x+f.L*.45))});
   for(const e of g.E)if(e.t==='node'){const f=fk.find(q=>e.x>q.x-40&&e.x<q.x+q.L+40);if(f)e.x=f.x-140}}
@@ -157,4 +157,4 @@ function herdHud(B,t){const g=G,o=HD.geo(),a=o.a,R=o.R,uw=o.uw,[m0,m1]=herdMouth
   if(B.t<0){ctx.fillStyle='rgba(6,40,70,.6)';ctx.fillRect(0,(a.y0+a.y1)/2-70*U,VW,140*U);ctx.fillStyle='#fff';ctx.font=`${(VW<500?14:17)*U}px ${FONT}`;
     const L=[tl('按住屏幕拖动小鱼，鱼群会躲着你走'),tl('别让鱼群回到灯光里，把它们赶进潟湖口'),tl(Math.ceil(-B.t)+' 秒后开始')];L.forEach((x,i)=>ctx.fillText(x,VW/2,(a.y0+a.y1)/2-28*U+i*30*U))}
   ctx.restore()}
-cv.addEventListener('pointermove',e=>{const B=G&&G.boss;if(state==='play'&&B&&B.mini&&!B.done&&B.t>=-3&&(e.buttons||e.pointerType==='mouse'))herdPt(e.clientX,e.clientY)});
+cv.addEventListener('pointermove',e=>{const B=G&&G.boss;if(state==='play'&&B&&B.k==='herd'&&!B.done&&B.t>=-3&&(e.buttons||e.pointerType==='mouse'))herdPt(e.clientX,e.clientY)});
