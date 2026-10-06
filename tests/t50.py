@@ -19,7 +19,7 @@ async (args)=>{const [mode,li,secs]=args;const T=window.__T,K=window.__K;K.SAVE.
   for(const e of g.E){if(e.gone||(e.t!=='jelly'&&e.t!=='octo'))continue;const sx=e.x-g.scroll-d.fishSX;if(sx>-60&&sx<150){const ey=T.entY(e,g.t);if(Math.abs(ty-ey)<90)ty=ey+(ey>(d.yMin+d.yMax)/2?-100:100)}}
   if(g.L.tide){const fl=d.yMax-T.tideH(g.t+.6)*(d.yMax-d.yMin);ty=Math.min(ty,fl-55)}
   const B=g.boss;if(B&&B.k==='guide'&&!B.done){const z=fy(.46);ty=Math.min(ty,z-50);const cx=d.fishSX+150;
-    if(B.t>0&&B.cd<=0&&B.reefs.some(r=>!r.ok&&!r.hit&&Math.abs(r.x-cx)<60&&r.c===T.gci(B))&&g.fish.y<z){T.tap(d.VW-12,d.yMax-6);taps++}}
+    const nx=B.reefs.find(r=>!r.ok&&!r.hit);if(B.t>0&&nx&&nx.x-cx<200&&nx.c!==T.gci(B)&&fr%10==0){const U=1/d.S,nc=(mode==='hard'||B.made>=3)?3:2,sp=58*U;T.tap(d.VW/2-(nc-1)*sp/2+nx.c*sp,d.yMax+28*U);taps++}}
   ty=Math.max(ty===d.yMin?d.yMin:d.yMin+40,Math.min(d.yMax-40,ty));
   if(g.trap){if(fr%6==0)T.press();}else{ if(g.fish.y>ty)T.press();else T.release(); }
   T.update(1/60);fr++; if(fr>60*secs)break;}

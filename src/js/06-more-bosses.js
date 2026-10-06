@@ -81,7 +81,7 @@ function bossRetry(){const g=G,B=g.boss;if(B.k!=='feed'){g.life=Math.max(1,g.cpL
 function score(){const g=G;return Math.floor(g.scroll/60)*10+g.pearls*20+g.bonus}
 
 function entY(e,t){switch(e.t){
-  case'pearl':return fy(e.f)+Math.sin(t*3+e.x)*4;
+  case'pearl':return fy(e.f)+Math.sin(t*3+e.x)*4+(e.py||0);
   case'octo':return fy(e.f)+Math.sin(t*1.2+e.ph)*14;
   case'jelly':return fy(clamp(e.f+Math.sin(t*e.sp+e.ph)*e.amp,.07,.93));
   case'net':return fy(e.f+Math.sin(t*.9+e.ph)*e.amp);
@@ -130,7 +130,8 @@ function update(dt){
     switch(e.t){
     case'fnet':v2Hit(g,e,sx,y,dx,dt);break;
     case'pearl':if(sx>fx)e.miss=0;else if(sx<fx-(g.magnet?120:50)&&!e.miss&&!e.air){e.miss=1;if(g.combo>=3)ftext('连击断了',fx+30,F.y-56,'#b8c7d9');g.combo=0}
-      if(dist<(g.magnet?115:38)&&!g.trap){e.gone=1;if(g.boss&&g.boss.k==='chase'&&!g.boss.done)g.boss.gap=Math.min(100,g.boss.gap+1.05);g.pearls+=e.air?2:1;if(e.air)burst(sx,y,'#ffe27a',6,1);g.combo++;g.comboT=3.5;g.maxCombo=Math.max(g.maxCombo,g.combo);SFX.pearl(g.combo);burst(sx,y,'#fff',4,1);
+      if(g.magnet&&dist<190&&dist>=38&&!g.trap){const k=Math.min(1,dt*(dist<115?9:5));e.dx=(e.dx||0)-dx*k;e.py=(e.py||0)-dy*k}
+      if(dist<38&&!g.trap){e.gone=1;if(g.boss&&g.boss.k==='chase'&&!g.boss.done)g.boss.gap=Math.min(100,g.boss.gap+1.05);g.pearls+=e.air?2:1;if(e.air)burst(sx,y,'#ffe27a',6,1);g.combo++;g.comboT=3.5;g.maxCombo=Math.max(g.maxCombo,g.combo);SFX.pearl(g.combo);burst(sx,y,'#fff',4,1);
         if(g.combo%10===0){g.pearls+=5;ftext(`连击 ${g.combo}！+5 ⚪`,fx+30,F.y-56,'#ffe27a');SFX.pearl(12)}}break;
     case'rock':{const hw=e.w/2-12,ry=e.top?fy(e.h)-12:fy(1-e.h)+12;
         if(Math.abs(dx)<hw+16&&(e.top?F.y-18<ry:F.y+18>ry))hurt(1)}break;
