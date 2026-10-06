@@ -17,7 +17,8 @@ const ITEMS=[
  {id:'slow',ic:'🐢',n:'慢慢游海藻',d:'本局游得慢一点，更好躲',p:40}];
 const SKINS=[{n:'橙色小鱼',p:0,c:['#ffe08a','#ffa01f','#ff7f1f']},{n:'蓝色小鱼',p:200,c:['#d2f4ff','#56b8f0','#2f8fd0']},
  {n:'粉色小鱼',p:200,c:['#ffe6f1','#ff8fc0','#f0589a']},{n:'翡翠小鱼',p:400,c:['#dcffee','#4fe0b5','#1c9c7a']},
- {n:'紫罗兰小鱼',p:300,c:['#efe0ff','#b57af2','#7d45c9']},{n:'墨墨小鱼',p:300,c:['#c8d0dc','#56627a','#2c3446']},{n:'黄金小鱼',p:800,c:['#fffbe0','#ffcf2e','#d99400']}];
+ {n:'紫罗兰小鱼',p:300,c:['#efe0ff','#b57af2','#7d45c9']},{n:'墨墨小鱼',p:300,c:['#c8d0dc','#56627a','#2c3446']},{n:'黄金小鱼',p:800,c:['#fffbe0','#ffcf2e','#d99400']},
+ {n:'海天使',p:3000,c:['#f2fdff','#9fe6ff','#ff6a4d'],sp:'angel',d:'会发光的海天使，游过的地方会留下荧光'}];
 SAVE=Object.assign({fish:{},dishes:{}},SAVE);
 const FISH={sard:{n:'沙丁鱼',c:['#eef7ff','#9cc4e8','#5f8fc0'],s:.72,hp:1,v:30},bream:{n:'鲷鱼',c:['#ffdcd4','#ff7a6b','#d94f45'],s:.88,hp:1,v:45},
  salmon:{n:'三文鱼',c:['#ffe6d4','#ff9a6a','#e0683a'],s:1,hp:2,v:60},puffer:{n:'河豚',c:['#fff8c8','#f2d24a','#c9a21a'],s:1.05,hp:2,v:35},tuna:{n:'金枪鱼',c:['#d4e2ff','#4a6fc0','#2a4690'],s:1.3,hp:3,v:85},
@@ -46,6 +47,6 @@ const DISH=[
  {id:'d31',ic:'🧊',n:'冰海双拼',need:{cod:1,salmon:1},p:55},{id:'d32',ic:'🍘',n:'蒲烧鳗鱼饭',need:{eel:2},p:60},
  {id:'d33',ic:'🍜',n:'鳗鱼拉面',need:{eel:1,yellow:1},p:45},{id:'d34',ic:'🏮',n:'鮟鱇鱼锅',need:{angler:1},p:55},
  {id:'d35',ic:'🥩',n:'香煎旗鱼排',need:{sword:1},p:60},{id:'d36',ic:'🏆',n:'黄金鱼汤',need:{gold:1},p:90}];
-const skin=()=>{const c=(SKINS[SAVE.skin]||SKINS[0]).c;return{c0:c[0],c1:c[1],c2:c[2]}};
+const skin=()=>{const k=SKINS[SAVE.skin]||SKINS[0],c=k.c;return{c0:c[0],c1:c[1],c2:c[2],sp:k.sp}};
 const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(SAVE))}catch(e){}};
 

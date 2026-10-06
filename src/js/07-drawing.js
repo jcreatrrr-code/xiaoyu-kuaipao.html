@@ -26,6 +26,7 @@ function drawBG(th,sc,t){
 }
 function drawFish(x,y,ang,t,o){
   o=o||{};ctx.save();ctx.translate(x,y);ctx.rotate(ang);const s=o.s||1;ctx.scale(s*(o.lx||1),s);
+  if(o.sp==='angel'){drawAngel(t,o);ctx.restore();return}
   const wag=Math.sin(t*14)*.35,c2=o.c2||'#ff7f1f';
   ctx.save();ctx.translate(-23,0);ctx.rotate(wag);ctx.fillStyle=c2;ctx.beginPath();ctx.moveTo(0,0);ctx.quadraticCurveTo(-16,-6,-27,-21);ctx.quadraticCurveTo(-19,0,-27,21);ctx.quadraticCurveTo(-16,6,0,0);ctx.fill();ctx.restore();
   ctx.fillStyle=c2;ctx.beginPath();ctx.moveTo(-12,-19);ctx.quadraticCurveTo(-3,-37,11,-20);ctx.fill();
@@ -39,6 +40,29 @@ function drawFish(x,y,ang,t,o){
   else{ctx.fillStyle='#fff';circ(13,-5,o.scared?11:9.5);ctx.fillStyle='#1b2a41';circ(15,-5,o.scared?4:5.4);ctx.fillStyle='#fff';circ(16.8,-7.2,2)}
   ctx.fillStyle='rgba(255,90,120,.45)';circ(7,8,4.5);
   if(o.scared||o.dead){ctx.fillStyle='#8a3b00';circ(23,7,3.6)}else{ctx.strokeStyle='#8a3b00';ctx.lineWidth=2.2;ctx.lineCap='round';ctx.beginPath();ctx.arc(20,4,5.5,.25,1.5);ctx.stroke()}
+  ctx.restore()}
+/* 海天使皮肤：半透明发光的身体、扇动的小翅膀、橙红色的心 */
+function drawAngel(t,o){
+  const fl=Math.sin(t*9),pu=.5+.5*Math.sin(t*3);
+  ctx.globalCompositeOperation='lighter';const h=ctx.createRadialGradient(0,0,6,0,0,62);h.addColorStop(0,`rgba(150,240,255,${.32+pu*.14})`);h.addColorStop(1,'rgba(150,240,255,0)');ctx.fillStyle=h;circ(0,0,62);ctx.globalCompositeOperation='source-over';
+  for(const d of[-1,1]){ctx.save();ctx.translate(2,d*6);ctx.scale(1,.55+.45*(d<0?fl:-fl)*.8+.25);ctx.fillStyle='rgba(205,245,255,.55)';ctx.strokeStyle='rgba(235,252,255,.9)';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(-6,0);ctx.bezierCurveTo(-26,d*30,6,d*44,16,d*22);ctx.quadraticCurveTo(14,d*8,6,0);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore()}
+  ctx.shadowColor='#9ff8ff';ctx.shadowBlur=22;
+  const g=ctx.createLinearGradient(30,0,-46,0);g.addColorStop(0,'rgba(245,253,255,.95)');g.addColorStop(.55,'rgba(200,240,255,.78)');g.addColorStop(1,'rgba(160,225,255,.35)');ctx.fillStyle=g;
+  const tw=Math.sin(t*6)*4;ctx.beginPath();ctx.moveTo(30,0);ctx.bezierCurveTo(30,-20,8,-22,0,-14);ctx.bezierCurveTo(-14,-10,-30,-6+tw*.3,-46,tw);ctx.bezierCurveTo(-30,6+tw*.3,-14,12,0,15);ctx.bezierCurveTo(8,22,30,20,30,0);ctx.fill();ctx.shadowBlur=0;
+  ctx.shadowColor='#ff6a4d';ctx.shadowBlur=12+pu*8;ctx.fillStyle='#ff6a4d';ctx.beginPath();ctx.ellipse(-10,1,10,6.5,0,0,TAU);ctx.fill();ctx.fillStyle='#ffb08a';circ(-13,-1,3);
+  ctx.fillStyle='#ff7f5a';circ(27,-12,3);circ(29,-6,2.5);ctx.shadowBlur=0;
+  ctx.fillStyle='#fff';for(let i=0;i<4;i++){ctx.globalAlpha=.4+.6*Math.abs(Math.sin(t*4+i*1.7));circ(-30+i*12,(i%2?-4:5),1.6)}ctx.globalAlpha=1;
+  if(o.dead){ctx.strokeStyle='#1b2a41';ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(10,-10);ctx.lineTo(19,-1);ctx.moveTo(19,-10);ctx.lineTo(10,-1);ctx.stroke()}
+  else{ctx.fillStyle='#fff';circ(15,-5,o.scared?9:7.5);ctx.fillStyle='#1b2a41';circ(16.5,-5,o.scared?3.4:4.4);ctx.fillStyle='#fff';circ(18,-7,1.6)}
+  ctx.fillStyle='rgba(255,120,150,.5)';circ(11,7,3.5);
+  ctx.strokeStyle='#c0465a';ctx.lineWidth=2;ctx.lineCap='round';ctx.beginPath();if(o.scared||o.dead)ctx.arc(24,6,2.6,0,TAU);else ctx.arc(21,4,4.5,.25,1.5);ctx.stroke()}
+/* 海天使游过留下的荧光拖尾 */
+function angelTrail(g,t){
+  const a=g.atr||(g.atr=[]);if(state==='play'&&a.lt!==t){a.lt=t;a.push({x:g.scroll+fishSX-30,y:g.fish.y+(Math.random()-.5)*14,b:t,r:2+Math.random()*3,c:Math.random()<.25?'255,170,140':'160,245,255'})}
+  while(a.length&&(t-a[0].b>1.1||a.length>90))a.shift();
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  for(const p of a){const k=(t-p.b)/1.1,sx=p.x-g.scroll-k*18;ctx.fillStyle=`rgba(${p.c},${(1-k)*.8})`;circ(sx,p.y+Math.sin(p.b*7+k*5)*5,p.r*(1-k*.5))}
   ctx.restore()}
 function drawPal(x,y,t,turtle){ctx.save();ctx.translate(x,y);
   if(turtle){const fl=Math.sin(t*5)*.35;ctx.fillStyle='#8fe09a';for(const d of[-1,1]){ctx.save();ctx.translate(4,d*11);ctx.rotate(d*(.5+fl));ctx.beginPath();ctx.ellipse(0,d*6,5,10,0,0,TAU);ctx.fill();ctx.restore();ctx.beginPath();ctx.ellipse(-12,d*11,4,6,d*-.6,0,TAU);ctx.fill()}
@@ -160,7 +184,7 @@ function drawWorld(){
     if(B.ph==='idle'){drawShark(bx,by,t);const mx=bx-112,my=by+10,op=bossOpen(B),on=B.carry>0&&op;if(!op){ctx.fillStyle='#5f7fa3';ctx.beginPath();ctx.moveTo(bx-124,by-8);ctx.quadraticCurveTo(bx-84,by+30,bx-54,by+24);ctx.lineTo(bx-56,by+2);ctx.closePath();ctx.fill()}ctx.save();ctx.strokeStyle=on?'#4fe0b5':'rgba(255,255,255,.75)';ctx.globalAlpha=op?1:.25;ctx.lineWidth=on?5:3;ctx.setLineDash([10,8]);ctx.lineDashOffset=-t*40;ctx.beginPath();ctx.arc(mx,my,44+Math.sin(t*6)*3,0,TAU);ctx.stroke();ctx.restore();
       ctx.fillStyle='#fff';ctx.font=`${20*Math.max(1,U*.85)}px ${FONT}`;ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='rgba(6,40,70,.6)';const tx=on?'点我喂！':op?'咕——':'……';ctx.strokeText(tx,bx-30,by-78);ctx.fillText(tx,bx-30,by-78)}
     for(let i=0;i<B.carry;i++)drawFish(fishSX-50-i*28,F.y+22+Math.sin(t*6+i)*3,0,t+i,{s:.45,c0:'#bff0ff',c1:'#56b8f0',c2:'#2f8fd0'})}
-  const dead=state==='dying';
+  const dead=state==='dying';if(SKINS[SAVE.skin]&&SKINS[SAVE.skin].sp==='angel'&&!dead)angelTrail(g,t);
   if(!(g.inv>0&&!g.trap&&Math.sin(t*30)>0)||dead){
     drawFish(fishSX,F.y,dead?Math.PI:clamp(F.vy/520,-.5,.5)+(g.trap?Math.sin(t*30)*.2:0),dead?0:t,{dead,scared:g.sharks.length>0||!!g.trap,...skin()})}
   if(g.orb){const o=g.orb;if(!(o.inv>0&&Math.sin(t*30)>0)){ctx.save();ctx.translate(fishSX-78,o.y);ctx.shadowColor='#9ff0ff';ctx.shadowBlur=26+Math.sin(t*4)*8;ctx.fillStyle='#dffaff';circ(0,0,15);ctx.shadowBlur=0;ctx.fillStyle='#9ff0ff';circ(0,0,9);ctx.fillStyle='#fff';for(let i=0;i<o.hp;i++)circ((i-(o.hp-1)/2)*11,-26,3.5);ctx.restore()}}
