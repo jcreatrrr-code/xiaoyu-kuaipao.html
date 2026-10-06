@@ -184,6 +184,8 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
 .gd .gn{display:block;font-size:13.5px;line-height:1.2;min-height:33px;text-shadow:0 1px 0 rgba(0,0,0,.4)}
 .gd .gp{display:inline-block;font-size:13px;background:var(--sun);color:#6a4500;border-radius:99px;padding:0 9px;line-height:1.5}
 .gd .gb{position:absolute;top:-7px;inset-inline-end:-9px;background:var(--mint);color:var(--ink);font-size:12px;border-radius:99px;padding:0 7px;line-height:1.6}
+.gd .gk{position:absolute;top:-7px;inset-inline-start:-9px;background:#2fbf71;color:#fff;font-size:12px;font-weight:700;border-radius:99px;width:20px;height:20px;line-height:20px;text-align:center}
+.eqst{font-weight:700;margin:.3em 0}
 .gd.sel .gi{box-shadow:0 0 0 4px var(--sun),0 3px 0 rgba(0,0,0,.28)}.gd.lock{opacity:.55}.gd.own .gp{background:var(--mint)}
 .card.info{width:min(100%,460px)}.card.info h3{margin-bottom:4px}.card.info p{text-align:center}.card.info .note{color:var(--muted);font-size:14px}.card.info .rowb{margin-top:12px}
 #shopCv{position:relative;inset:auto;height:auto;width:min(100%,460px);aspect-ratio:120/44;image-rendering:pixelated;border-radius:14px;box-shadow:0 0 0 4px #6b4226,0 6px 0 rgba(6,40,70,.3);flex-shrink:0;cursor:pointer}

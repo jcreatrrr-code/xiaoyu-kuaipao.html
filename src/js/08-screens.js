@@ -5,8 +5,9 @@ let shopTab='prot',shopSel='';
 const STABS=[['prot','🛡️','保护'],['help','🧰','帮手'],['tool','🔦','工具'],['skin','🐟','变身']];
 function shopItems(){
   if(shopTab==='prot'||shopTab==='help'){const i0=ITEMS.findIndex(x=>x.id==='magnet');return(shopTab==='prot'?ITEMS.slice(0,i0):ITEMS.slice(i0)).map(it=>{const n=SAVE.inv[it.id]||0,lock=chN()<ITEM_CH[it.id],on=SAVE.use[it.id]!==0;
-    return{id:it.id,ic:lock?'❓':it.ic,n:lock?'？？？':it.n,d:lock?'墨墨还没有进这件货。':it.d,note:lock?'':'每局用掉一个'+(n?'，现在有 '+n+' 个':''),tag:lock?'🔒':'⚪ '+it.p,badge:n?'×'+n:'',lock,
-      act:lock?`<button class="btn off" disabled>🔒 通关第 ${ITEM_CH[it.id]} 关</button>`:`<button class="btn sun" data-buy="${it.id}" ${SAVE.wallet<it.p?'disabled':''}>⚪ ${it.p}</button>`+(n?`<button class="btn ${on?'mint':'off'}" data-tog="${it.id}">${on?'出发时带上':'先不带'}</button>`:'')}})}
+    return{id:it.id,ic:lock?'❓':it.ic,n:lock?'？？？':it.n,d:lock?'墨墨还没有进这件货。':it.d,note:lock?'':'每局用掉一个'+(n?'，现在有 '+n+' 个':''),tag:lock?'🔒':'⚪ '+it.p,badge:n?'×'+n:'',chk:n&&on&&!lock,lock,
+      st:n&&!lock?(on?'✅ 已带上：下一局出发时用掉一个':'⬜ 没带上：先放在包里'):'',
+      act:lock?`<button class="btn off" disabled>🔒 通关第 ${ITEM_CH[it.id]} 关</button>`:`<button class="btn sun" data-buy="${it.id}" ${SAVE.wallet<it.p?'disabled':''}>⚪ ${it.p}</button>`+(n?`<button class="btn ${on?'off':'mint'}" data-tog="${it.id}">${on?'取下':'带上'}</button>`:'')}})}
   if(shopTab==='tool')return TOOLS.filter(t=>chN()>=(t.ch||5)).map(t=>{const own=SAVE.tools[t.id];return{id:t.id,ic:t.ic,n:t.n,d:t.d,note:'买一次，永久使用',tag:own?'已拥有':'⚪ '+t.p,own,
     act:own?'<button class="btn off" disabled>已拥有</button>':`<button class="btn sun" data-tool="${t.id}" ${SAVE.wallet<t.p?'disabled':''}>⚪ ${t.p}</button>`}});
   return SKINS.map((k,i)=>{const own=SAVE.skins.includes(i),cur=SAVE.skin===i;return{id:'s'+i,ic:`<i style="background:radial-gradient(circle at 35% 30%,${k.c[0]},${k.c[1]})"></i>`,n:k.n,d:cur?'正在使用':own?'已拥有':'换个颜色去冒险',note:'永久拥有',tag:cur?'使用中':own?'已拥有':'⚪ '+k.p,own,
@@ -14,8 +15,8 @@ function shopItems(){
 function showShop(){
   $('wallet').textContent=SAVE.wallet;const items=shopItems();if(!items.some(x=>x.id===shopSel))shopSel=items[0]?items[0].id:'';const cur=items.find(x=>x.id===shopSel);
   $('shopList').innerHTML=`<div class="tabs">${STABS.map(t=>`<button class="tab ${t[0]===shopTab?'on':''}" data-stab="${t[0]}">${t[1]} ${t[2]}</button>`).join('')}</div>`
-   +(items.length?`<div class="shelf">${items.map(x=>`<button class="gd ${x.id===shopSel?'sel':''} ${x.lock?'lock':''} ${x.own?'own':''}" data-sel="${x.id}"><span class="gi">${x.ic}${x.badge?`<span class="gb">${x.badge}</span>`:''}</span><span class="gn">${x.n}</span><span class="gp">${x.tag}</span></button>`).join('')}</div>`:'<div class="card info"><p>这一格货架还空着。</p></div>')
-   +(cur?`<div class="card info"><h3>${cur.n}</h3><p>${cur.d}</p><p class="note">${cur.note}</p><div class="rowb">${cur.act}</div></div>`:'');
+   +(items.length?`<div class="shelf">${items.map(x=>`<button class="gd ${x.id===shopSel?'sel':''} ${x.lock?'lock':''} ${x.own?'own':''}" data-sel="${x.id}"><span class="gi">${x.ic}${x.badge?`<span class="gb">${x.badge}</span>`:''}${x.chk?'<span class="gk">✓</span>':''}</span><span class="gn">${x.n}</span><span class="gp">${x.tag}</span></button>`).join('')}</div>`:'<div class="card info"><p>这一格货架还空着。</p></div>')
+   +(cur?`<div class="card info"><h3>${cur.n}</h3><p>${cur.d}</p><p class="note">${cur.note}</p>${cur.st?`<p class="eqst">${cur.st}</p>`:''}<div class="rowb">${cur.act}</div></div>`:'');
   show('sShop')}
 $('shopList').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)return;const d=b.dataset;
   if(d.stab){shopTab=d.stab;shopSel='';SFX.tap();showShop();return}if(d.sel){shopSel=d.sel;SFX.tap();showShop();return}
