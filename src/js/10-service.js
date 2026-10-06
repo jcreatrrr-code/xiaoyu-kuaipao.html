@@ -28,9 +28,11 @@ function startServe(banq){
   if(banq===2){SV.banq=2;SV.t=150;SV.seats=Array(4).fill(null);let un=DISH.filter(d=>+d.id.slice(1)>=52&&chN()>=(UNL[d.id]||[0])[0]);if(!un.length)un=DISH.filter(d=>+d.id.slice(1)>=52);SV.q=Array.from({length:12},(_,i)=>un[(i*5+2)%un.length].id)}
   else if(banq){SV.banq=1;SV.t=110;SV.seats=Array(4).fill(null);const un=DISH.filter(d=>unlocked(d)&&Object.keys(d.need).length<=2&&methodOf(d.id)!=='umu').sort((a,b)=>b.p-a.p).slice(0,8);SV.q=Array.from({length:10},(_,i)=>un[(i*3)%un.length].id)}
   $('svEnd').hidden=true;$('app').classList.add('serve');$('svScene').hidden=$('svShelf').hidden=false;show('sServe');svBuild();svRender();
-  if(banq===2)toast('石焖宴：全岛的人都来了！店员全来帮忙',3.2);else if(banq)toast('宴席挑战：店员进不了后厨，全靠你自己！',3.2);else if(broke.length)toast('珍珠不够付工资，'+broke.join('、')+'这场没来',3.2,1);else if(came.length)toast('本场店员：'+came.join('、')+'（工资 '+wage+' ⚪）',3);else toast('客人点什么，就在下面点那道菜开始做',3)}
+  if(banq===2)toast('石焖宴：全岛的人都来了！店员忙着招呼客人，后厨主要靠你',3.4);else if(banq)toast('宴席挑战：店员进不了后厨，全靠你自己！',3.2);else if(broke.length)toast('珍珠不够付工资，'+broke.join('、')+'这场没来',3.2,1);else if(came.length)toast('本场店员：'+came.join('、')+'（工资 '+wage+' ⚪）',3);else toast('客人点什么，就在下面点那道菜开始做',3)}
 function svSigNeed(id){const v=SV;return v.seats.filter(x=>x&&x.d===id&&x.sig).length-v.st.filter(x=>x.d===id&&x.hand&&x.ph!=='burn').length-v.shelf.filter(p=>p.d===id&&p.hand).length}
-function svStart(id,byHand){const v=SV,d=dById(id),m=startKind(id),s=v.st.find(x=>x.k===m&&!x.d);if(!s||svPending(id)<=0||!(v.banq||canMake(d,SAVE.fish)))return;s.hand=byHand&&svSigNeed(id)>0?1:0;
+/* 宴席里地炉一次焖三份，剩下的没人要时，别的地炉菜可以把它腾出来 */
+function svFreeSt(m){const v=SV;return v.st.find(x=>x.k===m&&!x.d)||v.banq&&v.st.find(x=>x.k===m&&x.open&&!v.seats.some(y=>y&&y.d===x.d))}
+function svStart(id,byHand){const v=SV,d=dById(id),m=startKind(id),s=svFreeSt(m);if(!s||svPending(id)<=0||!(v.banq||canMake(d,SAVE.fish)))return;s.hand=byHand&&svSigNeed(id)>0?1:0;
   if(!v.banq)for(const k in d.need)SAVE.fish[k]-=d.need[k];s.d=id;s.t=0;s.n=0;s.left=s.k==='umu'?3:0;s.open=0;s.ph=m==='cut'||m==='asm'?'work':'cook';s.need=m==='cut'?6:3+Object.values(d.need).reduce((a,b)=>a+b,0);v.dirty=1;SFX.tap();svFx('start',v.st.indexOf(s),d.ic,id)}
 function svPlate(s,q){const v=SV;if(M2[s.d]&&!s.stg){const k2=M2[s.d][1],t2=v.st.find(x=>x.k===k2&&!x.d);if(!t2){if(!v.banq||true)toast(STN[k2][1]+'没空，先腾出来',1.3);return false}t2.d=s.d;t2.ph=k2==='grill'||k2==='pot'?'cook':'work';t2.t=0;t2.n=0;t2.stg=1;t2.q0=q;t2.hand=s.hand;svFx('plate',v.st.indexOf(s),dById(s.d).ic);s.d=null;s.ph='';s.hand=0;v.dirty=1;SFX.tap();return true}if(s.q0&&s.q0!=='ok')q=s.q0;s.stg=0;s.q0=0;if(v.shelf.length>=4){toast('出菜口满了，先把菜端给客人',1.6);return false}
   if(s.k==='umu'){svFx('plate',v.st.indexOf(s),dById(s.d).ic);v.shelf.push({d:s.d,q,hand:s.hand,age:0});s.left=(s.left||3)-1;s.open=1;v.dirty=1;if(s.left<=0){s.d=null;s.ph='';s.hand=0;s.open=0}return true}
@@ -57,10 +59,11 @@ function svTick(dt){const v=SV;v.t-=dt;{const rd=dt/(SAVE.spd||1);v.gcd=Math.max
       if(d){const sig=!v.seats.some(x=>x&&x.sig)&&Math.random()<(o?.5:.22),P=o?30:sig?28:24;v.seats[i]={d:d.id,p:P,P,face:FACES[Math.floor(Math.random()*FACES.length)],name:o?o.c:'',o,sig,look:svLook(o),x:1e3};v.dirty=1;SFX.tap();if(sig&&v.staff.chef&&!v.sigTip){v.sigTip=1;toast('阿珍：“这道得你来，我算过了。”带 ⭐ 的单你亲手做能多卖四成；等太久她才会接手',3.6)}}}}
   for(const s of v.st){if(!s.d)continue;
     if(TIME[s.k]){if(!s.open){s.t+=dt;const T=TIME[s.k],ph=s.t<T[0]?'cook':s.t<T[1]?'perfect':s.t<T[2]?'ok':'burn';if(ph!==s.ph){s.ph=ph;v.dirty=1;if(ph==='perfect')SFX.shield();if(ph==='burn')SFX.hit()}}
-      if(v.staff.chef&&!s.hand&&s.ph!=='burn'&&s.t>=TIME[s.k][0]+1.5&&v.shelf.length<4&&(s.k!=='umu'||v.seats.filter(x=>x&&x.d===s.d).length>v.shelf.filter(p=>p.d===s.d).length))svPlate(s,'ok')}
-    else if(v.staff.chef&&!s.hand){s.ct=(s.ct||0)+dt;if(s.ct>.45){s.ct=0;svTapSt(s)}}}
-  if(v.staff.chef){v.cs=(v.cs||0)+dt;if(v.cs>.7){v.cs=0;for(const id of new Set(v.seats.filter(Boolean).map(s=>s.d))){const m=startKind(id),A=v.seats.filter(x=>x&&x.d===id&&(!x.sig||x.p/x.P<.45)).length,C=v.st.filter(x=>x.d===id&&x.ph!=='burn'&&!x.hand).length+v.shelf.filter(p=>p.d===id&&!p.hand).length;if(C<A&&svPending(id)>0&&(v.banq||canMake(dById(id),SAVE.fish))&&v.st.some(x=>x.k===m&&!x.d)){svStart(id);break}}}}
-  if(v.staff.waiter){v.wt+=dt;if(v.wt>.9){v.wt=0;for(const p of v.shelf){if(!p.fin&&p.age<1.8)continue;const i=svSeatFor(p);if(i>=0){svServe(i);break}}}}
-  const busy=v.seats.some(Boolean)||v.st.some(s=>s.d)||v.shelf.length;
+      if(v.staff.chef&&!s.hand&&s.ph!=='burn'&&s.t>=TIME[s.k][0]+(v.banq===2?4:1.5)&&v.shelf.length<4&&(s.k!=='umu'||v.seats.filter(x=>x&&x.d===s.d).length>v.shelf.filter(p=>p.d===s.d).length))svPlate(s,'ok')}
+    else if(v.staff.chef&&!s.hand){s.ct=(s.ct||0)+dt;if(s.ct>(v.banq===2?1.3:.45)){s.ct=0;svTapSt(s)}}}
+  if(v.staff.chef){const f2=v.banq===2;v.cs=(v.cs||0)+dt;if(v.cs>(f2?3.5:.7)){v.cs=0;for(const id of new Set(v.seats.filter(Boolean).map(s=>s.d))){const m=startKind(id),A=v.seats.filter(x=>x&&x.d===id&&(!x.sig||x.p/x.P<.45)&&(!f2||x.p/x.P<.5)).length,C=v.st.filter(x=>x.d===id&&x.ph!=='burn'&&!x.hand).length+v.shelf.filter(p=>p.d===id&&!p.hand).length;if(C<A&&svPending(id)>0&&(v.banq||canMake(dById(id),SAVE.fish))&&svFreeSt(m)){svStart(id);break}}}}
+  if(v.staff.waiter){const f2=v.banq===2;v.wt+=dt;if(v.wt>(f2?3:.9)){v.wt=0;for(const p of v.shelf){if(!p.fin&&p.age<(f2?3:1.8))continue;const i=svSeatFor(p);if(i>=0){svServe(i);break}}}}
+  if(v.banq){const n0=v.shelf.length;v.shelf=v.shelf.filter(p=>p.age<8||v.seats.some(x=>x&&x.d===p.d)||v.q.includes(p.d));if(v.shelf.length!==n0)v.dirty=1}
+  const busy=v.seats.some(Boolean)||v.st.some(s=>s.d&&!(v.banq&&s.open))||!v.banq&&v.shelf.length;
   if(v.t<=0||(!busy&&(v.banq?!v.q.length:!DISH.some(d=>unlocked(d)&&canMake(d,SAVE.fish))))){svEnd(v.t<=0?'time':'stock');return}
   if(v.dirty)svRender();svBars();svScene(dt)}

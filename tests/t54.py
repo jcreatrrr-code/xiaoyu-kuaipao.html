@@ -4,13 +4,14 @@ GAME=os.environ.get('XK_GAME') or 'file://'+os.path.abspath(os.path.join(os.path
 import asyncio, json, sys
 from playwright.async_api import async_playwright
 BOT = """
-async (args)=>{const [mode,li,secs]=args;const T=window.__T,K=window.__K;K.SAVE.tools.scoop=1;K.SAVE.tools.hook=1;K.SAVE.tools.lpot=1;K.SAVE.tools.rod=1;K.SAVE.tools.opot=1;T.startGame(mode,li);let fr=0,lastScroll=0,rest=0,taps=0;
+async (args)=>{const [mode,li,secs]=args;const T=window.__T,K=window.__K;K.SAVE.tools.scoop=1;K.SAVE.tools.hook=1;K.SAVE.tools.lpot=1;K.SAVE.tools.rod=1;K.SAVE.tools.opot=1;T.startGame(mode,li);let fr=0,lastScroll=0,rest=0,taps=0,pots=0;
  const fy=f=>{const d=T.dims();return d.yMin+f*(d.yMax-d.yMin)};
  while(T.state==='play'||T.state==='dying'){const g=T.G,d=T.dims();if(!g)break;if(g.scroll<lastScroll-50)rest++;lastScroll=g.scroll;
+  if(g.tcap){const c=g.tcap;if(fr%20===0){if(c.s===0)T.potgo(2);else if(c.s===2)T.potgo(0)}pots=Math.max(pots,1)}
   let ty=null,best=1e9;
   for(const e of g.E){if(e.gone)continue;const sx=e.x+(e.dx||0)-g.scroll-d.fishSX;if(sx<-10||sx>300)continue;
     if((e.t==='pearl'&&!e.air&&sx<240)||e.t==='node'){if(sx<best){best=sx;ty=T.entY(e,g.t)}}
-    if(e.t==='node'&&Math.abs(sx)<90&&fr%8===0){T.tap(d.fishSX+sx,T.entY(e,g.t));taps++}}
+    if(e.t==='node'&&!g.tcap&&Math.abs(sx)<90&&fr%8===0){T.tap(d.fishSX+sx,T.entY(e,g.t));taps++}}
   if(ty===null)ty=(d.yMin+d.yMax)/2;
   const roots=g.E.filter(e=>e.root&&!e.gone).map(e=>({e,sx:e.x-g.scroll-d.fishSX})).filter(o=>o.sx>-40&&o.sx<170).sort((a,b)=>a.sx-b.sx);
   if(roots.length>=2){const x0=roots[0].e.x,pair=roots.filter(o=>o.e.x===x0);if(pair.length===2){const tp=pair.find(o=>o.e.top).e,bt=pair.find(o=>!o.e.top).e;ty=(fy(tp.h)+fy(1-bt.h))/2}}
@@ -39,7 +40,7 @@ async (args)=>{const [mode,li,secs]=args;const T=window.__T,K=window.__K;K.SAVE.
   ty=Math.max(ty===d.yMin?d.yMin:d.yMin+40,Math.min(d.yMax-40,ty));
   if(g.lcap){if(fr%12==0)T.capgo(g.lcap.di)}else if(g.trap){if(fr%6==0)T.press();}else{ if(g.fish.y>ty)T.press();else T.release(); }
   T.update(1/60);fr++; if(fr>60*secs)break;}
- const g=T.G;return {mode,li,state:T.state,cause:g.cause,stars:K.SAVE[mode].st[li],m:Math.floor(g.scroll/60),pearls:g.pearls,life:g.life,got:Object.keys(g.caught).filter(k=>['grouper','tako','parrot'].includes(k)).map(k=>k+':'+g.caught[k]).join(','),rest,taps,leaps:g.leapN||0,boss:g.boss?{n:g.boss.n,hp:g.boss.hp,tries:g.boss.tries||0}:null}}
+ const g=T.G;return {mode,li,state:T.state,cause:g.cause,stars:K.SAVE[mode].st[li],m:Math.floor(g.scroll/60),pearls:g.pearls,life:g.life,got:Object.keys(g.caught).filter(k=>['grouper','tako','parrot'].includes(k)).map(k=>k+':'+g.caught[k]).join(','),rest,taps,pots,leaps:g.leapN||0,boss:g.boss?{n:g.boss.n,hp:g.boss.hp,tries:g.boss.tries||0}:null}}
 """
 async def main():
     bad=0

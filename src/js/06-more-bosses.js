@@ -106,7 +106,7 @@ function update(dt){
     g.pruneT+=dt;if(g.pruneT>2){g.pruneT=0;const lim=g.scroll-500;g.E=g.gen.E=g.E.filter(e=>!e.gone&&e.x+(e.dx||0)>lim)}
   }else g.speed=(g.mode==='hard'?205:150)*(g.L.spd||1);
   if(g.buff.slow)g.speed*=.85;if(g.boost>0){g.speed*=1.45;g.boost-=dt}if(g.boss&&!g.boss.done&&g.boss.k==='chase'&&g.boss.t>0)g.speed*=1.35;
-  if(g.lcap)a2CapUpd(g,dt);else if(g.trap){const tr=g.trap;tr.t-=dt;if(g.mode!=='simple')tr.p=Math.max(0,tr.p-1.5*dt);F.vy=0;
+  if(g.tcap)a3PotUpd(g,dt);else if(g.lcap)a2CapUpd(g,dt);else if(g.trap){const tr=g.trap;tr.t-=dt;if(g.mode!=='simple')tr.p=Math.max(0,tr.p-1.5*dt);F.vy=0;
     if(tr.t<=0){if(g.mode==='simple'){tr.e.gone=1;g.trap=null;g.life=Math.max(0,g.life-1);g.noDmg=false;g.combo=0;g.inv=1.8;SFX.hit();
         if(g.life<=0)die('net');else toast('渔网松开了，下次点快一点！',2)}else die('net')}
   }else{

@@ -37,17 +37,18 @@ function die(c){const g=G;if(state!=='play')return;if(SAVE.god&&SAVE.dev){g.life
   if(g.mode!=='endless'&&g.cp>0){g.noDmg=false;if(g.trap)g.trap.e.gone=1;g.trap=null;g.sharks=[];g.flash=.5;g.shake=.4;SFX.lose();g.life=Math.max(1,g.cpLife||1);restoreCP('回到检查点，带着当时的 '+g.life+' 颗星再来');return}
   g.life=0;g.cause=c;g.dead=1.2;g.trap=null;state='dying';g.shake=.4;SFX.lose()}
 function restoreCP(msg){const g=G;if(SAVE.god&&SAVE.dev){g.inv=1.5;return}g.scroll=g.cp;g.noDmg=false;g.combo=0;g.sharks=[];g.inv=2;g.flash=.5;g.fish.y=(yMin+yMax)/2;g.fish.vy=0;SFX.hit();
-  for(const e of g.E){if(e.x<=g.cp+fishSX)continue;e.dx=0;e.trig=0;e.broken=0;e.hold=0;if(e.t==='door'){e.open=0;e.a=0}if(e.t==='btn')e.on=0;if(e.t==='net'||e.t==='shield')e.gone=0}
+  for(const e of g.E){if(e.x<=g.cp+fishSX)continue;e.dx=0;e.trig=0;e.broken=0;e.hold=0;if(e.t==='door'){e.open=0;e.a=0}if(e.t==='btn')e.on=0;if(e.t==='net'||e.t==='shield')e.gone=0;if(e.t==='lava'){if(e.er)e.gone=1;e.k=0;e.y=0}}
   for(const e of g.E)if(e.t==='btn'&&e.d.x>g.cp+fishSX&&e.x<=g.cp+fishSX+330){e.on=1;e.d.open=1;e.d.a=1}
   g.cpN=g.cpAt===g.cp?(g.cpN||0)+1:1;g.cpAt=g.cp;if(g.cpN>=3){const nx=g.E.filter(e=>(e.t==='door'&&!e.open||e.t==='wall'&&!e.broken)&&e.x>g.cp+fishSX).sort((p,q)=>p.x-q.x)[0];if(nx){if(nx.t==='door'){nx.open=1;const b=g.E.find(q=>q.t==='btn'&&q.d===nx);if(b)b.on=1}else nx.broken=1;setTimeout(()=>{if(G===g&&state==='play')toast(nx.t==='door'?'石蟹看不下去了，替你把门打开了':'前面的黄色墙裂开了',2.6)},2300)}}
   else if(g.cpN>=2&&!g.shield){g.shield=true;setTimeout(()=>{if(G===g&&state==='play')toast('老龟送来一个结界，再试一次！',2.4)},2300)}
   toast(msg||'撞到黄色墙，回到检查点！',2.2,1)}
 function freeNet(){const g=G,tr=g.trap;tr.e.gone=1;g.trap=null;g.inv=1.6;SFX.free();burst(fishSX,g.fish.y,'#ffd23f',22);burst(fishSX,g.fish.y,'#fff',10,1);ftext('挣脱啦！',fishSX,g.fish.y-50,'#ffe27a')}
 function press(){if(state!=='play')return;hold=true;G.started=true;const tr=G.trap;if(tr){tr.p++;SFX.tap();burst(fishSX,G.fish.y,'#fff',3,1);if(tr.p>=tr.need)freeNet()}}
-function tryCatch(ev){const g=G;if(state!=='play'||g.trap)return false;const r=cv.getBoundingClientRect(),ux=(ev.clientX-r.left)/S,uy=(ev.clientY-r.top)/S;
+function tryCatch(ev){const g=G;if(state!=='play'||g.trap||g.tcap)return false;const r=cv.getBoundingClientRect(),ux=(ev.clientX-r.left)/S,uy=(ev.clientY-r.top)/S;
   let best=null,bd=1e9;for(const e of g.E){if(e.gone||(e.t!=='wild'&&e.t!=='node'))continue;const sx=e.x+(e.dx||0)-g.scroll;if(sx<-40||sx>VW+40)continue;const d=Math.hypot(sx-ux,entY(e,g.t)-uy);if(d<Math.max(52,36*U)+22*FISH[e.k].s&&d<bd){bd=d;best=e}}
   if(!best)return false;const e=best,sx=e.x+(e.dx||0)-g.scroll,y=entY(e,g.t),f=FISH[e.k],tk=e.t==='node'?NODE[e.k].tool:'';
   if(tk&&!hasTool(tk)){toast(NODE[e.k].no+'（杂货铺有售）',2.2,1);return true}
+  if(tk&&NODE[e.k].pot){a3PotStart(g,e);return true}
   if(tk&&NODE[e.k].timed&&!nodeOpen(e,g.t)){toast(NODE[e.k].wait||'扇贝合上了，等它张开再点',1.4);SFX.tap();return true}
   e.hp=g.buff.netbag&&!tk?0:e.hp-1;burst(sx,y,'#fff',8,1);
   if(e.hp<=0&&g.boss&&!g.boss.done&&g.boss.k==='feed'){e.gone=1;g.boss.carry=Math.min(3,g.boss.carry+1);SFX.save();burst(sx,y,f.c[1],12);ftext(g.boss.carry>=3?'拿不下了，快喂给大白！':'抓到了！点大白喂它',sx-40,y-40,'#fff');return true}

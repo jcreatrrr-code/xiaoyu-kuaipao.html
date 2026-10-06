@@ -29,7 +29,7 @@ function v2Build(L,g){a2Build(L,g);a3Build(L,g);if(L.tide)for(const e of g.E)if(
   for(const e of g.E){if(e.f!=null&&!e.air)e.f=m(e.f);if(e.amp!=null&&e.t!=='net')e.amp*=1-SURF;
     if(e.t==='fnet')e.h=m(e.h);else if(e.t==='rock')e.h=e.top?m(e.h):e.h*(1-SURF)}}
 /* 每帧：潮位、跃出水面 */
-function v2Move(g,dt,k){const F=g.fish,L=g.L,t=g.t;
+function v2Move(g,dt,k){const F=g.fish,L=g.L,t=g.t;a3Tick(g,dt);
   if(L.tide){if(!g.tips.tide&&t>3){g.tips.tide=1;toast(TIPS.tide,3)}const fl=yMax-tideH(t)*(yMax-yMin);
     if(F.y>fl-18){F.y=fl-18;if(g.inv<=0&&!g.trap){hurt(1);F.vy=-300*k}else if(F.vy>0)F.vy=0}}
   for(const e of g.E)if(e.mv&&e.x>g.scroll-200&&e.x<g.scroll+VW+300){const o=e.mv.amp*(L.leap?1-SURF:1)*Math.sin(t*1.2+e.mv.ph);if(e.h0==null)e.h0=e.t==='pearl'?e.f:e.h;
