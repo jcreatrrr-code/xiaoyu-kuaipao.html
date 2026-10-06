@@ -93,7 +93,7 @@ if(!SAVE.dexRead){SAVE.dexRead={};for(const c of DEX)if(c.got())SAVE.dexRead[c.i
 const dexNew=c=>c.got()&&!SAVE.dexRead[c.id];
 const BTABS=[['fish','鱼类'],['ing','食材'],['dish','料理'],['life','生灵'],['who','人物'],['sea','海域'],['art','器物'],['feat','事迹']];
 function showBook(){
-  const base=DEX.filter(c=>!c.hid),hidGot=DEX.filter(c=>c.hid&&c.got()).length;$('bookProg').textContent=`第一卷 · 已收录 ${base.filter(c=>c.got()).length} 张`+(hidGot?` · 隐藏卡 ${hidGot} 张`:'');
+  const base=DEX.filter(c=>!c.hid),hidGot=DEX.filter(c=>c.hid&&c.got()).length;const v1=base.filter(c=>c.vol!==2&&c.got()).length,v2=base.filter(c=>c.vol===2&&c.got()).length;$('bookProg').textContent=`第一卷 · 已收录 ${v1} 张`+(v2?` · 第二卷 ${v2} 张`:'')+(hidGot?` · 隐藏卡 ${hidGot} 张`:'');
   const inCat=DEX.filter(c=>c.cat===bookTab&&(!c.hid||c.got())),list=bookTab==='feat'?inCat:inCat.filter(c=>c.got()).concat(inCat.filter(c=>!c.got()).slice(0,1));if(!list.some(c=>c.id===bookSel))bookSel=(list.find(c=>c.got()&&!dexNew(c))||list.find(c=>c.got())||list[0]).id;const cur=list.find(c=>c.id===bookSel),g=cur.got();if(g&&!SAVE.dexRead[cur.id]){SAVE.dexRead[cur.id]=1;persist()}
   const bar=(n,lab)=>`<span class="pst"><em>${lab}</em>${'<i class="on"></i>'.repeat(n)}${'<i></i>'.repeat(5-n)}</span>`;
   $('bookTabs').innerHTML=BTABS.map(t=>{const l=base.filter(c=>c.cat===t[0]);return`<button class="tab ${t[0]===bookTab?'on':''}" data-bt="${t[0]}">${t[1]} ${l.filter(c=>c.got()).length}${DEX.some(c=>c.cat===t[0]&&dexNew(c))?'<i class="dot"></i>':''}</button>`}).join('');

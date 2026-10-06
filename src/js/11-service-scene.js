@@ -39,10 +39,16 @@ function svBars(){const v=SV;$('svSpd').textContent=(SAVE.spd||1)+'×';{const n=
 function svScene(dt){const v=SV,c=document.getElementById('svCv');if(!c||!c.clientWidth)return;const w=Math.max(60,Math.round(c.clientWidth/4)),h=Math.max(30,Math.round(c.clientHeight/4)),n=v.seats.length;
   if(c.width!==w||c.height!==h){c.width=w;c.height=h}if(pcv.width!==w||pcv.height!==h){pcv.width=w;pcv.height=h}
   const t=(v.at+=dt),gy=h-9;
-  R(0,0,w,h,'#f6e7c4');R(0,gy-15,w,15,'#e6cb9c');R(0,gy-15,w,1,'#c9a56c');
+  if(SAVE.story.pro2){R(0,0,w,gy-15,'#9fe0f0');R(0,gy-24,w,9,'#2fa9c8');R(0,gy-24,w,1,'#dff4ff');for(let i=0;i<4;i++)R(Math.round((i*w/4+t*3)%w),gy-21+(i%2)*3,5,1,'#dff4ff');
+    const ix=Math.round(w*.72);R(ix-12,gy-27,24,3,'#7fd0a0');R(ix-2,gy-35,2,8,'#8a5a2b');R(ix-6,gy-37,10,2,'#3fae6a');
+    const mx=Math.round(w*.46);R(mx,0,2,gy-15,'#8a5a2b');for(let j=0;j<18&&j<gy-20;j++)R(mx+3,2+j,Math.round(14*(1-j/22))+2,1,j%5?'#fff8e6':'#efe0c0');
+    R(0,gy-15,w,15,'#c98a4a');for(let x=0;x<w;x+=9)R(x,gy-15,1,15,'#a8703f');R(0,gy-15,w,1,'#8a5a2b');R(0,gy-19,w,1,'#8a5a2b');for(let x=3;x<w;x+=12)R(x,gy-19,1,4,'#8a5a2b');
+    R(0,2,w,1,'#5a4a3a');for(const lf of[.18,.62,.9]){const lx=Math.round(w*lf),sw=Math.round(Math.sin(t*1.6+lx));R(lx-2+sw,3,5,4,'#ff8f5a');R(lx-1+sw,4,3,2,'#ffd23f')}
+    R(w-10,gy-24,10,24,'#6b4226');R(w-9,gy-23,8,23,'#4a3020');R(w-8,gy-12,1,2,'#ffd23f')}
+  else{  R(0,0,w,h,'#f6e7c4');R(0,gy-15,w,15,'#e6cb9c');R(0,gy-15,w,1,'#c9a56c');
   for(const wx of[Math.round(w*.1),Math.round(w*.55)]){R(wx,5,24,15,'#8a5a2b');R(wx+2,7,20,11,'#8fd3ff');R(wx+2,13,20,5,'#3fa9d8');R(wx+11,7,1,11,'#8a5a2b');R(wx+3+((t*4+wx)%15),15,3,1,'#dff4ff');R(wx+6+((t*3+wx*2)%12),13,2,1,'#dff4ff')}
   for(const lf of[.36,.8]){const lx=Math.round(w*lf),sw=Math.round(Math.sin(t*1.3+lx));R(lx,0,1,5,'#5a4a3a');R(lx-3+sw,5,7,2,'#ffd23f');R(lx-1+sw,7,3,1,'#fff27a')}
-  R(w-10,gy-24,10,24,'#6b4226');R(w-9,gy-23,8,23,'#27384a');R(w-8,gy-12,1,2,'#ffd23f');
+  R(w-10,gy-24,10,24,'#6b4226');R(w-9,gy-23,8,23,'#27384a');R(w-8,gy-12,1,2,'#ffd23f');}
   v.wx+=((v.wtx<0?w*svSeatF(-1-v.wtx,n):6)-v.wx)*Math.min(1,dt*9);if(v.wtx<0&&(v.wT=(v.wT||0)+dt)>.7){v.wtx=6;v.wT=0}
   if(v.staff.waiter)human('aqiang',v.wx,gy+7);
   v.seats.forEach((s,i)=>{if(!s)return;const sx=w*svSeatF(i,n);if(s.x>w+8)s.x=w+8;s.x=Math.max(sx,s.x-95*dt);const low=s.p/s.P<.3;human(s.look,s.x+(low&&Math.sin(t*30)>0?1:0),gy+7-(s.x>sx&&Math.sin(t*16)>0?1:0),1)});

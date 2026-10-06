@@ -11,7 +11,7 @@ function startGame(mode,li){
   G={mode,li,L,gen,E:gen.E,t:0,scroll:0,speed:0,life,maxLife:life,pearls:0,rescued:0,combo:0,comboT:0,maxCombo:0,bonus:0,
      shield:false,shieldUsed:0,inv:0,slowT:0,trap:null,sharks:[],cp:0,noDmg:true,fish:{y:0,vy:0},parts:[],texts:[],shake:0,flash:0,
      theme:endless?0:L.theme,lvl:0,whale:false,magnet:false,caught:{},nCaught:0,buff:{},tips:{},dead:0,cause:'',bubT:0,pruneT:0,hudKey:''};
-  G.faded=!endless&&!L.dark&&li<5&&!(SAVE.simple.st[li]>0||SAVE.hard.st[li]>0);G.orb=!endless&&L.escort?{y:0,hp:3,inv:0}:null;
+  G.faded=!endless&&!L.dark&&(li<5||L.vol===2)&&!(SAVE.simple.st[li]>0||SAVE.hard.st[li]>0);G.orb=!endless&&L.escort?{y:0,hp:3,inv:0}:null;
   const used=[];for(const it of ITEMS)if(SAVE.inv[it.id]>0&&SAVE.use[it.id]!==0){SAVE.inv[it.id]--;used.push(it.n);
     if(it.id==='gold')G.shield=true;else if(it.id==='whale')G.whale=true;else if(it.id==='magnet')G.magnet=true;else if(it.id==='life'){G.life++;G.maxLife++}else G.buff[it.id]=true}
   if(G.buff.bait){gen.bait=true;for(const e of G.E.slice())if(e.t==='wild')G.E.push({...e,x:e.x+150,f:clamp(1.05-e.f,.15,.85),ph:e.ph+2})}
@@ -48,7 +48,7 @@ function tryCatch(ev){const g=G;if(state!=='play'||g.trap)return false;const r=c
   let best=null,bd=1e9;for(const e of g.E){if(e.gone||(e.t!=='wild'&&e.t!=='node'))continue;const sx=e.x+(e.dx||0)-g.scroll;if(sx<-40||sx>VW+40)continue;const d=Math.hypot(sx-ux,entY(e,g.t)-uy);if(d<Math.max(52,36*U)+22*FISH[e.k].s&&d<bd){bd=d;best=e}}
   if(!best)return false;const e=best,sx=e.x+(e.dx||0)-g.scroll,y=entY(e,g.t),f=FISH[e.k],tk=e.t==='node'?NODE[e.k].tool:'';
   if(tk&&!hasTool(tk)){toast(NODE[e.k].no+'（杂货铺有售）',2.2,1);return true}
-  if(tk&&NODE[e.k].timed&&!nodeOpen(e,g.t)){toast('扇贝合上了，等它张开再点',1.4);SFX.tap();return true}
+  if(tk&&NODE[e.k].timed&&!nodeOpen(e,g.t)){toast(NODE[e.k].wait||'扇贝合上了，等它张开再点',1.4);SFX.tap();return true}
   e.hp=g.buff.netbag&&!tk?0:e.hp-1;burst(sx,y,'#fff',8,1);
   if(e.hp<=0&&g.boss&&!g.boss.done&&g.boss.k==='feed'){e.gone=1;g.boss.carry=Math.min(3,g.boss.carry+1);SFX.save();burst(sx,y,f.c[1],12);ftext(g.boss.carry>=3?'拿不下了，快喂给大白！':'抓到了！点大白喂它',sx-40,y-40,'#fff');return true}
   if(e.hp<=0){e.gone=1;g.caught[e.k]=(g.caught[e.k]||0)+1;g.nCaught++;g.bonus+=30;SFX.save();burst(sx,y,f.c[1],12);ftext('捕获 '+f.n+'！',sx-40,y-40,'#fff');if(e.shiny){SAVE.dex['x_'+e.k]=(SAVE.dex['x_'+e.k]||0)+1;persist();setTimeout(()=>toast('是金鳞'+f.n+'！《奇珍书》多了一张隐藏卡',3.4),700)}if(tk&&!SAVE.tools[tk]){SAVE.rusty[tk]=0;persist();setTimeout(()=>toast('生锈的'+(tk==='chisel'?'凿子':'剪刀')+'用一次就坏了，下次得去杂货铺买新的',3),900)}}

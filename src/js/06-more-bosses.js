@@ -1,5 +1,6 @@
 /* ---------- more bosses: chase / pipe / team ---------- */
 function mkBoss(g){const k=g.L.boss===1?'feed':g.L.boss,hd=g.mode==='hard',fin=g.E.find(q=>q.t==='fin'),mid=(yMin+yMax)/2;
+  if(k==='guide')return guideMk(g,hd,fin);
   if(k==='feed')return{k,hun:0,need:hd?11:8,js:3,carry:0,ph:'idle',t:-2.5,by:mid,sp:1,done:0,fin};
   if(k==='chase')return{k,gap:60,dur:hd?46:38,t:-1.5,nx:0,sy:mid,done:0,fin,reset(){this.gap=60;this.t=-1.5;this.nx=0}};
   if(k==='pipe')return{k,n:0,need:4,chg:0,t:0,js:4,by:mid,hh:60,done:0,fin,reset(){this.n=0;this.chg=0;this.t=0}};
@@ -19,7 +20,7 @@ const BOSSMSG={feed:'大白来了，它饿坏了！点游过的鱼抓住它，�
 const HELPERS=[['🦈','wall','大白'],['🐙','net','墨墨'],['🦀','door','石蟹'],['🐋','fog','鲸婆婆']];
 const teamBtn=i=>[VW*(.14+.24*i),Math.min(VT-48*U,yMax+56),Math.max(36,32*U)];
 function bossWin(B,msg){const g=G;B.done=1;g.sharks=[];g.inv=3;g.flash=.6;g.shake=.5;g.bonus+=300;CSND.crash();SFX.win();for(const e of g.E)if(e.x>g.scroll-100&&(e.t==='wild'||e.t==='jelly'||e.t==='rock'||e.t==='torb'))e.gone=1;if(B.fin)B.fin.x=g.scroll+VW+500;toast(msg,3.4)}
-function bossUpd(B,dt){const g=G,F=g.fish,hd=g.mode==='hard',k=clamp((yMax-yMin)/544,.85,1.45);B.t+=dt;
+function bossUpd(B,dt){if(B.k==='guide')return guideUpd(B,dt);const g=G,F=g.fish,hd=g.mode==='hard',k=clamp((yMax-yMin)/544,.85,1.45);B.t+=dt;
   if(B.k==='chase'){B.sy+=(F.y-B.sy)*Math.min(1,dt*3);if(B.t<0)return;
     if(!B.nx||B.nx<g.scroll+VW)B.nx=g.scroll+VW+260;while(B.nx<g.scroll+VW+900){const nm=['pearls','pearls','rockB','rockT','gate','jelly'];PAT[nm[Math.floor(Math.random()*nm.length)]](g.gen,B.nx,.6);B.nx+=hd?330:390}
     B.gap-=(hd?3.7:2.9)*dt;if(B.gap<=0){die('shark');return}
@@ -34,13 +35,13 @@ function bossUpd(B,dt){const g=G,F=g.fish,hd=g.mode==='hard',k=clamp((yMax-yMin)
     while(B.obs.length&&B.obs[0].x<TLINE()){B.obs.shift();B.i++;ftext('没叫对帮手！',fishSX+20,F.y-56,'#ffb3b3');g.inv=0;hurt(1);if(state!=='play'||B!==g.boss||B.i===0)return}
     B.ot=(B.ot===undefined?2.5:B.ot)-dt;if(B.ot<=0&&B.orbs<5&&!g.E.some(e=>e.t==='torb'&&!e.gone&&e.x>g.scroll)){B.ot=3.2;g.E.push({t:'torb',x:g.scroll+VW+60,f:.2+Math.random()*.6})}
     if(B.i>=B.total&&!B.obs.length){if(B.orbs>=5)bossWin(B,'五颗潮心都接住了！大家一起把它们送了回去');else if(!B.msg){B.msg=1;toast('难关都过了！把剩下的潮心接住',2.6)}}}}
-function bossTap2(B,ux,uy){if(B.k!=='team'||B.t<0)return false;const g=G;
+function bossTap2(B,ux,uy){if(B.k==='guide')return guideTap(B,ux,uy);if(B.k!=='team'||B.t<0)return false;const g=G;
   for(let i=0;i<4;i++){const[bx,by,r]=teamBtn(i);if(Math.hypot(ux-bx,uy-by)>r*1.25)continue;const h=HELPERS[i],o=B.obs[0];if(B.cd[h[1]]>0)return true;
     if(o&&o.ty===h[1]){const fr=B.bt/(30/B.bpm),beat=(B.half%2===1?fr<.3:fr>.7);burst(o.x,(yMin+yMax)/2,'#ffd23f',26);ftext(h[2]+(beat?'：合拍！+30':'：交给我！'),Math.min(o.x,VW-170),yMin+74,beat?'#bff6e6':'#ffe27a');if(beat)g.bonus+=30;SFX.save();if(h[1]==='wall')CSND.crash();g.shake=.2;B.obs.shift();B.i++}
     else{B.cd[h[1]]=1.8;SFX.hit();ftext(o?'不是'+h[2]+'的活儿！':'还没到时候',bx-40,by-60,'#ffb3b3')}
     return true}
   return false}
-function bossDraw2(B,t){const g=G,F=g.fish;
+function bossDraw2(B,t){if(B.k==='guide')return guideDraw(B,t);const g=G,F=g.fish;
   if(B.k==='chase'){const sx=fishSX-70-Math.max(0,B.gap)*2.4;ctx.save();ctx.translate(sx,B.sy+Math.sin(t*9)*4);ctx.scale(-1,1);drawShark(0,0,t*1.6);ctx.restore()}
   else if(B.k==='pipe'){ctx.save();ctx.fillStyle=B.inb?'rgba(255,236,140,.3)':'rgba(255,236,140,.15)';ctx.fillRect(0,B.by-B.hh,VW,B.hh*2);ctx.strokeStyle='rgba(255,240,170,.9)';ctx.lineWidth=3;ctx.setLineDash([18,12]);ctx.lineDashOffset=-t*90;
     ctx.beginPath();ctx.moveTo(0,B.by-B.hh);ctx.lineTo(VW,B.by-B.hh);ctx.moveTo(0,B.by+B.hh);ctx.lineTo(VW,B.by+B.hh);ctx.stroke();ctx.setLineDash([]);
@@ -55,7 +56,7 @@ function bossDraw2(B,t){const g=G,F=g.fish;
       else{ctx.fillStyle='rgba(20,14,50,.92)';for(let yy=y0;yy<y1+40;yy+=70)circ(x+Math.sin(t*2+yy)*10,yy,64);ctx.fillStyle='#ff5a5a';for(let i=0;i<3;i++){const ey=y0+120+i*(y1-y0-200)/2;circ(x-14,ey,5);circ(x+14,ey,5)}}
       ctx.restore()}
     ctx.restore()}}
-function bossHud2(B,t){const g=G,hd=g.mode==='hard',w=Math.min(VW-40*U,300*U),x0=(VW-w)/2,y0=yMin+8*U,h=20*U;ctx.save();ctx.textAlign='center';ctx.font=`${14*U}px ${FONT}`;
+function bossHud2(B,t){if(B.k==='guide')return guideHud(B,t);const g=G,hd=g.mode==='hard',w=Math.min(VW-40*U,300*U),x0=(VW-w)/2,y0=yMin+8*U,h=20*U;ctx.save();ctx.textAlign='center';ctx.font=`${14*U}px ${FONT}`;
   const bar=(f,col,lab,yy)=>{ctx.fillStyle='rgba(6,40,70,.55)';ctx.fillRect(x0-4*U,yy-4*U,w+8*U,h+8*U);ctx.fillStyle=col;ctx.fillRect(x0,yy,w*clamp(f,0,1),h);ctx.fillStyle='#fff';ctx.fillText(lab,VW/2,yy+h-5*U)};
   if(B.k==='chase'){bar(B.gap/100,B.gap<25?'#ff7a6b':'#4fe0b5','和大白的距离',y0);bar(Math.max(0,B.t)/B.dur,'#ffd23f','再坚持 '+Math.max(0,Math.ceil(B.dur-B.t))+' 秒',y0+h+12*U);
     if(B.gap<25){const a=.25+.2*Math.sin(t*12),gr=ctx.createLinearGradient(0,0,VW*.5,0);gr.addColorStop(0,`rgba(255,40,40,${a})`);gr.addColorStop(1,'rgba(255,0,0,0)');ctx.fillStyle=gr;ctx.fillRect(0,0,VW*.5,VT)}}
@@ -112,21 +113,24 @@ function update(dt){
     const up=(g.slowT>0?180:330)*k*(g.boss&&!g.boss.done?1-.13*(g.boss.carry||0):1),dn=(g.mode==='simple'?165:215)*k,tv=hold?-up:g.started?dn:0;
     F.vy+=(tv-F.vy)*Math.min(1,dt*7);F.y+=F.vy*dt;
     if(F.y<yMin+22){F.y=yMin+22;F.vy=0}if(g.orb){const o=g.orb;if(!o.y)o.y=F.y;o.y+=(F.y-o.y)*Math.min(1,dt*2.4);o.inv=Math.max(0,o.inv-dt)}if(F.y>yMax-18){F.y=yMax-18;if(g.inv<=0){hurt(1);F.vy=-300*k;if(!g.tips.floor){g.tips.floor=1;toast('碰到海底也会掉星！',2.2,1)}}else if(F.vy>0)F.vy=0}
+    if(g.L&&g.L.vol===2)v2Move(g,dt,k);
     g.bubT-=dt;if(g.bubT<=0){g.bubT=.22;g.parts.push({x:fishSX-34,y:F.y,vx:-40,vy:-20,l:.9,c:'#fff',r:2+Math.random()*3,k:1})}
   }
   const fx=fishSX;
   for(const e of g.E){
     if(e.gone)continue;const sx=e.x+(e.dx||0)-g.scroll;if(sx<-200||sx>VW+320)continue;
     if(!SAVE.sight[e.t]&&sx<VW-20)SAVE.sight[e.t]=1;
-    if(g.mode==='simple'&&!g.boss&&TIPS[e.t]&&!g.tips[e.t]&&sx<VW-20&&t>5){g.tips[e.t]=1;toast(TIPS[e.t],2.6)}
+    {const tp=g.L&&g.L.vol===2&&TIPS2[e.t]||TIPS[e.t];if(g.mode==='simple'&&!g.boss&&tp&&!g.tips[e.t]&&sx<VW-20&&t>5){g.tips[e.t]=1;toast(tp,2.6)}}
     const y=entY(e,t),dx=sx-fx,dy=y-F.y,dist=Math.hypot(dx,dy);
+    if(g.leap&&LEAPSAFE[e.t])continue;
     if(g.orb&&g.orb.inv<=0){const ox=fx-78,oy=g.orb.y,od=Math.hypot(sx-ox,y-oy);let hit=false;
       if(e.t==='rock'){const hw=e.w/2-12,ry=e.top?fy(e.h)-12:fy(1-e.h)+12;hit=Math.abs(sx-ox)<hw+12&&(e.top?oy-14<ry:oy+14>ry)}
       else if(e.t==='octo')hit=od<octoR(e,t)+12;else if(e.t==='jelly')hit=od<40;else if(e.t==='ice')hit=od<44;
       if(hit&&!(SAVE.god&&SAVE.dev)){g.orb.hp--;g.orb.inv=1.6;SFX.hit();g.shake=.25;burst(ox,oy,'#bff6ff',12);ftext('潮心被撞到了！',fx,F.y-56,'#ffb3b3');if(g.orb.hp<=0){die('orb');if(state!=='play')return;g.orb.hp=2}}}
     switch(e.t){
-    case'pearl':if(sx>fx)e.miss=0;else if(sx<fx-(g.magnet?120:50)&&!e.miss){e.miss=1;if(g.combo>=3)ftext('连击断了',fx+30,F.y-56,'#b8c7d9');g.combo=0}
-      if(dist<(g.magnet?115:38)&&!g.trap){e.gone=1;if(g.boss&&g.boss.k==='chase'&&!g.boss.done)g.boss.gap=Math.min(100,g.boss.gap+1.05);g.pearls++;g.combo++;g.comboT=3.5;g.maxCombo=Math.max(g.maxCombo,g.combo);SFX.pearl(g.combo);burst(sx,y,'#fff',4,1);
+    case'fnet':v2Hit(g,e,sx,y,dx,dt);break;
+    case'pearl':if(sx>fx)e.miss=0;else if(sx<fx-(g.magnet?120:50)&&!e.miss&&!e.air){e.miss=1;if(g.combo>=3)ftext('连击断了',fx+30,F.y-56,'#b8c7d9');g.combo=0}
+      if(dist<(g.magnet?115:38)&&!g.trap){e.gone=1;if(g.boss&&g.boss.k==='chase'&&!g.boss.done)g.boss.gap=Math.min(100,g.boss.gap+1.05);g.pearls+=e.air?2:1;if(e.air)burst(sx,y,'#ffe27a',6,1);g.combo++;g.comboT=3.5;g.maxCombo=Math.max(g.maxCombo,g.combo);SFX.pearl(g.combo);burst(sx,y,'#fff',4,1);
         if(g.combo%10===0){g.pearls+=5;ftext(`连击 ${g.combo}！+5 ⚪`,fx+30,F.y-56,'#ffe27a');SFX.pearl(12)}}break;
     case'rock':{const hw=e.w/2-12,ry=e.top?fy(e.h)-12:fy(1-e.h)+12;
         if(Math.abs(dx)<hw+16&&(e.top?F.y-18<ry:F.y+18>ry))hurt(1)}break;
