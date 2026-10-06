@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>小鱼快跑</title>
-<meta name="version" content="2.0.3">
+<meta name="version" content="2.1.0">
 <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Yusei+Magic&family=Comfortaa:wght@600;700&family=Baloo+Bhaijaan+2:wght@500;700&family=Jua&family=Itim&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -127,6 +127,8 @@ h2{margin:0;font-weight:400;font-size:30px;color:#fff;text-shadow:0 3px 0 rgba(6
 @keyframes flick{to{transform:scaleY(1.3);filter:brightness(1.25)}}
 .k-pot{background:linear-gradient(#8fb4c4,#4f7688)}.k-pot::before{content:"";position:absolute;left:20%;right:20%;top:36px;bottom:22px;border-radius:8px 8px 28px 28px;background:linear-gradient(#e6ebee,#9aa8b5);box-shadow:-13px -22px 0 -17px #9aa8b5,13px -22px 0 -17px #9aa8b5}
 .k-pot .fl{height:22px}
+.k-umu{background:linear-gradient(#7a5a3e,#3f2c1e)}.k-umu::before{content:"";position:absolute;left:14%;right:14%;top:38px;bottom:20px;border-radius:50% 50% 12px 12px;background:radial-gradient(circle at 28% 78%,#3c3c3c 0 9px,transparent 10px),radial-gradient(circle at 70% 80%,#464646 0 10px,transparent 11px),linear-gradient(#6a9a40,#3d6b26)}.k-umu .fl{opacity:.25;height:16px}
+.k-umu.cook .smk,.k-umu.perfect .smk,.k-umu.ok .smk{animation:steam 2.2s infinite}
 .k-cut{background:linear-gradient(#f0d9b0,#d9b98a)}.k-cut::before{content:"";position:absolute;inset:30px 14px 22px;border-radius:14px;background:linear-gradient(#e0b070,#c99450);box-shadow:inset 0 -4px 0 rgba(0,0,0,.12)}
 .k-asm{background:linear-gradient(#cdeee2,#8fd0ba)}.k-asm::before{content:"";position:absolute;left:50%;top:50%;width:92px;height:92px;margin:-44px 0 0 -46px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 9px #eef3f6,0 3px 0 rgba(6,40,70,.2)}
 .dial{position:relative;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;z-index:1;box-shadow:0 2px 0 rgba(0,0,0,.25);margin-top:6px}
@@ -276,7 +278,7 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
       <button class="btn" id="bHelp">玩法说明</button>
       <button class="btn" id="bSet">设置</button>
     </div>
-    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v2.0.3</p>
+    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v2.1.0</p>
     <button class="btn sm float" data-go="sMenu">返回主菜单</button>
   </section>
 
@@ -619,7 +621,7 @@ function tryCatch(ev){const g=G;if(state!=='play'||g.trap)return false;const r=c
   return true}
 /* ---------- more bosses: chase / pipe / team ---------- */
 function mkBoss(g){const k=g.L.boss===1?'feed':g.L.boss,hd=g.mode==='hard',fin=g.E.find(q=>q.t==='fin'),mid=(yMin+yMax)/2;
-  if(k==='guide')return guideMk(g,hd,fin);
+  if(k==='guide')return guideMk(g,hd,fin);if(k==='herd')return herdMk(g,hd,fin);
   if(k==='feed')return{k,hun:0,need:hd?11:8,js:3,carry:0,ph:'idle',t:-2.5,by:mid,sp:1,done:0,fin};
   if(k==='chase')return{k,gap:60,dur:hd?46:38,t:-1.5,nx:0,sy:mid,done:0,fin,reset(){this.gap=60;this.t=-1.5;this.nx=0}};
   if(k==='pipe')return{k,n:0,need:4,chg:0,t:0,js:4,by:mid,hh:60,done:0,fin,reset(){this.n=0;this.chg=0;this.t=0}};
@@ -639,7 +641,7 @@ const BOSSMSG={feed:'大白来了，它饿坏了！点游过的鱼抓住它，�
 const HELPERS=[['🦈','wall','大白'],['🐙','net','墨墨'],['🦀','door','石蟹'],['🐋','fog','鲸婆婆']];
 const teamBtn=i=>[VW*(.14+.24*i),Math.min(VT-48*U,yMax+56),Math.max(36,32*U)];
 function bossWin(B,msg){const g=G;B.done=1;g.sharks=[];g.inv=3;g.flash=.6;g.shake=.5;g.bonus+=300;CSND.crash();SFX.win();for(const e of g.E)if(e.x>g.scroll-100&&(e.t==='wild'||e.t==='jelly'||e.t==='rock'||e.t==='torb'))e.gone=1;if(B.fin)B.fin.x=g.scroll+VW+500;toast(msg,3.4)}
-function bossUpd(B,dt){if(B.k==='guide')return guideUpd(B,dt);const g=G,F=g.fish,hd=g.mode==='hard',k=clamp((yMax-yMin)/544,.85,1.45);B.t+=dt;
+function bossUpd(B,dt){if(B.k==='guide')return guideUpd(B,dt);if(B.k==='herd')return herdUpd(B,dt);const g=G,F=g.fish,hd=g.mode==='hard',k=clamp((yMax-yMin)/544,.85,1.45);B.t+=dt;
   if(B.k==='chase'){B.sy+=(F.y-B.sy)*Math.min(1,dt*3);if(B.t<0)return;
     if(!B.nx||B.nx<g.scroll+VW)B.nx=g.scroll+VW+260;while(B.nx<g.scroll+VW+900){const nm=['pearls','pearls','rockB','rockT','gate','jelly'];PAT[nm[Math.floor(Math.random()*nm.length)]](g.gen,B.nx,.6);B.nx+=hd?330:390}
     B.gap-=(hd?3.7:2.9)*dt;if(B.gap<=0){die('shark');return}
@@ -654,13 +656,13 @@ function bossUpd(B,dt){if(B.k==='guide')return guideUpd(B,dt);const g=G,F=g.fish
     while(B.obs.length&&B.obs[0].x<TLINE()){B.obs.shift();B.i++;ftext('没叫对帮手！',fishSX+20,F.y-56,'#ffb3b3');g.inv=0;hurt(1);if(state!=='play'||B!==g.boss||B.i===0)return}
     B.ot=(B.ot===undefined?2.5:B.ot)-dt;if(B.ot<=0&&B.orbs<5&&!g.E.some(e=>e.t==='torb'&&!e.gone&&e.x>g.scroll)){B.ot=3.2;g.E.push({t:'torb',x:g.scroll+VW+60,f:.2+Math.random()*.6})}
     if(B.i>=B.total&&!B.obs.length){if(B.orbs>=5)bossWin(B,'五颗潮心都接住了！大家一起把它们送了回去');else if(!B.msg){B.msg=1;toast('难关都过了！把剩下的潮心接住',2.6)}}}}
-function bossTap2(B,ux,uy){if(B.k==='guide')return guideTap(B,ux,uy);if(B.k!=='team'||B.t<0)return false;const g=G;
+function bossTap2(B,ux,uy){if(B.k==='guide')return guideTap(B,ux,uy);if(B.k==='herd')return false;if(B.k!=='team'||B.t<0)return false;const g=G;
   for(let i=0;i<4;i++){const[bx,by,r]=teamBtn(i);if(Math.hypot(ux-bx,uy-by)>r*1.25)continue;const h=HELPERS[i],o=B.obs[0];if(B.cd[h[1]]>0)return true;
     if(o&&o.ty===h[1]){const fr=B.bt/(30/B.bpm),beat=(B.half%2===1?fr<.3:fr>.7);burst(o.x,(yMin+yMax)/2,'#ffd23f',26);ftext(h[2]+(beat?'：合拍！+30':'：交给我！'),Math.min(o.x,VW-170),yMin+74,beat?'#bff6e6':'#ffe27a');if(beat)g.bonus+=30;SFX.save();if(h[1]==='wall')CSND.crash();g.shake=.2;B.obs.shift();B.i++}
     else{B.cd[h[1]]=1.8;SFX.hit();ftext(o?'不是'+h[2]+'的活儿！':'还没到时候',bx-40,by-60,'#ffb3b3')}
     return true}
   return false}
-function bossDraw2(B,t){if(B.k==='guide')return guideDraw(B,t);const g=G,F=g.fish;
+function bossDraw2(B,t){if(B.k==='guide')return guideDraw(B,t);if(B.k==='herd')return herdDraw(B,t);const g=G,F=g.fish;
   if(B.k==='chase'){const sx=fishSX-70-Math.max(0,B.gap)*2.4;ctx.save();ctx.translate(sx,B.sy+Math.sin(t*9)*4);ctx.scale(-1,1);drawShark(0,0,t*1.6);ctx.restore()}
   else if(B.k==='pipe'){ctx.save();ctx.fillStyle=B.inb?'rgba(255,236,140,.3)':'rgba(255,236,140,.15)';ctx.fillRect(0,B.by-B.hh,VW,B.hh*2);ctx.strokeStyle='rgba(255,240,170,.9)';ctx.lineWidth=3;ctx.setLineDash([18,12]);ctx.lineDashOffset=-t*90;
     ctx.beginPath();ctx.moveTo(0,B.by-B.hh);ctx.lineTo(VW,B.by-B.hh);ctx.moveTo(0,B.by+B.hh);ctx.lineTo(VW,B.by+B.hh);ctx.stroke();ctx.setLineDash([]);
@@ -675,7 +677,7 @@ function bossDraw2(B,t){if(B.k==='guide')return guideDraw(B,t);const g=G,F=g.fis
       else{ctx.fillStyle='rgba(20,14,50,.92)';for(let yy=y0;yy<y1+40;yy+=70)circ(x+Math.sin(t*2+yy)*10,yy,64);ctx.fillStyle='#ff5a5a';for(let i=0;i<3;i++){const ey=y0+120+i*(y1-y0-200)/2;circ(x-14,ey,5);circ(x+14,ey,5)}}
       ctx.restore()}
     ctx.restore()}}
-function bossHud2(B,t){if(B.k==='guide')return guideHud(B,t);const g=G,hd=g.mode==='hard',w=Math.min(VW-40*U,300*U),x0=(VW-w)/2,y0=yMin+8*U,h=20*U;ctx.save();ctx.textAlign='center';ctx.font=`${14*U}px ${FONT}`;
+function bossHud2(B,t){if(B.k==='guide')return guideHud(B,t);if(B.k==='herd')return herdHud(B,t);const g=G,hd=g.mode==='hard',w=Math.min(VW-40*U,300*U),x0=(VW-w)/2,y0=yMin+8*U,h=20*U;ctx.save();ctx.textAlign='center';ctx.font=`${14*U}px ${FONT}`;
   const bar=(f,col,lab,yy)=>{ctx.fillStyle='rgba(6,40,70,.55)';ctx.fillRect(x0-4*U,yy-4*U,w+8*U,h+8*U);ctx.fillStyle=col;ctx.fillRect(x0,yy,w*clamp(f,0,1),h);ctx.fillStyle='#fff';ctx.fillText(lab,VW/2,yy+h-5*U)};
   if(B.k==='chase'){bar(B.gap/100,B.gap<25?'#ff7a6b':'#4fe0b5','和大白的距离',y0);bar(Math.max(0,B.t)/B.dur,'#ffd23f','再坚持 '+Math.max(0,Math.ceil(B.dur-B.t))+' 秒',y0+h+12*U);
     if(B.gap<25){const a=.25+.2*Math.sin(t*12),gr=ctx.createLinearGradient(0,0,VW*.5,0);gr.addColorStop(0,`rgba(255,40,40,${a})`);gr.addColorStop(1,'rgba(255,0,0,0)');ctx.fillStyle=gr;ctx.fillRect(0,0,VW*.5,VT)}}
@@ -737,7 +739,7 @@ function update(dt){
   }
   const fx=fishSX;
   for(const e of g.E){
-    if(e.gone)continue;const sx=e.x+(e.dx||0)-g.scroll;if(sx<-200||sx>VW+320)continue;
+    if(e.gone)continue;const sx=e.x+(e.dx||0)-g.scroll;if(sx<-200-(e.L||0)||sx>VW+320)continue;
     if(!SAVE.sight[e.t]&&sx<VW-20)SAVE.sight[e.t]=1;
     {const tp=g.L&&g.L.vol===2&&TIPS2[e.t]||TIPS[e.t];if(g.mode==='simple'&&!g.boss&&tp&&!g.tips[e.t]&&sx<VW-20&&t>5){g.tips[e.t]=1;toast(tp,2.6)}}
     const y=entY(e,t),dx=sx-fx,dy=y-F.y,dist=Math.hypot(dx,dy);
@@ -748,6 +750,7 @@ function update(dt){
       if(hit&&!(SAVE.god&&SAVE.dev)){g.orb.hp--;g.orb.inv=1.6;SFX.hit();g.shake=.25;burst(ox,oy,'#bff6ff',12);ftext('潮心被撞到了！',fx,F.y-56,'#ffb3b3');if(g.orb.hp<=0){die('orb');if(state!=='play')return;g.orb.hp=2}}}
     switch(e.t){
     case'fnet':v2Hit(g,e,sx,y,dx,dt);break;
+    case'fork':case'vent':case'lamp':a2Hit(g,e,sx,y,dx,dist,dt,k);break;
     case'pearl':if(sx>fx)e.miss=0;else if(sx<fx-(g.magnet?120:50)&&!e.miss&&!e.air){e.miss=1;if(g.combo>=3)ftext('连击断了',fx+30,F.y-56,'#b8c7d9');g.combo=0}
       if(g.magnet&&dist<190&&dist>=38&&!g.trap){const k=Math.min(1,dt*(dist<115?9:5));e.dx=(e.dx||0)-dx*k;e.py=(e.py||0)-dy*k}
       if(dist<38&&!g.trap){e.gone=1;if(g.boss&&g.boss.k==='chase'&&!g.boss.done)g.boss.gap=Math.min(100,g.boss.gap+1.05);g.pearls+=e.air?2:1;if(e.air)burst(sx,y,'#ffe27a',6,1);g.combo++;g.comboT=3.5;g.maxCombo=Math.max(g.maxCombo,g.combo);SFX.pearl(g.combo);burst(sx,y,'#fff',4,1);
@@ -834,7 +837,7 @@ const TIPS2={node:'发光的是要带回小馆的食材，用手指点它！',ro
 const LEAPSAFE={rock:1,octo:1,jelly:1,net:1,fnet:1,ice:1,mimic:1};
 const SURF=.3,surfY=()=>fy(SURF),LEAP={T:1.5,fs:SURF+.04,fp:.03};
 const tideH=t=>.2*(.5-.5*Math.cos(t*TAU/11));
-function v2Build(L,g){if(L.tide)for(const e of g.E)if(e.t==='pearl'||e.t==='wild')e.f=Math.min(e.f,.74);
+function v2Build(L,g){a2Build(L,g);if(L.tide)for(const e of g.E)if(e.t==='pearl'||e.t==='wild')e.f=Math.min(e.f,.74);
   if(!L.leap)return;const m=v=>SURF+(1-SURF)*v;g.E=g.E.filter(e=>!(e.t==='rock'&&e.top&&!e.root));
   for(const e of g.E){if(e.f!=null&&!e.air)e.f=m(e.f);if(e.amp!=null&&e.t!=='net')e.amp*=1-SURF;
     if(e.t==='fnet')e.h=m(e.h);else if(e.t==='rock')e.h=e.top?m(e.h):e.h*(1-SURF)}}
@@ -863,6 +866,7 @@ function v2BG(th,sc,t){
   if(th===13){ctx.fillStyle='rgba(30,70,120,.25)';for(let i=0;i<3;i++){const x=VW-((t*90+i*260+sc*.1)%(VW+200))+100,y=yMin+30+i*22;ctx.beginPath();ctx.ellipse(x,y,22,6,0,0,TAU);ctx.fill();ctx.beginPath();ctx.moveTo(x-4,y);ctx.lineTo(x+10,y-16);ctx.lineTo(x+14,y);ctx.fill()}}
   if(th===14){ctx.strokeStyle='rgba(60,40,25,.55)';ctx.lineCap='round';const o=sc*.3;for(let n=Math.floor(o/140)-1;n*140-o<VW+60;n++){const x=n*140-o,h=120+hash(n+2)*160;ctx.lineWidth=10;
     for(const s of[-1,1]){ctx.beginPath();ctx.moveTo(x,0);ctx.quadraticCurveTo(x+s*30,h*.6,x+s*44,h);ctx.stroke()}}}
+  a2BG(th,sc,t);
   if(th===15){ctx.strokeStyle='rgba(200,220,255,.18)';ctx.lineWidth=1.5;for(let i=0;i<40;i++){const x=((i*97+t*60)%(VW+80))-40,y=((i*53+t*700)%(PH+60))-30;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-6,y+18);ctx.stroke()}}}
 function v2Sky(g,t){if(!g||!g.L||!g.L.leap)return;const y=surfY(),st=g.theme===15;ctx.save();const gr=ctx.createLinearGradient(0,0,0,y);
   gr.addColorStop(0,st?'#141c2c':'#bfe9ff');gr.addColorStop(1,st?'#3a4a62':'#eaf8ff');ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(VW,0);
@@ -886,7 +890,7 @@ function drawNode2(e,t){
   if(e.k==='flyfish'){const op=nodeOpen(e,t),k=op?Math.sin(((t+e.x*.01)%3.2)/1.9*Math.PI):0;ctx.translate(0,-k*46);ctx.rotate(-.2);ctx.fillStyle='#5f9fe0';ctx.beginPath();ctx.ellipse(0,0,20,7,0,0,TAU);ctx.fill();
     ctx.fillStyle='rgba(220,240,255,.85)';ctx.beginPath();ctx.moveTo(-4,-2);ctx.lineTo(10,-22-k*4);ctx.lineTo(14,-2);ctx.fill();ctx.beginPath();ctx.moveTo(-4,2);ctx.lineTo(8,18);ctx.lineTo(12,2);ctx.fill();ctx.fillStyle='#2f5fa8';ctx.beginPath();ctx.moveTo(-18,0);ctx.lineTo(-28,-8);ctx.lineTo(-28,8);ctx.fill();ctx.fillStyle='#1b2a41';circ(13,-1,2);if(!op){ctx.globalAlpha=.35}return 1}
   if(e.k==='mudcrab'){ctx.fillStyle='#5f6a3a';ctx.beginPath();ctx.ellipse(0,0,20,13,0,0,TAU);ctx.fill();ctx.strokeStyle='#3a4020';ctx.lineWidth=4;ctx.lineCap='round';for(const s of[-1,1]){for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(s*14,2+i*4);ctx.lineTo(s*26,10+i*5);ctx.stroke()}ctx.fillStyle='#7a8a4a';circ(s*24,-12,7)}ctx.fillStyle='#1b2a41';circ(-5,-10,2.5);circ(5,-10,2.5);return 1}
-  return 0}
+  return a2Node(e,t)}
 /* ---------- 风暴引航 Boss：浪把独木舟推向暗礁，小鱼游到水面附近点一下发光，把船叫回航道 ---------- */
 const GC=[['红','#ff5a5a'],['绿','#4fe07a'],['黄','#ffd23f']],gNc=B=>G.mode==='hard'||B.made>=3?3:2,gCi=B=>B.pc%gNc(B);
 const GD={cx:()=>fishSX+150,sy:()=>surfY()-8,zone:()=>fy(SURF+.16),win:hd=>hd?80:95,
@@ -926,6 +930,95 @@ function guideHud(B,t){const w=Math.min(VW-40*U,300*U),x0=(VW-w)/2,y0=yMax+58*U,
   for(let i=0;i<nc;i++){const[bx,by,br]=GD.btn(i),on=i===ci;ctx.globalAlpha=on?1:.45;ctx.fillStyle=GC[i][1];if(on){ctx.shadowColor=GC[i][1];ctx.shadowBlur=16}circ(bx,by,on?br:br*.8);ctx.shadowBlur=0;
     if(on){ctx.globalAlpha=1;ctx.strokeStyle='#fff';ctx.lineWidth=3*U;ctx.beginPath();ctx.arc(bx,by,br+4*U,0,TAU);ctx.stroke()}}
   ctx.restore()}
+/* ---------- 第二卷 第二幕：星路海、火山岛、灯塔环、灯下鱼群 ---------- */
+TH.push(
+ {n:'星路海',top:'#2a4a7a',bot:'#0a1838',far:'#1f3a66',mid:'#183058',sand:'#c8c0a0',rock:'#5a6a8a',rock2:'#3a4a6a',weed:'#4fa0a0'},
+ {n:'火山岛',top:'#5a7a8a',bot:'#1a1a24',far:'#4a4a52',mid:'#33333c',sand:'#3a3634',rock:'#4a3a36',rock2:'#2a2220',weed:'#6a8a5a'},
+ {n:'灯塔环',top:'#3a4a7a',bot:'#0e1430',far:'#2a3260',mid:'#1f2650',sand:'#a8a088',rock:'#6a6a80',rock2:'#45455a',weed:'#5a8a8a'},
+ {n:'灯下鱼群',top:'#34507a',bot:'#0c1630',far:'#25406a',mid:'#1c3258',sand:'#b8b090',rock:'#5a6a80',rock2:'#3a465a',weed:'#4f9a90'});
+LV.push(
+ {name:'星路海',vol:2,fish:['saury','yellow','bream'],len:210,theme:16,nodes:['turbo'],gname:'夜光螺',pool:{pearls:2,fork:4,rockB:2,rockT:1,jelly:1,shield:1},goal:{k:'gather',n:[2,3]},extra:[20,30]},
+ {name:'火山岛',vol:2,fish:['mack','eel','tuna'],len:210,theme:17,tool:'lpot',nodes:['lobster'],gname:'龙虾',pool:{pearls:2,vent:5,rockB:1,rockT:2,octo:1,shield:1},goal:{k:'gather',n:[2,3]},extra:[20,30]},
+ {name:'灯塔环',vol:2,fish:['sard','mack','saury'],len:210,theme:18,tool:'rod',nodes:['skipjack'],gname:'鲣鱼',pool:{pearls:2,lamp:5,rockB:1,rockT:1,jelly:1,shield:1},goal:{k:'gather',n:[2,3]},extra:[20,30]},
+ {name:'灯下鱼群',vol:2,fish:['sard','saury'],len:200,theme:19,boss:'herd',gtxt:'把鱼群赶回潟湖',pool:{pearls:2,lamp:2,vent:1,rockB:2,jelly:1,shield:1},goal:{k:'boss'},extra:[20,30]});
+Object.assign(FISH,{turbo:{n:'夜光螺',c:['#fff4e0','#c89a5a','#7a5a30'],s:1,x:1},lobster:{n:'龙虾',c:['#ffe0d0','#d0603a','#8a3020'],s:1,x:1},skipjack:{n:'鲣鱼',c:['#e8f0ff','#4a6aa0','#2a3a60'],s:1,x:1}});
+Object.assign(NODE,{turbo:{tool:'',hp:1,f:.88,no:''},lobster:{tool:'lpot',hp:2,f:.9,no:'龙虾躲在石缝里，需要龙虾笼'},skipjack:{tool:'rod',hp:1,f:.22,no:'鲣鱼要用钓竿一条一条钓'}});
+Object.assign(BOSSMSG,{herd:'鱼群被灯光困住了！你在鱼群上面，它就往下躲；在下面，它就往上躲。把鱼群赶进灯光帘的暗缝里'});
+Object.assign(TIPS,{fork:'前面分成上下两条路！跟着星星的倒影游，走错了会被暗流冲回来',vent:'海底的热泉冒小泡泡时，马上要喷热水了，别待在它上面',lamp:'灯会把小鱼往它那边拉，顶着光游，别被吸进去'});
+const FORK={L:720,th:.07};
+Object.assign(PAT,{
+ fork(g,x,d){const c=g.r(.4,.6),up=g.r()<.5,L=FORK.L;g.E.push({t:'fork',x,c,up,L});
+   const ok=up?(c-FORK.th)/2:(1+c+FORK.th)/2,no=up?(1+c+FORK.th)/2:(c-FORK.th)/2;arc(g,x-280,c,c,3);arc(g,x+60,ok,ok,8);arc(g,x+60,no,no,4);
+   if(g.mode!=='simple')g.E.push({t:'jelly',x:x+L*.45,f:no,amp:.05,ph:g.r(0,6),sp:1});g.x+=L-120},
+ vent(g,x,d){const n=d>.5&&g.mode!=='simple'?2:1;for(let i=0;i<n;i++)g.E.push({t:'vent',x:x+i*230,ph:g.r(0,3),h:g.mode==='simple'?.42:.34});arc(g,x-200,.3,.3,4);arc(g,x+n*230-120,.3,.5,3)},
+ lamp(g,x,d){const top=g.r()<.6;g.E.push({t:'lamp',x,top,f:top?.05:.95});const f=top?.8:.2;arc(g,x-160,f,f,6)}});
+const a2Pull=g=>(g.mode==='simple'?135:175);
+function a2Hit(g,e,sx,y,dx,dist,dt,k){const F=g.fish;
+  if(e.t==='fork'){const cy=fy(e.c),ins=fishSX>sx&&fishSX<sx+e.L;
+    if(ins&&Math.abs(F.y-cy)<fy(FORK.th)-yMin+16)hurt(1);
+    if(fishSX>sx&&fishSX<sx+40&&e.lane==null)e.lane=F.y<cy?1:0;
+    if(e.lane!=null&&e.lane!==(e.up?1:0)&&fishSX>sx+e.L*.55){e.lane=null;g.scroll=e.x-fishSX-430;F.vy=0;g.inv=Math.max(g.inv,1);g.combo=0;g.flash=.35;CSND.crash&&CSND.crash();
+      toast('绕远路了！被暗流冲回了岔路口。跟着星星的倒影游',2.6,1)}
+    if(fishSX>sx+e.L)e.lane=null;return}
+  if(e.t==='vent'){const s=a2Vent(e,g.t);if(s===2&&Math.abs(dx)<40&&F.y>fy(1-e.h)-10)hurt(1);return}
+  if(e.t==='lamp'){if(e.off||g.trap)return;const R=230;if(Math.abs(dx)<R){const p=a2Pull(g)*k*(1-Math.abs(dx)/R);F.y+=Math.sign(y-F.y)*Math.min(Math.abs(y-F.y),p*dt)}
+    if(dist<58&&g.inv<=0){if(g.shield||g.whale){absorb();e.off=1;burst(sx,y,'#ffe9a8',16)}
+      else{const T=g.mode==='simple'?6:9;g.trap={t:T,T,p:0,need:g.mode==='simple'?8:13,e:{lamp:1}};g.combo=0;SFX.hit();toast(g.mode==='simple'?'被灯光吸住了！快速连点屏幕！':'被灯光吸住了！快速连点挣脱！',2,1)}}}}
+const a2Vent=(e,t)=>{const P=G&&G.mode==='hard'?2.8:3.4,c=(t+e.ph)%P;return c>P-1.1?2:c>P-2.1?1:0};
+function a2Draw(e,sx,g,t,T){
+  if(e.t==='fork'){const cy=fy(e.c),h=fy(FORK.th)-yMin,okY=e.up?(yMin+cy-h)/2:(cy+h+yMax)/2;ctx.save();ctx.fillStyle=T.rock;ctx.beginPath();ctx.moveTo(sx,cy);ctx.quadraticCurveTo(sx+30,cy-h,sx+70,cy-h);ctx.lineTo(sx+e.L-40,cy-h);ctx.quadraticCurveTo(sx+e.L,cy,sx+e.L-40,cy+h);ctx.lineTo(sx+70,cy+h);ctx.quadraticCurveTo(sx+30,cy+h,sx,cy);ctx.fill();
+    ctx.fillStyle=T.rock2;for(let i=0;i<Math.floor(e.L/60);i++)circ(sx+80+i*60+hash(e.x+i)*20,cy+(hash(i+e.x*.1)-.5)*h,6+hash(i)*5);
+    const big=g.mode==='simple',r=(big?16:11)+Math.sin(t*4)*2,hx=sx-70;ctx.translate(hx,okY);ctx.rotate(t*.6);ctx.shadowColor='#fff8c0';ctx.shadowBlur=22;ctx.fillStyle='#fff8d0';ctx.beginPath();for(let i=0;i<8;i++){const a=i*Math.PI/4,q=i%2?r*.35:r;ctx.lineTo(Math.cos(a)*q,Math.sin(a)*q)}ctx.fill();ctx.restore();
+    ctx.save();ctx.globalAlpha=.25+.1*Math.sin(t*3);ctx.fillStyle='#fff8d0';ctx.fillRect(hx+20,okY-2,Math.max(0,sx+e.L*.5-hx-20),4);ctx.restore();
+    const wy=e.up?(cy+h+yMax)/2:(yMin+cy-h)/2,wx=sx+e.L*.6;ctx.save();ctx.strokeStyle='rgba(20,30,60,.55)';ctx.lineWidth=4;for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(wx,wy,14+i*12,t*3+i,t*3+i+4.2);ctx.stroke()}ctx.restore();return}
+  if(e.t==='vent'){const s=a2Vent(e,t),b=yMax+30,top=fy(1-e.h);ctx.save();ctx.fillStyle=T.rock;ctx.beginPath();ctx.moveTo(sx-46,b);ctx.lineTo(sx-14,b-44);ctx.lineTo(sx+14,b-44);ctx.lineTo(sx+46,b);ctx.fill();ctx.fillStyle='#ff7a3a';ctx.globalAlpha=.6+.3*Math.sin(t*5);ctx.fillRect(sx-10,b-48,20,6);ctx.globalAlpha=1;
+    if(s===1){ctx.strokeStyle='rgba(255,255,255,.75)';ctx.lineWidth=2;for(let i=0;i<6;i++){const q=((t*1.6+i/6)%1),yy=b-50-q*(b-50-top)*.5;ctx.beginPath();ctx.arc(sx+Math.sin(i*2+t*6)*10,yy,3+i%3,0,TAU);ctx.stroke()}}
+    if(s===2){const gr=ctx.createLinearGradient(0,top,0,b);gr.addColorStop(0,'rgba(255,240,220,.15)');gr.addColorStop(1,'rgba(255,160,90,.75)');ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(sx-18,b-44);ctx.quadraticCurveTo(sx-34+Math.sin(t*20)*4,(top+b)/2,sx-26,top);ctx.lineTo(sx+26,top);ctx.quadraticCurveTo(sx+34+Math.sin(t*20+1)*4,(top+b)/2,sx+18,b-44);ctx.fill()}ctx.restore();return}
+  if(e.t==='lamp'){const y=fy(e.f),R=230;ctx.save();if(!e.off){const gr=ctx.createRadialGradient(sx,y,4,sx,y,R);gr.addColorStop(0,'rgba(255,240,170,.55)');gr.addColorStop(1,'rgba(255,240,170,0)');ctx.fillStyle=gr;ctx.fillRect(sx-R,y-R,R*2,R*2)}
+    ctx.strokeStyle='#c8c0b0';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(sx,e.top?yMin-40:yMax+40);ctx.lineTo(sx,y);ctx.stroke();ctx.fillStyle='#6a6a80';ctx.fillRect(sx-12,y-(e.top?16:-4),24,12);
+    ctx.fillStyle=e.off?'#556':'#fff3b0';if(!e.off){ctx.shadowColor='#ffe27a';ctx.shadowBlur=26}circ(sx,y+(e.top?6:-6),13);ctx.restore();return}}
+function a2Node(e,t){
+  if(e.k==='turbo'){ctx.rotate(Math.sin(t*1.5+e.x)*.1);ctx.fillStyle='#c89a5a';ctx.beginPath();ctx.arc(0,2,18,0,TAU);ctx.fill();ctx.fillStyle='#e8c890';ctx.beginPath();ctx.arc(-3,-2,11,0,TAU);ctx.fill();ctx.fillStyle='#fff8e8';circ(-5,-4,5);ctx.strokeStyle='#7a5a30';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,2,18,.4,2.6);ctx.stroke();return 1}
+  if(e.k==='lobster'){ctx.fillStyle='#d0603a';ctx.beginPath();ctx.ellipse(0,0,22,9,0,0,TAU);ctx.fill();ctx.fillStyle='#b0482a';for(let i=0;i<3;i++)ctx.fillRect(-18+i*9,-8,5,16);ctx.strokeStyle='#d0603a';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(18,-4);ctx.quadraticCurveTo(40,-24+Math.sin(t*3)*4,46,-6);ctx.moveTo(18,2);ctx.quadraticCurveTo(42,-10,48,8);ctx.stroke();ctx.fillStyle='#1b2a41';circ(16,-5,2);return 1}
+  if(e.k==='skipjack'){const a=t*1.8+e.x*.01;ctx.translate(Math.cos(a)*14,Math.sin(a)*6);ctx.fillStyle='#4a6aa0';ctx.beginPath();ctx.ellipse(0,0,22,9,0,0,TAU);ctx.fill();ctx.fillStyle='#e8f0ff';ctx.beginPath();ctx.ellipse(2,4,16,4,0,0,TAU);ctx.fill();ctx.strokeStyle='#2a3a60';ctx.lineWidth=1.5;for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-8+i*7,2);ctx.lineTo(-4+i*7,7);ctx.stroke()}ctx.fillStyle='#2a3a60';ctx.beginPath();ctx.moveTo(-20,0);ctx.lineTo(-30,-9);ctx.lineTo(-30,9);ctx.fill();ctx.fillStyle='#1b2a41';circ(14,-2,2);return 1}
+  return 0}
+function a2Build(L,g){const fk=g.E.filter(e=>e.t==='fork');if(!fk.length)return;g.E=g.E.filter(e=>{if(e.t==='fork'||e.t==='pearl'||e.t==='node'||e.t==='cp'||e.t==='fin'||e.t==='boss')return true;return!fk.some(f=>e.x>f.x-60&&e.x<f.x+f.L+60&&!(e.t==='jelly'&&e.x===f.x+f.L*.45))});
+  for(const e of g.E)if(e.t==='node'){const f=fk.find(q=>e.x>q.x-40&&e.x<q.x+q.L+40);if(f)e.x=f.x-140}}
+function a2BG(th,sc,t){
+  if(th===16||th===18||th===19){ctx.fillStyle='rgba(255,255,240,.7)';for(let i=0;i<26;i++){const x=(((i*83-sc*.04)%(VW+40))+VW+40)%(VW+40)-20,y=yMin+((i*47)%140);ctx.globalAlpha=.25+.25*Math.sin(t*2+i);ctx.fillRect(x,y,2,2)}ctx.globalAlpha=1}
+  if(th===17){const o=sc*.18;for(let n=Math.floor(o/600)-1;n*600-o<VW+300;n++){const x=n*600-o+hash(n+11)*120,b=PH-150;ctx.fillStyle='rgba(40,34,36,.8)';ctx.beginPath();ctx.moveTo(x-180,b);ctx.lineTo(x-30,b-210);ctx.lineTo(x+30,b-210);ctx.lineTo(x+180,b);ctx.fill();ctx.fillStyle='rgba(255,110,50,'+(.25+.15*Math.sin(t*2+n))+')';ctx.fillRect(x-24,b-214,48,8);
+    ctx.fillStyle='rgba(200,200,200,.12)';for(let i=0;i<4;i++){const q=(t*.15+i/4)%1;ctx.beginPath();ctx.arc(x+Math.sin(q*6+n)*20,b-220-q*200,16+q*30,0,TAU);ctx.fill()}}}
+  if(th===18||th===19){const o=sc*.2;for(let n=Math.floor(o/420)-1;n*420-o<VW+200;n++){const x=n*420-o+hash(n+3)*80,b=PH-150;ctx.fillStyle='rgba(30,36,70,.85)';ctx.fillRect(x-10,b-190,20,190);ctx.fillRect(x-18,b-200,36,12);
+    ctx.save();ctx.globalAlpha=.12;ctx.fillStyle='#fff3b0';const a=Math.sin(t*.8+n)*.6;ctx.beginPath();ctx.moveTo(x,b-196);ctx.lineTo(x+Math.cos(a-.12)*600,b-196+Math.sin(a-.12)*600);ctx.lineTo(x+Math.cos(a+.12)*600,b-196+Math.sin(a+.12)*600);ctx.fill();ctx.restore();ctx.fillStyle='#fff3b0';circ(x,b-196,7)}}}
+/* ---------- 牧鱼 Boss：鱼群躲着小鱼走，要把它赶进灯光帘的暗缝 ---------- */
+const HD={hx:()=>fishSX+190,R:()=>170};
+function herdMk(g,hd,fin){const mid=(yMin+yMax)/2;return{k:'herd',hp:3,n:0,need:hd?9:6,cur:[],made:0,t:-2.5,sp:1,sy:mid,svy:0,cnt:30,lastC:.5,done:0,fin,
+  reset(){this.hp=3;this.n=0;this.cur=[];this.made=0;this.t=-2;this.sp=1;this.sy=(yMin+yMax)/2;this.svy=0;this.cnt=30;this.lastC=.5}}}
+function herdUpd(B,dt){const g=G,F=g.fish,hd=g.mode==='hard',hx=HD.hx(),R=HD.R();B.t+=dt;
+  const d=B.sy-F.y,ad=Math.abs(d);if(ad<R)B.svy+=Math.sign(d||1)*(hd?560:620)*(1-ad/R)*dt;
+  B.svy+=Math.sin(B.t*.8)*(hd?70:45)*dt;
+  for(const r of B.cur)if(!r.done&&r.x>hx&&r.x-hx<150){const f=(B.sy-yMin)/(yMax-yMin);if(Math.abs(f-r.c)>r.gap/2)B.svy+=Math.sign(f-r.c)*(hd?90:55)*dt}
+  B.svy*=Math.max(0,1-2.4*dt);B.sy+=B.svy*dt;if(B.sy<yMin+40){B.sy=yMin+40;B.svy=Math.abs(B.svy)*.3}if(B.sy>yMax-40){B.sy=yMax-40;B.svy=-Math.abs(B.svy)*.3}
+  if(B.t<0)return;
+  if(B.n+B.cur.filter(r=>!r.done).length<B.need&&B.made<B.need+6){B.sp-=dt;if(B.sp<=0){B.sp=hd?2.3+Math.random()*.8:3+Math.random()*1.1;
+    const s=Math.random()<.5?-1:1,c=clamp(B.lastC+s*(.22+Math.random()*.22),.22,.78);B.lastC=c;B.cur.push({x:VW+60,c,gap:(hd?.24:.32)*Math.max(1,760/(yMax-yMin))});B.made++}}
+  for(const r of B.cur){r.x-=(hd?125:100)*dt;
+    if(!r.done&&r.x<=hx){r.done=1;const f=(B.sy-yMin)/(yMax-yMin);
+      if(Math.abs(f-r.c)<=r.gap/2-.03){B.n++;SFX.save();burst(hx,B.sy,'#bff6ff',16);g.bonus+=40;ftext('鱼群穿过去了！',hx-40,B.sy-50,'#bff6e6')}
+      else{r.bad=1;B.hp--;B.cnt=Math.max(6,B.cnt-8);g.shake=.4;g.flash=.25;SFX.hit();ftext('鱼群被灯光吸走了一些！',hx-60,B.sy-50,'#ffb3b3');if(B.hp<=0){die('herd');return}}}}
+  B.cur=B.cur.filter(r=>r.x>-80);
+  if(B.n>=B.need&&!B.cur.some(r=>!r.done))bossWin(B,'鱼群游回了潟湖！')}
+function herdDraw(B,t){const g=G,hx=HD.hx(),nx=B.cur.find(r=>!r.done);ctx.save();
+  for(const r of B.cur){const g0=fy(r.c-r.gap/2),g1=fy(r.c+r.gap/2),w=46;
+    for(const[a,b]of[[yMin-20,g0],[g1,yMax+30]]){const gr=ctx.createLinearGradient(r.x-w,0,r.x+w,0);gr.addColorStop(0,'rgba(255,240,170,0)');gr.addColorStop(.5,r.bad?'rgba(255,200,150,.55)':'rgba(255,240,170,.6)');gr.addColorStop(1,'rgba(255,240,170,0)');ctx.fillStyle=gr;ctx.fillRect(r.x-w,a,w*2,b-a)}
+    ctx.fillStyle='#fff3b0';ctx.shadowColor='#ffe27a';ctx.shadowBlur=18;circ(r.x,yMin-4,10);ctx.shadowBlur=0;
+    if(r===nx){ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=3;ctx.setLineDash([8,6]);ctx.lineDashOffset=-t*30;ctx.strokeRect(r.x-28,g0,56,g1-g0);ctx.setLineDash([])}}
+  for(let i=0;i<B.cnt;i++){const a=t*(1.4+(i%5)*.12)+i*2.39,rr=12+(i*7)%30,x=hx+Math.cos(a)*rr*1.3,y=B.sy+Math.sin(a)*rr*.8,dir=Math.cos(a+Math.PI/2)>0?1:-1;
+    ctx.fillStyle=i%3?'#cfe0f0':'#9fb8d0';ctx.beginPath();ctx.ellipse(x,y,7,3,0,0,TAU);ctx.fill();ctx.beginPath();ctx.moveTo(x-6*dir,y);ctx.lineTo(x-11*dir,y-3);ctx.lineTo(x-11*dir,y+3);ctx.fill()}
+  ctx.strokeStyle='rgba(255,255,255,.18)';ctx.lineWidth=2;ctx.setLineDash([4,8]);ctx.beginPath();ctx.arc(fishSX,g.fish.y,HD.R(),-.7,.7);ctx.stroke();ctx.setLineDash([]);ctx.restore()}
+function herdHud(B,t){const w=Math.min(VW-40*U,300*U),x0=(VW-w)/2,y0=yMax+14*U,h=16*U;ctx.save();ctx.textAlign='center';ctx.font=`${14*U}px ${FONT}`;
+  ctx.fillStyle='rgba(6,40,70,.55)';ctx.fillRect(x0-4*U,y0-4*U,w+8*U,h+8*U);const sg=w/B.need;for(let i=0;i<B.need;i++){ctx.fillStyle=i<B.n?'#4fe0b5':'rgba(255,255,255,.25)';ctx.fillRect(x0+i*sg+2*U,y0,sg-4*U,h)}
+  ctx.fillStyle='#fff';ctx.fillText(tl('鱼群 '+'❤'.repeat(Math.max(0,B.hp))+' · 还差 '+Math.max(0,B.need-B.n)+' 道灯光'),VW/2,y0+h+18*U);ctx.restore()}
 /* ---------- drawing ---------- */
 const circ=(x,y,r)=>{ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.fill()};
 function hills(col,off,base,amp,a,b){ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(0,VT);for(let x=0;x<=VW+30;x+=30){const wx=x+off;ctx.lineTo(x,base-(Math.sin(wx*a)+Math.sin(wx*b+1.3))*amp*.5-amp)}ctx.lineTo(VW+30,VT);ctx.fill()}
@@ -1019,6 +1112,7 @@ function drawEntity(e,sx,y,g,T){const t=g.t;switch(e.t){
     const tw=(Math.sin(t*5+e.x)+1)/2;ctx.fillStyle=`rgba(255,255,255,${tw})`;ctx.fillRect(sx+7,y-14,2,8);ctx.fillRect(sx+4,y-11,8,2)}break;
   case'rock':drawRock(sx,e,T);break;
   case'fnet':drawFnet(e,sx,g,t);break;
+  case'fork':case'vent':case'lamp':a2Draw(e,sx,g,t,T);break;
   case'octo':drawOcto(sx,y,octoR(e,t),octoWarn(e,t),t,e);break;
   case'jelly':drawJelly(sx,y,t,e);break;
   case'net':if(!e.hold)drawNet(sx,y,t);break;
@@ -1074,7 +1168,7 @@ function drawWorld(){
   drawBG(g.theme,g.scroll,t);if(g.faded){ctx.fillStyle='rgba(140,150,160,.42)';ctx.fillRect(0,0,VW,VT)}
   for(const s of g.sharks)if(s.ph===0){const a=.16+.14*Math.sin(t*14);ctx.fillStyle=`rgba(255,60,60,${a})`;ctx.fillRect(0,s.y-58,VW,116);
     ctx.fillStyle='#5f7fa3';const fxx=VW-30-Math.sin(t*10)*8;ctx.beginPath();ctx.moveTo(fxx-34,s.y+26);ctx.lineTo(fxx+4,s.y-36);ctx.lineTo(fxx+26,s.y+26);ctx.fill()}
-  for(const e of g.E){if(e.gone)continue;const sx=e.x+(e.dx||0)-g.scroll;if(sx<-200||sx>VW+200)continue;drawEntity(e,sx,entY(e,t),g,T)}
+  for(const e of g.E){if(e.gone)continue;const sx=e.x+(e.dx||0)-g.scroll;if(sx<-200-(e.L||0)||sx>VW+200)continue;drawEntity(e,sx,entY(e,t),g,T)}
   if(g.L&&g.L.tide)drawTide(g,t);v2Surface(g,t);
   if(g.boss&&!g.boss.done&&g.boss.k!=='feed')bossDraw2(g.boss,t);
   if(g.boss&&g.boss.done&&g.boss.k==='feed'){const B=g.boss;if(B.fedAt==null)B.fedAt=t;const k=t-B.fedAt;if(k<3.4){const[bx,by]=bossPos();
@@ -1096,7 +1190,7 @@ function drawWorld(){
     ctx.translate(-8,-70+Math.sin(t*3)*3);ctx.fillStyle='#4a90d9';ctx.beginPath();ctx.ellipse(0,0,20,12,0,0,TAU);ctx.fill();ctx.beginPath();ctx.moveTo(-17,0);ctx.lineTo(-30,-10);ctx.lineTo(-27,0);ctx.lineTo(-30,9);ctx.fill();
     ctx.fillStyle='#d9efff';ctx.beginPath();ctx.ellipse(3,6,13,5,0,0,TAU);ctx.fill();ctx.fillStyle='#1b2a41';circ(11,-2,2.2);ctx.strokeStyle='#d9efff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(2,-12);ctx.lineTo(-2,-20);ctx.moveTo(2,-12);ctx.lineTo(6,-20);ctx.stroke();ctx.restore()}
   if(g.magnet&&!dead){ctx.strokeStyle=`rgba(255,255,255,${.18+.1*Math.sin(t*5)})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(fishSX,F.y,115,0,TAU);ctx.stroke()}
-  if(g.trap)drawNet(fishSX,F.y,t*6);
+  if(g.trap){if(g.trap.e.lamp){ctx.save();ctx.strokeStyle='rgba(255,240,170,.85)';ctx.lineWidth=4;for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(fishSX,F.y,40+i*12+Math.sin(t*8+i)*4,0,TAU);ctx.stroke()}ctx.restore()}else drawNet(fishSX,F.y,t*6)}
   for(const s of g.sharks)if(s.ph===1)drawShark(s.sx,s.y,t);
   for(const p of g.parts){ctx.globalAlpha=clamp(p.l*2,0,1);if(p.k){ctx.strokeStyle=p.c;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,TAU);ctx.stroke()}else{ctx.fillStyle=p.c;circ(p.x,p.y,p.r)}}
   ctx.globalAlpha=1;ctx.textAlign='center';ctx.font=`${20*Math.max(1,U*.85)}px ${FONT}`;
@@ -1395,10 +1489,10 @@ function cookDish(d,order){for(const k in d.need)SAVE.fish[k]-=d.need[k];const f
   SAVE.dishes[d.id]=(SAVE.dishes[d.id]||0)+1;SAVE.wallet+=gain;addRep(order?15:Math.round(d.p/5));SFX.win();return{gain,first}}
 
 /* ---------- restaurant service (kitchen mini-game) ---------- */
-const METHOD={cut:['d49','d50','d7','d5','d14','d37','d40'],grill:['d47','d48','d41','d1','d4','d25','d27','d35','d17','d29','d32','d11'],pot:['d2','d3','d6','d19','d34','d36','d33','d12','d28','d16','d13','d22','d39','d42','d43','d45']};
+const METHOD={cut:['d49','d50','d7','d5','d14','d37','d40'],grill:['d47','d48','d41','d1','d4','d25','d27','d35','d17','d29','d32','d11'],pot:['d2','d3','d6','d19','d34','d36','d33','d12','d28','d16','d13','d22','d39','d42','d43','d45'],umu:[]};
 const M2={d2:['cut','pot'],d23:['cut','pot'],d18:['asm','pot'],d46:['asm','pot'],d11:['asm','grill'],d15:['grill','asm']},startKind=id=>M2[id]?M2[id][0]:methodOf(id);
-const methodOf=id=>M2[id]?M2[id][1]:METHOD.cut.includes(id)?'cut':METHOD.grill.includes(id)?'grill':METHOD.pot.includes(id)?'pot':'asm';
-const STN={cut:['🔪','砧板'],grill:['🔥','烤架'],pot:['🍲','汤锅'],asm:['🍽️','装盘台']},TIME={grill:[4,6.5,9],pot:[7,13,17]};
+const methodOf=id=>M2[id]?M2[id][1]:METHOD.cut.includes(id)?'cut':METHOD.grill.includes(id)?'grill':METHOD.pot.includes(id)?'pot':METHOD.umu.includes(id)?'umu':'asm';
+const STN={cut:['🔪','砧板'],grill:['🔥','烤架'],pot:['🍲','汤锅'],asm:['🍽️','装盘台'],umu:['🪨','地炉']},TIME={grill:[4,6.5,9],pot:[7,13,17],umu:[16,24,60]};
 const FACES=['👵','👴','👩','🧔','👧','🧑','👨‍🦳','👩‍🦰'];
 SAVE.up=SAVE.up||{seat:0,grill:0,pot:0};SAVE.staff=SAVE.staff||{waiter:0,chef:0};
 const UPG=[{id:'seat',ic:'🪑',n:'加一张桌子',d:'多招待一位客人',cost:[300,700,1500]},{id:'grill',ic:'🔥',n:'第二个烤架',d:'同时烤两份',cost:[500]},{id:'pot',ic:'🍲',n:'第二口汤锅',d:'同时煮两锅',cost:[900]}];
@@ -1413,24 +1507,26 @@ DISH.forEach(d=>d.p=Math.round(8+d.p*.35));
 const wageOf=s=>s.w+(s.id==='chef'?3:2)*(restLv()-1);
 let SV=null;
 const dById=id=>DISH.find(d=>d.id===id),canMake=(d,f)=>Object.entries(d.need).every(([k,n])=>(f[k]||0)>=n);
-function svPending(id){let w=0,s=0;SV.seats.forEach(x=>{if(x&&x.d===id)w++});SV.st.forEach(x=>{if(x.d===id&&x.ph!=='burn')s++});SV.shelf.forEach(p=>{if(p.d===id)s++});return w-s}
+function svPending(id){let w=0,s=0;SV.seats.forEach(x=>{if(x&&x.d===id)w++});SV.st.forEach(x=>{if(x.d===id&&x.ph!=='burn')s+=x.k==='umu'?(x.left||3):1});SV.shelf.forEach(p=>{if(p.d===id)s++});return w-s}
 function svAvail(){const f={...SAVE.fish},seen={};SV.seats.forEach(s=>{if(!s||seen[s.d])return;seen[s.d]=1;const n=Math.max(0,svPending(s.d)),d=dById(s.d);for(const k in d.need)f[k]=(f[k]||0)-n*d.need[k]});return f}
 function startServe(banq){
   if(!banq&&!DISH.some(d=>unlocked(d)&&canMake(d,SAVE.fish))){toast('鱼篓里的鱼不够做任何一道菜，先出海捕鱼吧',2.8);return}
   ensureOrders();let wage=0;const staff={},came=[],broke=[];for(const s of STAFF)if(!banq&&SAVE.staff[s.id]&&s.ok()){if(SAVE.wallet-wage>=wageOf(s)){staff[s.id]=1;wage+=wageOf(s);came.push(s.n.split('（')[0])}else broke.push(s.n.split('（')[0])}SAVE.wallet-=wage;
-  const st=[{k:'cut'},{k:'grill'},{k:'pot'},{k:'asm'}];if(SAVE.up.grill)st.push({k:'grill'});if(SAVE.up.pot)st.push({k:'pot'});
+  const st=[{k:'cut'},{k:'grill'},{k:'pot'},{k:'asm'}];if(SAVE.up.grill)st.push({k:'grill'});if(SAVE.up.pot)st.push({k:'pot'});if(SAVE.story.post17)st.push({k:'umu'});
   SAVE.orders.list.forEach(o=>delete o.in);
   SV={t:90,earn:0,tips:0,rep:0,served:0,lost:0,wage,staff,seats:Array(2+SAVE.up.seat).fill(null),shelf:[],st,next:1,wt:0,dirty:1,over:0,salt:!banq&&(SAVE.fish.salt||0)>0};
-  if(banq){SV.banq=1;SV.t=110;SV.seats=Array(4).fill(null);const un=DISH.filter(d=>unlocked(d)&&Object.keys(d.need).length<=2).sort((a,b)=>b.p-a.p).slice(0,8);SV.q=Array.from({length:10},(_,i)=>un[(i*3)%un.length].id)}
+  if(banq){SV.banq=1;SV.t=110;SV.seats=Array(4).fill(null);const un=DISH.filter(d=>unlocked(d)&&Object.keys(d.need).length<=2&&methodOf(d.id)!=='umu').sort((a,b)=>b.p-a.p).slice(0,8);SV.q=Array.from({length:10},(_,i)=>un[(i*3)%un.length].id)}
   $('svEnd').hidden=true;$('app').classList.add('serve');$('svScene').hidden=$('svShelf').hidden=false;show('sServe');svBuild();svRender();
   if(banq)toast('宴席挑战：店员进不了后厨，全靠你自己！',3.2);else if(broke.length)toast('珍珠不够付工资，'+broke.join('、')+'这场没来',3.2,1);else if(came.length)toast('本场店员：'+came.join('、')+'（工资 '+wage+' ⚪）',3);else toast('客人点什么，就在下面点那道菜开始做',3)}
 function svSigNeed(id){const v=SV;return v.seats.filter(x=>x&&x.d===id&&x.sig).length-v.st.filter(x=>x.d===id&&x.hand&&x.ph!=='burn').length-v.shelf.filter(p=>p.d===id&&p.hand).length}
 function svStart(id,byHand){const v=SV,d=dById(id),m=startKind(id),s=v.st.find(x=>x.k===m&&!x.d);if(!s||svPending(id)<=0||!(v.banq||canMake(d,SAVE.fish)))return;s.hand=byHand&&svSigNeed(id)>0?1:0;
-  if(!v.banq)for(const k in d.need)SAVE.fish[k]-=d.need[k];s.d=id;s.t=0;s.n=0;s.ph=m==='cut'||m==='asm'?'work':'cook';s.need=m==='cut'?6:3+Object.values(d.need).reduce((a,b)=>a+b,0);v.dirty=1;SFX.tap();svFx('start',v.st.indexOf(s),d.ic,id)}
-function svPlate(s,q){const v=SV;if(M2[s.d]&&!s.stg){const k2=M2[s.d][1],t2=v.st.find(x=>x.k===k2&&!x.d);if(!t2){if(!v.banq||true)toast(STN[k2][1]+'没空，先腾出来',1.3);return false}t2.d=s.d;t2.ph=k2==='grill'||k2==='pot'?'cook':'work';t2.t=0;t2.n=0;t2.stg=1;t2.q0=q;t2.hand=s.hand;svFx('plate',v.st.indexOf(s),dById(s.d).ic);s.d=null;s.ph='';s.hand=0;v.dirty=1;SFX.tap();return true}if(s.q0&&s.q0!=='ok')q=s.q0;s.stg=0;s.q0=0;if(v.shelf.length>=4){toast('出菜口满了，先把菜端给客人',1.6);return false}svFx('plate',v.st.indexOf(s),dById(s.d).ic);v.shelf.push({d:s.d,q,hand:s.hand,age:0});s.d=null;s.ph='';s.hand=0;v.dirty=1;if(!v.banq&&!SAVE.tipFin){SAVE.tipFin=1;toast('点一下出菜口的菜，给它“点睛”，多卖一成半',3.2)}return true}
+  if(!v.banq)for(const k in d.need)SAVE.fish[k]-=d.need[k];s.d=id;s.t=0;s.n=0;s.left=s.k==='umu'?3:0;s.open=0;s.ph=m==='cut'||m==='asm'?'work':'cook';s.need=m==='cut'?6:3+Object.values(d.need).reduce((a,b)=>a+b,0);v.dirty=1;SFX.tap();svFx('start',v.st.indexOf(s),d.ic,id)}
+function svPlate(s,q){const v=SV;if(M2[s.d]&&!s.stg){const k2=M2[s.d][1],t2=v.st.find(x=>x.k===k2&&!x.d);if(!t2){if(!v.banq||true)toast(STN[k2][1]+'没空，先腾出来',1.3);return false}t2.d=s.d;t2.ph=k2==='grill'||k2==='pot'?'cook':'work';t2.t=0;t2.n=0;t2.stg=1;t2.q0=q;t2.hand=s.hand;svFx('plate',v.st.indexOf(s),dById(s.d).ic);s.d=null;s.ph='';s.hand=0;v.dirty=1;SFX.tap();return true}if(s.q0&&s.q0!=='ok')q=s.q0;s.stg=0;s.q0=0;if(v.shelf.length>=4){toast('出菜口满了，先把菜端给客人',1.6);return false}
+  if(s.k==='umu'){svFx('plate',v.st.indexOf(s),dById(s.d).ic);v.shelf.push({d:s.d,q,hand:s.hand,age:0});s.left=(s.left||3)-1;s.open=1;v.dirty=1;if(s.left<=0){s.d=null;s.ph='';s.hand=0;s.open=0}return true}
+  svFx('plate',v.st.indexOf(s),dById(s.d).ic);v.shelf.push({d:s.d,q,hand:s.hand,age:0});s.d=null;s.ph='';s.hand=0;v.dirty=1;if(!v.banq&&!SAVE.tipFin){SAVE.tipFin=1;toast('点一下出菜口的菜，给它“点睛”，多卖一成半',3.2)}return true}
 function svTapSt(s){const v=SV;if(!s.d)return;
   if(s.k==='cut'||s.k==='asm'){if(s.n<s.need){s.n++;SFX.tap();v.dirty=1;svFx('chop',v.st.indexOf(s))}if(s.n>=s.need)svPlate(s,'ok')}
-  else if(s.ph==='cook')toast('还没熟，再等等',1);
+  else if(s.ph==='cook')toast(s.k==='umu'?'地炉封着，中途不能打开':'还没熟，再等等',1.2);
   else if(s.ph==='burn'){s.d=null;s.ph='';v.dirty=1;SFX.pop()}
   else if(svPlate(s,s.ph==='perfect'?'perfect':'ok'))SFX.save()}
 function svGarnish(j){const v=SV,p=v.shelf[j];if(!p)return;if(p.fin){toast('这盘已经点过睛了',1);return}p.fin=1;v.dirty=1;SFX.shield();const e=$('svShelf').querySelectorAll('.plate')[j];svPop('✨ 点睛',e)}
@@ -1445,12 +1541,12 @@ function svServe(i){const v=SV,s=v.seats[i];if(!s)return;const ord=p=>(p.d===s.d
   toast([sigOk&&'招牌菜，亲手做的！',p.q==='perfect'&&'火候刚好！',first&&'新菜谱，多得五成！'].filter(Boolean).map(tl).join(/^(zh|ja)$/.test(SAVE.lang)?'':' '),1.4)}
 function svTick(dt){const v=SV;v.t-=dt;{const rd=dt/(SAVE.spd||1);v.gcd=Math.max(0,(v.gcd||0)-rd);for(const p of v.shelf)p.age=(p.age||0)+rd}
   v.seats.forEach((s,i)=>{if(!s)return;s.p-=dt;if(s.p<=0){svGhost(s,i,0);v.seats[i]=null;v.lost++;v.rep-=2;if(s.o)delete s.o.in;v.dirty=1;SFX.hit()}});
-  v.next-=dt;if(v.next<=0&&v.t>8){v.next=5-.7*v.seats.length+Math.random()*3;const i=v.seats.indexOf(null);if(i>=0&&v.banq){if(v.q.length){const d=dById(v.q.shift());v.seats[i]={d:d.id,p:30,P:30,face:'🧑',name:'宾客',o:null,look:svLook(),x:1e3};v.dirty=1;SFX.tap()}}else if(i>=0){const f=svAvail(),o=SAVE.orders.list.find(o=>!o.done&&!o.in&&unlocked(dById(o.d))&&canMake(dById(o.d),f));let d=null;
-      if(o){o.in=1;d=dById(o.d)}else{const pool=DISH.filter(d=>unlocked(d)&&canMake(d,f));if(pool.length)d=pool[Math.floor(Math.random()*pool.length)]}
+  v.next-=dt;if(v.next<=0&&v.t>8){v.next=5-.7*v.seats.length+Math.random()*3;const i=v.seats.indexOf(null);if(i>=0&&v.banq){if(v.q.length){const d=dById(v.q.shift());v.seats[i]={d:d.id,p:30,P:30,face:'🧑',name:'宾客',o:null,look:svLook(),x:1e3};v.dirty=1;SFX.tap()}}else if(i>=0){const f=svAvail(),spare=v.shelf.find(p=>!v.seats.some(x=>x&&x.d===p.d)),o=spare?null:SAVE.orders.list.find(o=>!o.done&&!o.in&&unlocked(dById(o.d))&&canMake(dById(o.d),f));let d=spare?dById(spare.d):null;
+      if(!d){if(o){o.in=1;d=dById(o.d)}else{const pool=DISH.filter(d=>unlocked(d)&&canMake(d,f));if(pool.length)d=pool[Math.floor(Math.random()*pool.length)]}}
       if(d){const sig=!v.seats.some(x=>x&&x.sig)&&Math.random()<(o?.5:.22),P=o?30:sig?28:24;v.seats[i]={d:d.id,p:P,P,face:FACES[Math.floor(Math.random()*FACES.length)],name:o?o.c:'',o,sig,look:svLook(o),x:1e3};v.dirty=1;SFX.tap();if(sig&&v.staff.chef&&!v.sigTip){v.sigTip=1;toast('阿珍：“这道得你来，我算过了。”带 ⭐ 的单你亲手做能多卖四成；等太久她才会接手',3.6)}}}}
   for(const s of v.st){if(!s.d)continue;
-    if(s.k==='grill'||s.k==='pot'){s.t+=dt;const T=TIME[s.k],ph=s.t<T[0]?'cook':s.t<T[1]?'perfect':s.t<T[2]?'ok':'burn';if(ph!==s.ph){s.ph=ph;v.dirty=1;if(ph==='perfect')SFX.shield();if(ph==='burn')SFX.hit()}
-      if(v.staff.chef&&!s.hand&&s.ph!=='burn'&&s.t>=TIME[s.k][0]+1.5&&v.shelf.length<4)svPlate(s,'ok')}
+    if(TIME[s.k]){if(!s.open){s.t+=dt;const T=TIME[s.k],ph=s.t<T[0]?'cook':s.t<T[1]?'perfect':s.t<T[2]?'ok':'burn';if(ph!==s.ph){s.ph=ph;v.dirty=1;if(ph==='perfect')SFX.shield();if(ph==='burn')SFX.hit()}}
+      if(v.staff.chef&&!s.hand&&s.ph!=='burn'&&s.t>=TIME[s.k][0]+1.5&&v.shelf.length<4&&(s.k!=='umu'||v.seats.filter(x=>x&&x.d===s.d).length>v.shelf.filter(p=>p.d===s.d).length))svPlate(s,'ok')}
     else if(v.staff.chef&&!s.hand){s.ct=(s.ct||0)+dt;if(s.ct>.45){s.ct=0;svTapSt(s)}}}
   if(v.staff.chef){v.cs=(v.cs||0)+dt;if(v.cs>.7){v.cs=0;for(const id of new Set(v.seats.filter(Boolean).map(s=>s.d))){const m=startKind(id),A=v.seats.filter(x=>x&&x.d===id&&(!x.sig||x.p/x.P<.45)).length,C=v.st.filter(x=>x.d===id&&x.ph!=='burn'&&!x.hand).length+v.shelf.filter(p=>p.d===id&&!p.hand).length;if(C<A&&svPending(id)>0&&(v.banq||canMake(dById(id),SAVE.fish))&&v.st.some(x=>x.k===m&&!x.d)){svStart(id);break}}}}
   if(v.staff.waiter){v.wt+=dt;if(v.wt>.9){v.wt=0;for(const p of v.shelf){if(!p.fin&&p.age<1.8)continue;const i=svSeatFor(p);if(i>=0){svServe(i);break}}}}
@@ -1486,7 +1582,7 @@ function svRender(){const v=SV;v.dirty=0;if(!SVE)return;
   v.seats.forEach((s,i)=>{const e=SVE.sb[i];e.hidden=!s;if(!s)return;const d=dById(s.d);e.className='sb'+(s.o?' vip':'')+(s.sig?' sig':'')+(v.shelf.some(p=>p.d===s.d)?' can':'');e.querySelector('.di').textContent=d.ic;e.querySelector('.dnm').textContent=(s.sig?'⭐ ':'')+(s.o?s.name+'：':'')+d.n});
   $('svShelf').innerHTML='<span class="lbl">出菜口</span>'+v.shelf.map((p,j)=>`<button class="plate ${p.q==='perfect'?'pf':''} ${p.fin?'fin':'raw'} ${p.hand?'hd':''}" data-pl="${j}">${dById(p.d).ic}</button>`).join('')+'<span class="sp"></span><span class="bell">🛎️</span>';
   v.st.forEach((s,i)=>{const e=SVE.st[i],ph=s.d?s.ph:'idle',keep=e.classList.contains('chop')?' chop':'';e.className=`stn k-${s.k} ${ph}`+keep+(v.staff.chef&&!s.hand?' hasChef':'')+(s.d&&s.hand?' hand':'');e.querySelector('.fd').textContent=s.d?(ph==='burn'?'💨':dById(s.d).ic):'';
-    e.querySelector('.tx').textContent=(s.d&&s.hand&&ph!=='burn'?'⭐ ':'')+(ph==='work'?(s.k==='cut'?'连点切菜！':'连点装盘！'):ph==='perfect'?'出锅！':ph==='ok'?'快出锅！':ph==='burn'?'焦了，点一下清理':ph==='cook'&&s.hand?'招牌菜，盯着火候':'');
+    e.querySelector('.tx').textContent=(s.d&&s.hand&&ph!=='burn'?'⭐ ':'')+(ph==='work'?(s.k==='cut'?'连点切菜！':'连点装盘！'):s.open?'还剩 '+s.left+' 份':ph==='perfect'?'出锅！':ph==='ok'?'快出锅！':ph==='burn'?'焦了，点一下清理':ph==='cook'&&s.hand?'招牌菜，盯着火候':ph==='cook'&&s.k==='umu'?'焖着，别打开':'');
     if(!TIME[s.k])e.querySelector('.dial').style.background=`conic-gradient(#4fe0b5 ${s.d?s.n/s.need*100:0}%,rgba(6,40,70,.15) 0)`});
   const ids=[...new Set(v.seats.filter(Boolean).map(s=>s.d))];
   $('svMenu').innerHTML=ids.length?ids.map(id=>{const d=dById(id),m=startKind(id),ok=svPending(id)>0&&(v.banq||canMake(d,SAVE.fish))&&v.st.some(x=>x.k===m&&!x.d);
@@ -1720,6 +1816,9 @@ function drawCut(dt){
   if(cutFade>0){px.fillStyle=`rgba(11,26,42,${Math.ceil(cutFade*4)/4})`;px.fillRect(0,0,CW,CH2)}
   ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.imageSmoothingEnabled=false;ctx.drawImage(pcv,0,0,CW,CH2,0,0,CW*ps*cv.width/W,CH2*ps*cv.width/W);ctx.restore()}
 
+/* 第二幕工具 */
+TOOLS.push({id:'lpot',ic:'🪤',n:'龙虾笼',d:'放在石缝边引出龙虾，没有它进不了火山岛',p:550,ch:17},{id:'rod',ic:'🎣',n:'钓竿',d:'一竿一条钓鲣鱼，没有它进不了灯塔环',p:600,ch:18});
+Object.assign(TOOLN,{lpot:['🪤','龙虾笼','龙虾躲在石缝里，先去墨墨的杂货铺买一个龙虾笼'],rod:['🎣','钓竿','鲣鱼要用钓竿钓，先去墨墨的杂货铺买一根']});
 /* ---------- 第二卷 南方环礁：人物、过场场景、剧本 ---------- */
 Object.assign(PEOPLE,{xiaofan:{H:'#2a1a12',T:'#e8553a',L:'#f2c14e',D:'#c98a5a',pony:1},laoduo:{H:'#f1f1f1',T:'#8a5a3a',L:'#3a4a5a',D:'#c98a5a',hat:'#d9c08a'},ayao:{H:'#3a2a1a',T:'#ffd23f',L:'#5a4a3a',D:'#ffd9b3',hat:'#c9a85a'}});
 Object.assign(WHO,{'小帆':['xiaofan'],'老舵':['laoduo'],'阿曜':['ayao']});
@@ -1796,6 +1895,60 @@ function deckScene(t,gy,hy,o){const sky=o.night?['#0e1838','#2a3a6a']:['#7fcbff'
   if(o.ring){const cx=Math.round(CW*.66);El(cx,hy+1,16,2,'#f3e2b0');El(cx,hy+1,11,1,'#3fd0c0');R(cx-13,hy-3,1,3,'#8a5a2b');R(cx-15,hy-4,4,1,'#3fae6a');R(cx+10,hy-3,1,3,'#8a5a2b');R(cx+8,hy-4,4,1,'#3fae6a')}
   R(0,gy-8,CW,2,'#8a5a2b');for(let x=2;x<CW;x+=7)R(x,gy-8,1,8,'#8a5a2b');R(0,gy,CW,CH2-gy,'#b07a44');for(let i=0;i<6;i++)R(0,gy+4+i*7,CW,1,'#8f5f33');
   R(Math.round(CW*.93),0,2,gy-8,'#6b4226')}
+/* ---------- 第二卷第二幕：过场场景、剧本、新菜 ---------- */
+Object.assign(SCN,{
+ v2Star:{bg:'shore',atoll:1,night:1,stars:1,cast:[['kid',.2,'g'],['xiaofan',.42,'g'],['laoduo',.7,'g',1]]},
+ v2StarSea:{bg:'sea',i:16,cast:[['fish',.4,.3]]},
+ v2Volc:{bg:'shore',atoll:1,cast:[['kid',.16,'g'],['xiaoman',.36,'g'],['aqiang',.54,'g',1],['xiaofan',.76,'g',1]]},
+ v2Stone:{bg:'shore',atoll:1,dusk:1,cast:[['kid',.16,'g'],['haisheng',.34,'g'],['laoduo',.54,'g',1],['ayao',.76,'g',1]]},
+ v2Lamp:{bg:'sea',i:18,cast:[['fish',.4,.3]]},
+ v2Ledger:{bg:'shore',atoll:1,night:1,cast:[['kid',.16,'g'],['xiaofan',.34,'g'],['laoduo',.56,'g',1],['ayao',.78,'g',1]]},
+ v2Herd:{bg:'shore',deck:1,night:1,stars:1,cast:[['kid',.14,'g'],['xiaofan',.32,'g'],['xiaoman',.52,'g',1],['aqiang',.68,'g',1],['laoduo',.86,'g',1]]},
+ v2Home:{bg:'sea',i:19,fd:1,cast:[['fish',.4,.3]]}});
+Object.assign(STORY,{
+ pre16:[['旁白','灯塔熄了以后，商会连夜修了三天。第四天晚上，灯又亮了。','v2Star'],['小帆','爷爷说，今晚教一课。就一课。','v2Star',{em:'!'}],['老舵','……看那颗。东边刚升起来的那颗。','v2Star'],
+  ['小鱼','哪颗？天上全是星。','v2Star',{em:'?'}],['老舵','最低、最亮、不眨眼的那颗。它从哪边升起，回家的岛就在哪边。','v2Star'],['小帆','海面上也有它的倒影！小鱼，到了岔路口，你就跟着倒影游！','v2StarSea',{cut:1}]],
+ post16:[['小鱼','我回来了！一次都没绕远！……好吧，绕了两次。','v2Star',{em:'!'}],['老舵','哼。比我徒弟第一回强。','v2Star'],['小帆','爷爷！你笑了！','v2Star',{em:'!'}],
+  ['老舵','……没笑。石焖宴要三样东西：叶、石、火。叶子我有。','v2Star',{cut:1}],['小鱼','那石头呢？','v2Star',{em:'?'}],['老舵','地炉的石头不是随便捡的，得是火山烧过的。','v2Star']],
+ pre17:[['旁白','环礁最南边有一座火山岛，山顶终年冒着一缕白烟。','v2Volc'],['小帆','海底有热泉，喷出来的水能把虾煮熟！冒小泡泡的时候千万别靠近。','v2Volc',{em:'!'}],
+  ['阿珍','煮熟？那正好，省柴火。','v2Volc'],['阿强','……那是海底，阿珍。','v2Volc',{em:'…'}],['小鱼','我去找石头，顺便看看热泉边有什么好吃的。','v2Volc',{cut:1}]],
+ post17:[['小鱼','找到了！这块黑黑的，沉得要命。','v2Stone',{em:'!'}],['老舵','就是它。烧过一次的石头，才存得住热。','v2Stone'],
+  ['阿曜','哎呀，你们要生火？何必那么麻烦！我给小馆装一盏灯，灶也用灯热着。亮一点，总没错。','v2Stone',{em:'!'}],['海生','……不用。','v2Stone',{cut:1}],
+  ['阿曜','商会的灯不烧柴、不烧油，一年到头亮着，一分钱都不用付。','v2Stone'],['小鱼','一分钱都不用付？那它烧的是什么？','v2Stone',{em:'?'}]],
+ pre18:[['旁白','夜里，小鱼游到灯塔底下。越靠近，身子越不听使唤，像被一只手往上拽。','v2Lamp'],['小鱼','这光……在拉我！','v2Lamp',{em:'!',shake:1}],
+  ['小帆','离灯远点！被拽进去就出不来了！','v2Lamp'],['旁白','灯塔的底座刻着一圈圈老纹样。纹样中间，一根细细的光管一直通到海底。','v2Lamp',{cut:1}]],
+ post18:[['小鱼','光管通到潟湖底下……那里是这片海的潮心。它在一点一点变暗。','v2Ledger'],['小帆','所以潟湖才会褪色？','v2Ledger',{em:'?'}],
+  ['阿曜','你们看。有灯以后，十二年，一条船都没丢过。一条都没有。','v2Ledger',{em:'!'}],['老舵','……他说的是真的。','v2Ledger',{cut:1}],
+  ['小鱼','那灯底下那些转圈的鱼呢？它们也回不了家。','v2Ledger'],['旁白','灯下，成千上万条鱼围着光打转，越转越慢。','v2Home']],
+ pre19:[['小帆','鱼群跟着灯光转，天亮了都不散。再转下去，它们会累死的。','v2Herd'],['老舵','赶鱼跟领船一个道理：你在哪边，它就往另一边躲。','v2Herd'],
+  ['小鱼','所以我在上面，它们就往下跑？','v2Herd',{em:'?'}],['老舵','嗯。把它们赶进潟湖口。别让它们碰到灯光，一碰就又被吸回去了。','v2Herd',{cut:1}],
+  ['旁白','船底下，一片背鳍冒出来，又沉了下去。','v2Herd',{snd:'growl'}],['阿珍','刚才……那是什么？','v2Herd',{em:'?'}],['阿强','没看见。','v2Herd']],
+ post19:[['旁白','鱼群一条接一条游进潟湖口，水面上翻起一大片银色的浪。','v2Home'],['小帆','回来了！它们回家了！','v2Ledger',{em:'!'}],
+  ['阿曜','……我只是想让夜里的船看得见路。我没想到，鱼会看不见路。','v2Ledger',{em:'…'}],['老舵','我当年也没想到。','v2Ledger',{cut:1}],
+  ['旁白','远处，火山岛的山顶，那缕白烟忽然变成了黑的。','v2Ledger',{shake:1,snd:'thunder'}],['小鱼','……火山为什么在冒黑烟？','v2Ledger',{em:'?'}]]});
+GAL.push(['pre16','第五章 星路海 · 开场'],['post16','第五章 星路海 · 结尾'],['pre17','第六章 火山岛 · 开场'],['post17','第六章 火山岛 · 结尾'],
+ ['pre18','第七章 灯塔环 · 开场'],['post18','第七章 灯塔环 · 结尾'],['pre19','第八章 灯下鱼群 · 开场'],['post19','第八章 灯下鱼群 · 结尾']);
+/* 新菜（只用椰浆调味） */
+DISH.push({id:'d58',ic:'🐚',n:'炭烤夜光螺',need:{turbo:1},p:48},{id:'d59',ic:'🍲',n:'椰浆夜光螺',need:{turbo:1,coco:1},p:60},
+ {id:'d60',ic:'🦞',n:'炭烤龙虾',need:{lobster:1},p:70},{id:'d61',ic:'🥘',n:'椰浆龙虾',need:{lobster:1,coco:1},p:84},
+ {id:'d62',ic:'🥗',n:'椰浆拌生鲣鱼',need:{skipjack:1,coco:1},p:62},{id:'d63',ic:'🐟',n:'炭烤鲣鱼',need:{skipjack:1},p:55});
+Object.assign(UNL,{d58:[17,3],d59:[17,4],d60:[18,4],d61:[18,5],d62:[19,4],d63:[19,4]});
+METHOD.grill.push('d58','d60','d63');METHOD.pot.push('d59','d61');METHOD.cut.push('d62');
+Object.assign(RCP,{
+d58:['夜光螺（蝾螺）、盐',['螺用刷子刷干净，在清水里泡一会儿吐沙。','开口朝上放在炭火或烤架上，烤到汤汁冒泡，大约十分钟。','用叉子把螺肉转出来，去掉末端发黑的内脏。'],'现实里买得到的多是蝾螺，做法一样。'],
+d59:['夜光螺肉、椰浆、姜',['螺肉焯水后切片。','姜片煸香，倒入椰浆小火煮开。','放入螺肉煮两三分钟就关火，煮久了会变硬。']],
+d60:['龙虾、盐、青柠',['龙虾从头到尾对半剖开，去掉虾线。','切面朝上，炭火或烤架中火烤八到十分钟，虾肉变白就熟了。','撒一点盐，挤上青柠汁。'],'处理活龙虾要小心，最好请店家帮忙剖开。'],
+d61:['龙虾、椰浆、姜、葱',['龙虾切块。','姜片煸香，倒入椰浆煮开。','放入龙虾盖上盖子焖六七分钟，撒葱花。']],
+d62:['新鲜鲣鱼、椰浆、青柠、洋葱、黄瓜',['鲣鱼切成小方块，用青柠汁拌匀，冷藏腌十五分钟。','洋葱、黄瓜切丁拌进去。','吃之前浇上椰浆拌匀。'],'太平洋岛屿上很常见的吃法。生食一定要用可以生吃的新鲜鱼，孕妇、老人和小孩不建议吃生鱼。'],
+d63:['鲣鱼一段、盐',['鲣鱼切厚块，抹盐。','炭火大火把表面烤到焦香。','切片，里面可以留一点粉色。'],'日本高知有类似的吃法，叫“炙烤鲣鱼”。']});
+CTIP.push('岔路口先找星星的倒影，倒影在哪条路，就走哪条。','热泉冒小泡泡，就是要喷热水了，先躲开它上面。','灯会把小鱼往它那边拉，提前离灯远一点。','赶鱼群：你在它上面，它往下躲；你在它下面，它往上躲。');
+/* 地炉台子：第六章结尾解锁，一次出三份 */
+DISH.push({id:'d64',ic:'🍃',n:'叶包地炉鱼',need:{tuna:1,coco:1},p:66},{id:'d65',ic:'🪨',n:'地炉三鲜',need:{lobster:1,turbo:1,coco:1},p:110});
+Object.assign(UNL,{d64:[17,3],d65:[18,4]});METHOD.umu.push('d64','d65');
+Object.assign(RCP,{
+d64:['鱼肉、椰浆、芋头叶或香蕉叶、洋葱、盐',['鱼肉切块，抹一点盐，和洋葱丝一起放在叶子中间。','浇上椰浆，把叶子包紧，外面再包一层锡纸。','家里没有地炉，就放进烤箱，180 度烤四十分钟左右。'],'这是太平洋岛屿地炉里最常见的做法。芋头叶一定要彻底焖熟，没熟的会刺嗓子。'],
+d65:['龙虾、螺肉、椰浆、香蕉叶、姜',['龙虾切块，螺肉焯水切片，和姜片一起铺在叶子上。','浇椰浆，包好放进带盖的铁锅里。','烤箱 200 度焖二十五分钟。'],'地炉的好处是一次焖一大份，全家一起吃。']});
+CTIP.push('地炉一次出三份，可是焖得久，中途不能打开。客人多的时候先把地炉焖上。');
 /* ---------- 奇珍书 (collection book) ---------- */
 SAVE.dex=SAVE.dex||{};for(const k in SAVE.fish)if(SAVE.fish[k]>0&&!SAVE.dex[k])SAVE.dex[k]=SAVE.fish[k];
 for(const d of DISH)if(SAVE.dishes[d.id])for(const k in d.need)if(!SAVE.dex[k])SAVE.dex[k]=1;
@@ -1922,6 +2075,20 @@ V2C.forEach(c=>{c.ref=0;c.how='带上合适的工具去采集'});Object.assign(V
 const V2D=['d52','d53','d54','d55','d56','d57'];
 for(const c of DEX)if(V2D.includes(c.id))c.vol=2;
 V2C.forEach(c=>{c.vol=2;DEX.push(c)});
+/* 第二幕：新食材、新海域、新菜 */
+Object.assign(PIX,{
+ turbo(x,y){El(x,y,9,8,'#c89a5a');El(x-2,y-2,5,4,'#e8c890');R(x-4,y-4,3,2,'#fff8e8');R(x+4,y+2,3,2,'#7a5a30')},
+ lobster(x,y){El(x,y,10,4,'#d0603a');for(let i=0;i<3;i++)R(x-8+i*5,y-4,2,8,'#b0482a');R(x+9,y-6,8,1,'#d0603a');R(x+9,y+5,8,1,'#d0603a');El(x-12,y,3,3,'#d0603a');R(x+6,y-2,1,1,'#1b2a41')},
+ skipjack(x,y){El(x,y,11,4,'#4a6aa0');El(x+1,y+2,8,2,'#e8f0ff');for(let i=0;i<3;i++)R(x-4+i*4,y+1,1,3,'#2a3a60');R(x-14,y-3,3,7,'#2a3a60');R(x+7,y-1,1,1,'#1b2a41')}});
+const V2C2=[
+ ic('turbo',2,'星路海',[1,1,1],'螺壳又圆又厚，像一顶小帽子。它的“厣”（关门用的小盖子）白亮亮的，岛上的孩子把它捡来当纽扣。现实里它的近亲叫蝾螺。',1),
+ ic('lobster',3,'火山岛',[2,3,2],'白天躲在石缝里，只露两根长须，夜里才出来找吃的。没有大钳子的这种叫“岩龙虾”，太平洋的岛上最常见。',1),
+ ic('skipjack',2,'灯塔环',[1,4,3],'游得极快，成群在大洋里追小鱼，肚子上有几道深色的条纹。岛上的渔夫用竿子一条一条钓，从不撒大网。',1)];
+V2C2.forEach(c=>{c.ref=0;c.vol=2});Object.assign(V2C2[1],{how:'带上龙虾笼去火山岛'});Object.assign(V2C2[2],{cat:'fish',how:'带上钓竿去灯塔环'});
+['夜里只有星星认路的海，水下分出一条条岔路。','山顶冒着白烟，海底的热泉会突然喷出热水。','商会的灯塔底下，光会把鱼往上拽。','灯下成千上万条鱼围着光打转，回不了家。']
+ .forEach((d,j)=>{const i=VOL1+4+j;V2C2.push({id:'s_'+i,cat:'sea',n:LV[i].name,r:2+Math.floor(j/2),tag:'第二卷第 '+(j+5)+' 章的海域',d,got:()=>cleared(i),clue:'通关这片海域',art:emoPix(['🌟','🌋','🗼','🐟'][j]),vol:2})});
+for(const c of DEX)if(['d58','d59','d60','d61','d62','d63','d64','d65'].includes(c.id))c.vol=2;
+V2C2.forEach(c=>DEX.push(c));
 /* ---------- developer mode ---------- */
 let devMode='simple',devTap=0,devT=0;
 $('setTitle').onclick=()=>{const n=Date.now();devTap=n-devT<1500?devTap+1:1;devT=n;if(devTap>=5){devTap=0;SAVE.dev=SAVE.dev?0:1;persist();refreshMenu();toast(SAVE.dev?'开发者模式已开启，主菜单右上角有扳手按钮':'开发者模式已关闭',3)}};
@@ -2332,6 +2499,112 @@ RULES.push([/^颜色不对！这处浮标是(.)灯$/,m=>`Wrong color! The buoy i
  [/^第二卷第 (\d+) 章的海域$/,m=>`Volume 2 · sea of chapter ${m[1]}`]);
 for(let i=RULES.length-3;i<RULES.length;i++){const r=RULES[i];while(r.length<5)r.push(r[1])}
 for(const k in TLC)delete TLC[k];
+/* 第二卷第二幕（第 5–8 章）的英文 */
+{const EN3={"星路海":"Star Road Sea","火山岛":"Volcano Isle","灯塔环":"Lighthouse Ring","灯下鱼群":"Shoal Under the Lamp","夜光螺":"Turban snail","龙虾":"Lobster","鲣鱼":"Skipjack","把鱼群赶回潟湖":"Herd the shoal back to the lagoon",
+"龙虾躲在石缝里，需要龙虾笼":"The lobster hides in rock cracks. You need a lobster pot","鲣鱼要用钓竿一条一条钓":"Skipjack must be caught one by one with a rod",
+"鱼群被灯光困住了！你在鱼群上面，它就往下躲；在下面，它就往上躲。把鱼群赶进灯光帘的暗缝里":"The shoal is trapped by the light! Swim above it and it dodges down; swim below and it dodges up. Herd it into the dark gap in each light curtain",
+"前面分成上下两条路！跟着星星的倒影游，走错了会被暗流冲回来":"The way splits into an upper and a lower path! Follow the star's reflection. Take the wrong one and the current sweeps you back",
+"海底的热泉冒小泡泡时，马上要喷热水了，别待在它上面":"When a hot spring on the seabed bubbles, it's about to erupt. Don't stay above it",
+"灯会把小鱼往它那边拉，顶着光游，别被吸进去":"The lamp pulls Xiaoyu toward it. Swim against the light and don't get sucked in",
+"绕远路了！被暗流冲回了岔路口。跟着星星的倒影游":"Wrong way! The current swept you back to the fork. Follow the star's reflection",
+"被灯光吸住了！快速连点屏幕！":"Caught by the light! Tap the screen fast!","被灯光吸住了！快速连点挣脱！":"Caught by the light! Tap fast to break free!",
+"鱼群穿过去了！":"The shoal got through!","鱼群被灯光吸走了一些！":"The light pulled some of the shoal away!","鱼群游回了潟湖！":"The shoal swam home to the lagoon!",
+"灯塔熄了以后，商会连夜修了三天。第四天晚上，灯又亮了。":"After the lighthouse went dark, the Guild worked on it for three nights straight. On the fourth night the lamp shone again.",
+"爷爷说，今晚教一课。就一课。":"Grandpa says he'll teach one lesson tonight. Just one.",
+"……看那颗。东边刚升起来的那颗。":"...Look at that one. The one just rising in the east.",
+"哪颗？天上全是星。":"Which one? The sky is full of stars.",
+"最低、最亮、不眨眼的那颗。它从哪边升起，回家的岛就在哪边。":"The lowest, brightest one that doesn't twinkle. Wherever it rises, that's where home is.",
+"海面上也有它的倒影！小鱼，到了岔路口，你就跟着倒影游！":"Its reflection is on the water too! Xiaoyu, when you reach a fork, follow the reflection!",
+"我回来了！一次都没绕远！……好吧，绕了两次。":"I'm back! Didn't take a single wrong turn! ...Okay, two.",
+"哼。比我徒弟第一回强。":"Hmph. Better than my apprentice's first time.",
+"爷爷！你笑了！":"Grandpa! You smiled!",
+"……没笑。石焖宴要三样东西：叶、石、火。叶子我有。":"...I did not. A stone feast needs three things: leaves, stones and fire. I have the leaves.",
+"那石头呢？":"And the stones?",
+"地炉的石头不是随便捡的，得是火山烧过的。":"Earth-oven stones aren't just any stones. They have to be fired by a volcano.",
+"环礁最南边有一座火山岛，山顶终年冒着一缕白烟。":"At the southern tip of the atolls stands a volcanic island, a thread of white smoke always rising from its peak.",
+"海底有热泉，喷出来的水能把虾煮熟！冒小泡泡的时候千万别靠近。":"There are hot springs on the seabed. The water they shoot out could cook a shrimp! Stay away when they start bubbling.",
+"煮熟？那正好，省柴火。":"Cook it? Perfect, saves firewood.",
+"……那是海底，阿珍。":"...That's the bottom of the sea, A-Zhen.",
+"我去找石头，顺便看看热泉边有什么好吃的。":"I'll go find the stones, and see what tasty things live by the hot springs.",
+"找到了！这块黑黑的，沉得要命。":"Found it! This black one weighs a ton.",
+"就是它。烧过一次的石头，才存得住热。":"That's the one. Only stone that's been through fire can hold the heat.",
+"哎呀，你们要生火？何必那么麻烦！我给小馆装一盏灯，灶也用灯热着。亮一点，总没错。":"Oh, you're lighting a fire? Why the trouble! I'll put a lamp in your restaurant and heat the stove with it too. A bit brighter never hurts.",
+"……不用。":"...No need.",
+"商会的灯不烧柴、不烧油，一年到头亮着，一分钱都不用付。":"The Guild's lamps burn no wood and no oil. They shine all year and cost you nothing.",
+"一分钱都不用付？那它烧的是什么？":"Cost nothing? Then what do they burn?",
+"夜里，小鱼游到灯塔底下。越靠近，身子越不听使唤，像被一只手往上拽。":"That night Xiaoyu swam to the foot of the lighthouse. The closer it got, the less its body obeyed, as if a hand were pulling it up.",
+"这光……在拉我！":"This light... it's pulling me!",
+"离灯远点！被拽进去就出不来了！":"Keep away from the lamp! If it pulls you in you won't get out!",
+"灯塔的底座刻着一圈圈老纹样。纹样中间，一根细细的光管一直通到海底。":"Old patterns ring the base of the lighthouse. From their centre a thin tube of light runs all the way down to the seabed.",
+"光管通到潟湖底下……那里是这片海的潮心。它在一点一点变暗。":"The light tube runs under the lagoon... to the tide heart of this sea. It's getting dimmer bit by bit.",
+"所以潟湖才会褪色？":"So that's why the lagoon is fading?",
+"你们看。有灯以后，十二年，一条船都没丢过。一条都没有。":"Look. In twelve years since the lamp, not one boat has been lost. Not one.",
+"……他说的是真的。":"...He's telling the truth.",
+"那灯底下那些转圈的鱼呢？它们也回不了家。":"And the fish circling under the lamp? They can't get home either.",
+"灯下，成千上万条鱼围着光打转，越转越慢。":"Under the lamp, thousands of fish circle the light, slower and slower.",
+"鱼群跟着灯光转，天亮了都不散。再转下去，它们会累死的。":"The shoal circles the light and doesn't scatter even at dawn. If it keeps going, they'll swim themselves to death.",
+"赶鱼跟领船一个道理：你在哪边，它就往另一边躲。":"Herding fish is like piloting a boat: whichever side you're on, they dodge to the other.",
+"所以我在上面，它们就往下跑？":"So if I'm above them, they swim down?",
+"嗯。把它们赶进潟湖口。别让它们碰到灯光，一碰就又被吸回去了。":"Mm. Drive them into the lagoon mouth. Don't let them touch the light, or it pulls them right back.",
+"船底下，一片背鳍冒出来，又沉了下去。":"Under the boat a dorsal fin broke the surface, then sank again.",
+"刚才……那是什么？":"What... was that?","没看见。":"Didn't see anything.",
+"鱼群一条接一条游进潟湖口，水面上翻起一大片银色的浪。":"One by one the fish swam into the lagoon mouth, and a great silver wave rolled across the water.",
+"回来了！它们回家了！":"They're back! They're home!",
+"……我只是想让夜里的船看得见路。我没想到，鱼会看不见路。":"...I only wanted boats to see their way at night. I never thought the fish would lose theirs.",
+"我当年也没想到。":"Neither did I, back then.",
+"远处，火山岛的山顶，那缕白烟忽然变成了黑的。":"Far away, the thread of smoke above the volcano suddenly turned black.",
+"……火山为什么在冒黑烟？":"...Why is the volcano smoking black?",
+"第五章 星路海 · 开场":"Ch. 5 Star Road Sea · Opening","第五章 星路海 · 结尾":"Ch. 5 Star Road Sea · Ending","第六章 火山岛 · 开场":"Ch. 6 Volcano Isle · Opening","第六章 火山岛 · 结尾":"Ch. 6 Volcano Isle · Ending",
+"第七章 灯塔环 · 开场":"Ch. 7 Lighthouse Ring · Opening","第七章 灯塔环 · 结尾":"Ch. 7 Lighthouse Ring · Ending","第八章 灯下鱼群 · 开场":"Ch. 8 Shoal Under the Lamp · Opening","第八章 灯下鱼群 · 结尾":"Ch. 8 Shoal Under the Lamp · Ending",
+"炭烤夜光螺":"Charcoal-grilled turban snail","椰浆夜光螺":"Turban snail in coconut cream","炭烤龙虾":"Charcoal-grilled lobster","椰浆龙虾":"Lobster in coconut cream","椰浆拌生鲣鱼":"Raw skipjack in coconut cream","炭烤鲣鱼":"Charcoal-seared skipjack",
+"叶包地炉鱼":"Leaf-wrapped earth-oven fish","地炉三鲜":"Earth-oven seafood trio","地炉":"Earth oven","焖着，别打开":"Baking, keep it shut","地炉封着，中途不能打开":"The earth oven is sealed. It can't be opened midway",
+"夜光螺（蝾螺）、盐":"Turban snails, salt","螺用刷子刷干净，在清水里泡一会儿吐沙。":"Scrub the snails and soak them in clean water for a while to purge sand.",
+"开口朝上放在炭火或烤架上，烤到汤汁冒泡，大约十分钟。":"Set them opening-up on charcoal or a grill until the juices bubble, about ten minutes.",
+"用叉子把螺肉转出来，去掉末端发黑的内脏。":"Twist the meat out with a fork and remove the dark gut at the tip.",
+"现实里买得到的多是蝾螺，做法一样。":"In real life you'll mostly find turban snails (sazae). Same method.",
+"夜光螺肉、椰浆、姜":"Turban snail meat, coconut cream, ginger","螺肉焯水后切片。":"Blanch the snail meat and slice it.","姜片煸香，倒入椰浆小火煮开。":"Fry ginger slices until fragrant, add coconut cream and bring to a gentle boil.",
+"放入螺肉煮两三分钟就关火，煮久了会变硬。":"Add the snail meat, cook two or three minutes, then turn off the heat. Longer makes it tough.",
+"龙虾、盐、青柠":"Lobster, salt, lime","龙虾从头到尾对半剖开，去掉虾线。":"Split the lobster in half from head to tail and remove the vein.",
+"切面朝上，炭火或烤架中火烤八到十分钟，虾肉变白就熟了。":"Cut side up, grill over medium charcoal for eight to ten minutes until the meat turns white.",
+"撒一点盐，挤上青柠汁。":"Sprinkle with salt and squeeze over lime.","处理活龙虾要小心，最好请店家帮忙剖开。":"Handle live lobster carefully. Best to ask the fishmonger to split it.",
+"龙虾、椰浆、姜、葱":"Lobster, coconut cream, ginger, spring onion","龙虾切块。":"Cut the lobster into pieces.","放入龙虾盖上盖子焖六七分钟，撒葱花。":"Add the lobster, cover and simmer six or seven minutes, then scatter spring onion.",
+"新鲜鲣鱼、椰浆、青柠、洋葱、黄瓜":"Fresh skipjack, coconut cream, lime, onion, cucumber","鲣鱼切成小方块，用青柠汁拌匀，冷藏腌十五分钟。":"Dice the skipjack, toss with lime juice and chill for fifteen minutes.",
+"洋葱、黄瓜切丁拌进去。":"Dice the onion and cucumber and mix them in.","吃之前浇上椰浆拌匀。":"Pour over coconut cream and toss just before eating.",
+"太平洋岛屿上很常见的吃法。生食一定要用可以生吃的新鲜鱼，孕妇、老人和小孩不建议吃生鱼。":"A common dish across the Pacific islands. Only use fresh fish sold as safe to eat raw. Raw fish is not recommended for pregnant women, the elderly or young children.",
+"鲣鱼一段、盐":"A piece of skipjack, salt","鲣鱼切厚块，抹盐。":"Cut the skipjack into thick pieces and rub with salt.","炭火大火把表面烤到焦香。":"Sear the surface over hot charcoal until charred and fragrant.",
+"切片，里面可以留一点粉色。":"Slice it. It's fine to leave a little pink inside.","日本高知有类似的吃法，叫“炙烤鲣鱼”。":"Kochi in Japan has a similar dish called katsuo no tataki.",
+"鱼肉、椰浆、芋头叶或香蕉叶、洋葱、盐":"Fish, coconut cream, taro or banana leaves, onion, salt","鱼肉切块，抹一点盐，和洋葱丝一起放在叶子中间。":"Cut the fish into pieces, salt lightly and place in the middle of the leaves with sliced onion.",
+"浇上椰浆，把叶子包紧，外面再包一层锡纸。":"Pour over coconut cream, wrap the leaves tightly, then wrap again in foil.",
+"家里没有地炉，就放进烤箱，180 度烤四十分钟左右。":"No earth oven at home? Bake at 180°C for about forty minutes.",
+"这是太平洋岛屿地炉里最常见的做法。芋头叶一定要彻底焖熟，没熟的会刺嗓子。":"This is the most common earth-oven dish in the Pacific islands. Taro leaves must be fully cooked, or they irritate the throat.",
+"龙虾、螺肉、椰浆、香蕉叶、姜":"Lobster, snail meat, coconut cream, banana leaves, ginger","龙虾切块，螺肉焯水切片，和姜片一起铺在叶子上。":"Cut the lobster into pieces, blanch and slice the snail meat, and lay them on the leaves with ginger.",
+"浇椰浆，包好放进带盖的铁锅里。":"Pour over coconut cream, wrap and place in a lidded cast-iron pot.","烤箱 200 度焖二十五分钟。":"Bake at 200°C for twenty-five minutes.",
+"地炉的好处是一次焖一大份，全家一起吃。":"The beauty of an earth oven is one big batch for the whole family.",
+"岔路口先找星星的倒影，倒影在哪条路，就走哪条。":"At a fork, look for the star's reflection and take the path it's on.",
+"热泉冒小泡泡，就是要喷热水了，先躲开它上面。":"When a hot spring bubbles, it's about to erupt. Get out from above it.",
+"灯会把小鱼往它那边拉，提前离灯远一点。":"Lamps pull Xiaoyu toward them. Keep your distance early.",
+"赶鱼群：你在它上面，它往下躲；你在它下面，它往上躲。":"Herding: above the shoal, it dodges down; below it, it dodges up.",
+"地炉一次出三份，可是焖得久，中途不能打开。客人多的时候先把地炉焖上。":"The earth oven makes three servings at once, but it bakes a long time and can't be opened midway. Start it when the restaurant is busy.",
+"螺壳又圆又厚，像一顶小帽子。它的“厣”（关门用的小盖子）白亮亮的，岛上的孩子把它捡来当纽扣。现实里它的近亲叫蝾螺。":"Its shell is round and thick like a little hat. Its operculum, the lid it closes its door with, is shiny white, and island children use them as buttons. Its real-life cousin is the turban snail.",
+"白天躲在石缝里，只露两根长须，夜里才出来找吃的。没有大钳子的这种叫“岩龙虾”，太平洋的岛上最常见。":"By day it hides in rock cracks with only its two long feelers showing, and comes out to feed at night. This clawless kind is the spiny rock lobster, the most common one in the Pacific islands.",
+"游得极快，成群在大洋里追小鱼，肚子上有几道深色的条纹。岛上的渔夫用竿子一条一条钓，从不撒大网。":"Very fast, it hunts small fish in schools across the open ocean and has dark stripes on its belly. Island fishers catch them one at a time on a pole, never with big nets.",
+"带上龙虾笼去火山岛":"Bring a lobster pot to Volcano Isle","带上钓竿去灯塔环":"Bring a fishing rod to Lighthouse Ring",
+"夜里只有星星认路的海，水下分出一条条岔路。":"A sea where only the stars show the way at night, and the water splits into forks.",
+"山顶冒着白烟，海底的热泉会突然喷出热水。":"Smoke rises from the peak, and hot springs on the seabed erupt without warning.",
+"商会的灯塔底下，光会把鱼往上拽。":"Under the Guild's lighthouse, the light pulls fish upward.",
+"灯下成千上万条鱼围着光打转，回不了家。":"Under the lamp, thousands of fish circle the light and can't get home.",
+"龙虾笼":"Lobster pot","放在石缝边引出龙虾，没有它进不了火山岛":"Set it by rock cracks to lure out lobsters. Needed for Volcano Isle",
+"钓竿":"Fishing rod","一竿一条钓鲣鱼，没有它进不了灯塔环":"Catch skipjack one at a time. Needed for Lighthouse Ring",
+"龙虾躲在石缝里，先去墨墨的杂货铺买一个龙虾笼":"Lobsters hide in rock cracks. Buy a lobster pot at Momo's shop first",
+"鲣鱼要用钓竿钓，先去墨墨的杂货铺买一根":"Skipjack need a fishing rod. Buy one at Momo's shop first"};
+ for(const k in EN3)if(!DICT[k]){const v=EN3[k];DICT[k]=[v,v,v,v]}}
+RULES.push([/^鱼群 (❤*) · 还差 (\d+) 道灯光$/,m=>`Shoal ${m[1]} · ${m[2]} light curtains to go`],[/^还剩 (\d+) 份$/,m=>`${m[1]} left`]);
+for(let i=RULES.length-2;i<RULES.length;i++){const r=RULES[i];while(r.length<5)r.push(r[1])}
+for(const k in TLC)delete TLC[k];
+/* 新菜在图鉴里的说明：按“已经上过 0 次”的样子登记，次数由原有规则替换 */
+for(const d of DISH){if(+d.id.slice(1)<52)continue;const m=methodOf(d.id),z=`用${Object.entries(d.need).map(([k,n])=>FISH[k].n+(n>1?'×'+n:'')).join('、')}做成，在${STN[m][1]}上完成。小馆里一份卖 ${d.p} 珍珠，已经上过 0 次。`;
+ if(DICT[z])continue;const v=`Made with ${Object.entries(d.need).map(([k,n])=>tl0(FISH[k].n,'en')+(n>1?' ×'+n:'')).join(', ')}, finished at the ${tl0(STN[m][1],'en').toLowerCase()}. Sells for ${d.p} pearls a plate at the diner. Times served: 0.`;DICT[z]=[v,v,v,v]}
+for(const k in TLC)delete TLC[k];
 /* ---------- music (synthesised) ---------- */
 const TRK={
  menu:{bpm:96,root:60,mo:12,kick:1,ch:[[0,4,7],[7,11,14],[9,12,16],[5,9,12]],
@@ -2388,7 +2661,19 @@ Object.assign(TRK,{
   B:'12 - 10 . 7 . 5 . 10 - 7 . 3 - - . 5 . 7 . 10 . 12 . 10 - 7 . 5 - 3 .'},
  lv15:{bpm:132,root:45,mo:24,kick:1,pulse:1,ch:[[0,3,7],[-4,0,3],[-2,2,5],[-5,-1,2]],
   A:'0 . 3 . 0 . 7 . 5 . 3 . 2 . 0 . 0 . 3 . 7 . 10 . 8 - 7 . 3 - 2 .',
-  B:'12 - 10 . 8 - 7 . 10 - 8 . 7 - 3 . 8 - 7 . 5 . 3 . 7 . 5 . 2 - -1 .'}});
+  B:'12 - 10 . 8 - 7 . 10 - 8 . 7 - 3 . 8 - 7 . 5 . 3 . 7 . 5 . 2 - -1 .'},
+ lv16:{bpm:84,root:52,mo:12,pluck:1,ch:[[0,4,7],[-3,0,4],[5,9,12],[7,11,14]],
+  A:'7 - - . 4 . 7 . 9 - 7 . 4 - - . 2 . 4 . 7 . 12 - 11 - 9 . 7 - - .',
+  B:'12 - 14 . 12 - 9 . 7 - 9 . 12 - - . 11 - 9 . 7 . 4 . 2 - 4 . 0 - - .'},
+ lv17:{bpm:108,root:47,mo:12,tom:1,kick:1,ch:[[0,3,7],[-2,2,5],[-4,0,3],[-2,2,5]],
+  A:'0 . 0 3 5 . 3 . 7 . 5 3 0 - - . 0 . 0 3 5 . 7 . 10 . 7 5 3 - 0 .',
+  B:'12 . 10 . 7 . 5 7 10 - 7 . 5 - 3 . 5 . 7 . 10 . 12 . 10 7 5 3 0 - - .'},
+ lv18:{bpm:96,root:50,mo:12,arp:1,ch:[[0,3,7],[-4,0,3],[-7,-3,0],[-5,-1,2]],
+  A:'0 . 3 . 7 . 10 . 8 - 7 . 3 - - . -1 . 2 . 5 . 8 . 7 - 3 . 2 - - .',
+  B:'15 - 14 . 12 - 10 . 8 - 7 . 8 - 10 . 12 - 10 . 8 . 7 . 3 - 2 . 0 - - .'},
+ lv19:{bpm:126,root:48,mo:12,kick:1,pulse:1,ch:[[0,4,7],[-3,0,4],[-7,-3,0],[-5,-1,2]],
+  A:'0 . 4 . 7 . 4 . 9 . 7 . 4 . 2 . 0 . 4 . 7 . 12 . 11 - 9 . 7 - - .',
+  B:'12 - 11 . 9 - 7 . 9 - 11 . 12 - 14 . 16 - 14 . 12 . 11 . 9 - 7 . 4 - - .'}});
 for(const k in TRK){const t=TRK[k],a=t.A.split(' '),b=t.B.split(' ');t.seq=[...a,...a,...b,...a]}
 const MUS={cur:null,step:0,next:0,out:null,lp:null,noise:null,chk:0};
 function initAudio(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();
@@ -2468,7 +2753,7 @@ const _rm=refreshMenu;refreshMenu=()=>{_rm();$('bBook').classList.toggle('hasNew
   hb.classList.toggle('locked',!h);eb.classList.toggle('locked',!e);$('hardSub').textContent=h?'挑战极限，成为海底高手！':'🔒 通关普通模式全部关卡后解锁';if(!e)$('bestTxt').textContent='🔒 通关第 1 关后解锁'};
 resize();refreshMenu();applyLang();requestAnimationFrame(frame);
 if(!SAVE.story.pro){show('sStart');$('sStart').onclick=()=>{initAudio();playStory(STORY.pro,()=>{SAVE.story.pro=1;persist();show('sMenu')})}}
-window.__M=MUS;window.__tap=(x,y)=>{const ev={clientX:x,clientY:y},B=G&&G.boss;if(!(B&&B.carry>0?bossTap(ev)||tryCatch(ev):tryCatch(ev)||bossTap(ev)))press()};window.__K={get SV(){return SV},startServe,svTick,svStart,svTapSt,svServe,svGarnish,svSeatTap,svSigNeed,svPending,methodOf,canMake,DISH,get SAVE(){return SAVE}};window.__cut=k=>{const who={shore:'旁白',dAchao:'阿潮',s3whale:'鲸婆婆',ice:'旁白',s4dish:'旁白',shEnd:'海生'}[k];playStory([[who,'这是一句用来检查过场画面的测试对白。',k]],()=>show('sMenu'))};window.__T={startGame,update,press,release:()=>{hold=false},get G(){return G},get state(){return state},dims:()=>({yMin,yMax,fishSX,VW,S}),entY,LV,tap:(ux,uy)=>{const r=cv.getBoundingClientRect();window.__tap(r.left+ux*S,r.top+uy*S)},tideH,gci:gCi};
+window.__M=MUS;window.__tap=(x,y)=>{const ev={clientX:x,clientY:y},B=G&&G.boss;if(!(B&&B.carry>0?bossTap(ev)||tryCatch(ev):tryCatch(ev)||bossTap(ev)))press()};window.__K={get SV(){return SV},startServe,svTick,svStart,svTapSt,svServe,svGarnish,svSeatTap,svSigNeed,svPending,methodOf,canMake,DISH,get SAVE(){return SAVE}};window.__cut=k=>{const who={shore:'旁白',dAchao:'阿潮',s3whale:'鲸婆婆',ice:'旁白',s4dish:'旁白',shEnd:'海生'}[k];playStory([[who,'这是一句用来检查过场画面的测试对白。',k]],()=>show('sMenu'))};window.__T={startGame,update,press,release:()=>{hold=false},get G(){return G},get state(){return state},dims:()=>({yMin,yMax,fishSX,VW,S}),entY,LV,tap:(ux,uy)=>{const r=cv.getBoundingClientRect();window.__tap(r.left+ux*S,r.top+uy*S)},tideH,gci:gCi,a2v:a2Vent,hd:HD,fork:FORK};
 })();
 </script>
 </body>

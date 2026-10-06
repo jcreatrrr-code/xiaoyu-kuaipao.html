@@ -91,6 +91,7 @@ function drawEntity(e,sx,y,g,T){const t=g.t;switch(e.t){
     const tw=(Math.sin(t*5+e.x)+1)/2;ctx.fillStyle=`rgba(255,255,255,${tw})`;ctx.fillRect(sx+7,y-14,2,8);ctx.fillRect(sx+4,y-11,8,2)}break;
   case'rock':drawRock(sx,e,T);break;
   case'fnet':drawFnet(e,sx,g,t);break;
+  case'fork':case'vent':case'lamp':a2Draw(e,sx,g,t,T);break;
   case'octo':drawOcto(sx,y,octoR(e,t),octoWarn(e,t),t,e);break;
   case'jelly':drawJelly(sx,y,t,e);break;
   case'net':if(!e.hold)drawNet(sx,y,t);break;
@@ -146,7 +147,7 @@ function drawWorld(){
   drawBG(g.theme,g.scroll,t);if(g.faded){ctx.fillStyle='rgba(140,150,160,.42)';ctx.fillRect(0,0,VW,VT)}
   for(const s of g.sharks)if(s.ph===0){const a=.16+.14*Math.sin(t*14);ctx.fillStyle=`rgba(255,60,60,${a})`;ctx.fillRect(0,s.y-58,VW,116);
     ctx.fillStyle='#5f7fa3';const fxx=VW-30-Math.sin(t*10)*8;ctx.beginPath();ctx.moveTo(fxx-34,s.y+26);ctx.lineTo(fxx+4,s.y-36);ctx.lineTo(fxx+26,s.y+26);ctx.fill()}
-  for(const e of g.E){if(e.gone)continue;const sx=e.x+(e.dx||0)-g.scroll;if(sx<-200||sx>VW+200)continue;drawEntity(e,sx,entY(e,t),g,T)}
+  for(const e of g.E){if(e.gone)continue;const sx=e.x+(e.dx||0)-g.scroll;if(sx<-200-(e.L||0)||sx>VW+200)continue;drawEntity(e,sx,entY(e,t),g,T)}
   if(g.L&&g.L.tide)drawTide(g,t);v2Surface(g,t);
   if(g.boss&&!g.boss.done&&g.boss.k!=='feed')bossDraw2(g.boss,t);
   if(g.boss&&g.boss.done&&g.boss.k==='feed'){const B=g.boss;if(B.fedAt==null)B.fedAt=t;const k=t-B.fedAt;if(k<3.4){const[bx,by]=bossPos();
@@ -168,7 +169,7 @@ function drawWorld(){
     ctx.translate(-8,-70+Math.sin(t*3)*3);ctx.fillStyle='#4a90d9';ctx.beginPath();ctx.ellipse(0,0,20,12,0,0,TAU);ctx.fill();ctx.beginPath();ctx.moveTo(-17,0);ctx.lineTo(-30,-10);ctx.lineTo(-27,0);ctx.lineTo(-30,9);ctx.fill();
     ctx.fillStyle='#d9efff';ctx.beginPath();ctx.ellipse(3,6,13,5,0,0,TAU);ctx.fill();ctx.fillStyle='#1b2a41';circ(11,-2,2.2);ctx.strokeStyle='#d9efff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(2,-12);ctx.lineTo(-2,-20);ctx.moveTo(2,-12);ctx.lineTo(6,-20);ctx.stroke();ctx.restore()}
   if(g.magnet&&!dead){ctx.strokeStyle=`rgba(255,255,255,${.18+.1*Math.sin(t*5)})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(fishSX,F.y,115,0,TAU);ctx.stroke()}
-  if(g.trap)drawNet(fishSX,F.y,t*6);
+  if(g.trap){if(g.trap.e.lamp){ctx.save();ctx.strokeStyle='rgba(255,240,170,.85)';ctx.lineWidth=4;for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(fishSX,F.y,40+i*12+Math.sin(t*8+i)*4,0,TAU);ctx.stroke()}ctx.restore()}else drawNet(fishSX,F.y,t*6)}
   for(const s of g.sharks)if(s.ph===1)drawShark(s.sx,s.y,t);
   for(const p of g.parts){ctx.globalAlpha=clamp(p.l*2,0,1);if(p.k){ctx.strokeStyle=p.c;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,TAU);ctx.stroke()}else{ctx.fillStyle=p.c;circ(p.x,p.y,p.r)}}
   ctx.globalAlpha=1;ctx.textAlign='center';ctx.font=`${20*Math.max(1,U*.85)}px ${FONT}`;

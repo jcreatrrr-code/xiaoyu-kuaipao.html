@@ -24,7 +24,7 @@ const TIPS2={node:'发光的是要带回小馆的食材，用手指点它！',ro
 const LEAPSAFE={rock:1,octo:1,jelly:1,net:1,fnet:1,ice:1,mimic:1};
 const SURF=.3,surfY=()=>fy(SURF),LEAP={T:1.5,fs:SURF+.04,fp:.03};
 const tideH=t=>.2*(.5-.5*Math.cos(t*TAU/11));
-function v2Build(L,g){if(L.tide)for(const e of g.E)if(e.t==='pearl'||e.t==='wild')e.f=Math.min(e.f,.74);
+function v2Build(L,g){a2Build(L,g);if(L.tide)for(const e of g.E)if(e.t==='pearl'||e.t==='wild')e.f=Math.min(e.f,.74);
   if(!L.leap)return;const m=v=>SURF+(1-SURF)*v;g.E=g.E.filter(e=>!(e.t==='rock'&&e.top&&!e.root));
   for(const e of g.E){if(e.f!=null&&!e.air)e.f=m(e.f);if(e.amp!=null&&e.t!=='net')e.amp*=1-SURF;
     if(e.t==='fnet')e.h=m(e.h);else if(e.t==='rock')e.h=e.top?m(e.h):e.h*(1-SURF)}}
@@ -53,6 +53,7 @@ function v2BG(th,sc,t){
   if(th===13){ctx.fillStyle='rgba(30,70,120,.25)';for(let i=0;i<3;i++){const x=VW-((t*90+i*260+sc*.1)%(VW+200))+100,y=yMin+30+i*22;ctx.beginPath();ctx.ellipse(x,y,22,6,0,0,TAU);ctx.fill();ctx.beginPath();ctx.moveTo(x-4,y);ctx.lineTo(x+10,y-16);ctx.lineTo(x+14,y);ctx.fill()}}
   if(th===14){ctx.strokeStyle='rgba(60,40,25,.55)';ctx.lineCap='round';const o=sc*.3;for(let n=Math.floor(o/140)-1;n*140-o<VW+60;n++){const x=n*140-o,h=120+hash(n+2)*160;ctx.lineWidth=10;
     for(const s of[-1,1]){ctx.beginPath();ctx.moveTo(x,0);ctx.quadraticCurveTo(x+s*30,h*.6,x+s*44,h);ctx.stroke()}}}
+  a2BG(th,sc,t);
   if(th===15){ctx.strokeStyle='rgba(200,220,255,.18)';ctx.lineWidth=1.5;for(let i=0;i<40;i++){const x=((i*97+t*60)%(VW+80))-40,y=((i*53+t*700)%(PH+60))-30;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-6,y+18);ctx.stroke()}}}
 function v2Sky(g,t){if(!g||!g.L||!g.L.leap)return;const y=surfY(),st=g.theme===15;ctx.save();const gr=ctx.createLinearGradient(0,0,0,y);
   gr.addColorStop(0,st?'#141c2c':'#bfe9ff');gr.addColorStop(1,st?'#3a4a62':'#eaf8ff');ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(VW,0);
@@ -76,7 +77,7 @@ function drawNode2(e,t){
   if(e.k==='flyfish'){const op=nodeOpen(e,t),k=op?Math.sin(((t+e.x*.01)%3.2)/1.9*Math.PI):0;ctx.translate(0,-k*46);ctx.rotate(-.2);ctx.fillStyle='#5f9fe0';ctx.beginPath();ctx.ellipse(0,0,20,7,0,0,TAU);ctx.fill();
     ctx.fillStyle='rgba(220,240,255,.85)';ctx.beginPath();ctx.moveTo(-4,-2);ctx.lineTo(10,-22-k*4);ctx.lineTo(14,-2);ctx.fill();ctx.beginPath();ctx.moveTo(-4,2);ctx.lineTo(8,18);ctx.lineTo(12,2);ctx.fill();ctx.fillStyle='#2f5fa8';ctx.beginPath();ctx.moveTo(-18,0);ctx.lineTo(-28,-8);ctx.lineTo(-28,8);ctx.fill();ctx.fillStyle='#1b2a41';circ(13,-1,2);if(!op){ctx.globalAlpha=.35}return 1}
   if(e.k==='mudcrab'){ctx.fillStyle='#5f6a3a';ctx.beginPath();ctx.ellipse(0,0,20,13,0,0,TAU);ctx.fill();ctx.strokeStyle='#3a4020';ctx.lineWidth=4;ctx.lineCap='round';for(const s of[-1,1]){for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(s*14,2+i*4);ctx.lineTo(s*26,10+i*5);ctx.stroke()}ctx.fillStyle='#7a8a4a';circ(s*24,-12,7)}ctx.fillStyle='#1b2a41';circ(-5,-10,2.5);circ(5,-10,2.5);return 1}
-  return 0}
+  return a2Node(e,t)}
 /* ---------- 风暴引航 Boss：浪把独木舟推向暗礁，小鱼游到水面附近点一下发光，把船叫回航道 ---------- */
 const GC=[['红','#ff5a5a'],['绿','#4fe07a'],['黄','#ffd23f']],gNc=B=>G.mode==='hard'||B.made>=3?3:2,gCi=B=>B.pc%gNc(B);
 const GD={cx:()=>fishSX+150,sy:()=>surfY()-8,zone:()=>fy(SURF+.16),win:hd=>hd?80:95,

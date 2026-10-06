@@ -9,6 +9,7 @@ src/js/04-levels.js
 src/js/05-game-state.js
 src/js/06-more-bosses.js
 src/js/06a-volume2.js
+src/js/06b-volume2-act2.js
 src/js/07-drawing.js
 src/js/08-screens.js
 src/js/09-story-restaurant.js
@@ -17,6 +18,7 @@ src/js/11-service-scene.js
 src/js/12-recipes.js
 src/js/13-cutscenes.js
 src/js/13a-volume2-story.js
+src/js/13b-volume2-act2-story.js
 src/js/14-book.js
 src/js/14a-volume2-book.js
 src/js/15-devmode.js

@@ -17,3 +17,17 @@ V2C.forEach(c=>{c.ref=0;c.how='带上合适的工具去采集'});Object.assign(V
 const V2D=['d52','d53','d54','d55','d56','d57'];
 for(const c of DEX)if(V2D.includes(c.id))c.vol=2;
 V2C.forEach(c=>{c.vol=2;DEX.push(c)});
+/* 第二幕：新食材、新海域、新菜 */
+Object.assign(PIX,{
+ turbo(x,y){El(x,y,9,8,'#c89a5a');El(x-2,y-2,5,4,'#e8c890');R(x-4,y-4,3,2,'#fff8e8');R(x+4,y+2,3,2,'#7a5a30')},
+ lobster(x,y){El(x,y,10,4,'#d0603a');for(let i=0;i<3;i++)R(x-8+i*5,y-4,2,8,'#b0482a');R(x+9,y-6,8,1,'#d0603a');R(x+9,y+5,8,1,'#d0603a');El(x-12,y,3,3,'#d0603a');R(x+6,y-2,1,1,'#1b2a41')},
+ skipjack(x,y){El(x,y,11,4,'#4a6aa0');El(x+1,y+2,8,2,'#e8f0ff');for(let i=0;i<3;i++)R(x-4+i*4,y+1,1,3,'#2a3a60');R(x-14,y-3,3,7,'#2a3a60');R(x+7,y-1,1,1,'#1b2a41')}});
+const V2C2=[
+ ic('turbo',2,'星路海',[1,1,1],'螺壳又圆又厚，像一顶小帽子。它的“厣”（关门用的小盖子）白亮亮的，岛上的孩子把它捡来当纽扣。现实里它的近亲叫蝾螺。',1),
+ ic('lobster',3,'火山岛',[2,3,2],'白天躲在石缝里，只露两根长须，夜里才出来找吃的。没有大钳子的这种叫“岩龙虾”，太平洋的岛上最常见。',1),
+ ic('skipjack',2,'灯塔环',[1,4,3],'游得极快，成群在大洋里追小鱼，肚子上有几道深色的条纹。岛上的渔夫用竿子一条一条钓，从不撒大网。',1)];
+V2C2.forEach(c=>{c.ref=0;c.vol=2});Object.assign(V2C2[1],{how:'带上龙虾笼去火山岛'});Object.assign(V2C2[2],{cat:'fish',how:'带上钓竿去灯塔环'});
+['夜里只有星星认路的海，水下分出一条条岔路。','山顶冒着白烟，海底的热泉会突然喷出热水。','商会的灯塔底下，光会把鱼往上拽。','灯下成千上万条鱼围着光打转，回不了家。']
+ .forEach((d,j)=>{const i=VOL1+4+j;V2C2.push({id:'s_'+i,cat:'sea',n:LV[i].name,r:2+Math.floor(j/2),tag:'第二卷第 '+(j+5)+' 章的海域',d,got:()=>cleared(i),clue:'通关这片海域',art:emoPix(['🌟','🌋','🗼','🐟'][j]),vol:2})});
+for(const c of DEX)if(['d58','d59','d60','d61','d62','d63','d64','d65'].includes(c.id))c.vol=2;
+V2C2.forEach(c=>DEX.push(c));
