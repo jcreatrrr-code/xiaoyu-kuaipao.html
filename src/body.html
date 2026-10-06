@@ -1,0 +1,176 @@
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="c"></canvas>
+
+  <div id="hud" hidden>
+    <div id="stars"></div>
+    <span class="sp"></span>
+    <button id="bPause" aria-label="暂停">❚❚</button>
+    <span class="brk"></span>
+    <span class="chip" id="cGoal"></span>
+    <span class="chip" id="cDist"></span>
+    <span class="chip gold" id="cShield" hidden>结界已开启</span>
+    <span class="chip" id="cFish" hidden></span>
+    <span class="chip" id="cBuff" hidden></span>
+    <span class="chip" id="cWhale" hidden>🐋 鲸鱼结界</span>
+    <span class="chip hot" id="cCombo" hidden></span>
+    <div id="prog"><i></i></div>
+  </div>
+  <div id="toast" role="status"></div>
+
+  <section class="scr on" id="sMenu">
+    <div class="mtop"><span class="wal">⚪ <span id="menuWal">0</span></span><span class="sp"></span><button class="rnd" id="bDev" hidden aria-label="开发者模式">🛠</button><button class="rnd" id="bBook" hidden aria-label="奇珍书">📖</button><button class="rnd" id="bConch" hidden aria-label="潮音螺">🐚</button><button class="rnd" id="bMore" aria-label="更多">☰</button></div>
+    <h1 id="title"><span>小</span><span>鱼</span><span>快</span><span>跑</span></h1>
+    <p class="tag">按住屏幕向上游，松开慢慢下沉</p>
+    <div class="col">
+      <button class="btn mint xl" id="bSail">出海</button>
+      <div class="duo"><button class="btn sun" id="bKit">海边小馆</button><button class="btn" id="bShop">杂货铺</button></div>
+    </div>
+  </section>
+
+  <section class="scr dim" id="sBook">
+    <h2>奇珍书</h2>
+    <p class="sub" id="bookProg" style="text-align:center;margin:0"></p>
+    <div class="tabs scroll" id="bookTabs"></div>
+    <div class="card" id="bookInfo"></div>
+    <div id="bookGrid"></div>
+    <button class="btn sm float" data-go="sMenu">返回主菜单</button>
+  </section>
+
+  <section class="scr" id="sStart" style="background:#0b1a2a;cursor:pointer">
+    <h1><span>小</span><span>鱼</span><span>快</span><span>跑</span></h1>
+    <p class="tag">建议打开声音</p>
+    <button class="btn sun xl" id="bStart">开始</button>
+  </section>
+
+  <section class="scr dim" id="sDev">
+    <h2>开发者模式</h2>
+    <div class="card" style="width:min(100%,460px)">
+      <div class="rowb" id="devOps"></div>
+      <p class="note" style="margin:14px 0 8px;text-align:center;color:var(--muted)">直接进入关卡（跳过剧情和工具限制）</p>
+      <div class="rowb" id="devLv"></div>
+    </div>
+    <button class="btn sm float" data-go="sMenu">返回主菜单</button>
+  </section>
+
+  <section class="scr dim" id="sMore">
+    <h2>更多</h2>
+    <div class="col">
+      <button class="btn" id="bStory">剧情回顾</button>
+      <button class="btn" id="bHelp">玩法说明</button>
+      <button class="btn" id="bSet">设置</button>
+    </div>
+    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v1.3.0</p>
+    <button class="btn sm float" data-go="sMenu">返回主菜单</button>
+  </section>
+
+  <section class="scr" id="sLevels">
+    <div class="tabs" id="modeTabs"><button class="tab" data-mode="simple">普通模式</button><button class="tab" data-mode="hard">困难模式</button><button class="tab" data-mode="endless">无限模式</button></div>
+    <p class="sub" id="starInfo" style="text-align:center;margin:0"></p>
+    <h2 id="lvTitle" hidden>选择关卡</h2><span id="hardSub" hidden></span>
+    <div id="lvGrid"></div>
+    <div class="card" id="endPanel" hidden><h3>无限模式</h3><p id="bestTxt" style="text-align:center"></p><div class="rowb" style="margin-top:14px"><button class="btn sun" id="bEndGo">出发</button></div></div>
+    <button class="btn sm float" data-go="sMenu">返回主菜单</button>
+  </section>
+
+  <section class="scr dim" id="sShop">
+    <h2>墨墨的杂货铺</h2>
+    <canvas id="shopCv" width="120" height="44" aria-hidden="true"></canvas>
+    <span class="wal">我的珍珠 ⚪ <span id="wallet">0</span></span>
+    <div id="shopList"></div>
+    <button class="btn sm float" data-go="sMenu">返回主菜单</button>
+  </section>
+
+  <section class="scr dim" id="sKit">
+    <h2>海边小馆</h2>
+    <div class="tabs" id="kitTabs"><button class="tab on" data-kt="open">🍽️ 营业</button><button class="tab" data-kt="menu">📖 菜谱</button><button class="tab" data-kt="team">👥 店员</button><button class="tab" data-kt="bask">🧺 鱼篓</button></div>
+    <div class="pane" data-pane="open">
+      <div class="card" id="restCard" style="padding:12px 18px"></div>
+      <button class="btn sun xl" id="bServe" style="width:min(100%,440px)">开始营业<small>约 90 秒 · 客人点菜，你来做菜上菜</small></button>
+      <p class="sub">今日订单（营业时到店，上菜多得五成珍珠）</p>
+      <div class="grid10" id="ordList"></div>
+    </div>
+    <div class="pane" data-pane="menu" hidden>
+      <p class="sub" id="kitTitle" style="text-align:center;margin:0"></p>
+      <p class="sub" style="text-align:center;margin:0;font-size:14px;opacity:.85">点一道菜，看看现实里的用料和做法</p>
+      <div id="kitList" style="display:grid;gap:10px;width:min(100%,440px)"></div>
+    </div>
+    <div class="pane" data-pane="team" hidden><div class="grid10" id="svPanel"></div></div>
+    <div class="pane" data-pane="bask" hidden><div class="bask" id="bask"></div></div>
+    <button class="btn sm float" data-go="sMenu">返回主菜单</button>
+  </section>
+
+  <section class="scr" id="sServe">
+    <div class="svTop"><span class="chip" id="svTime"></span><span class="chip gold" id="svEarn"></span><button class="chip" id="svSalt" hidden style="border:0;font:inherit;cursor:pointer"></button><span class="sp"></span><button class="btn sm" id="svQuit">打烊</button><button class="btn sm sun" id="svSpd" style="min-width:64px">1×</button></div>
+    <div id="svStaff" class="svTop" hidden></div>
+    <div id="svScene"></div>
+    <div id="svShelf"></div>
+    <div id="svSt"></div>
+    <div id="svMenu"></div>
+    <div class="card" id="svEnd" hidden></div>
+  </section>
+
+  <section class="scr dim" id="sHelp">
+    <div class="card">
+      <h3>小鱼的海底守则</h3>
+      <ul id="helpList">
+        <li>按住屏幕向上游，松开就慢慢下沉。</li>
+        <li><b>章鱼</b>和<b>水母</b>碰一下，掉一颗星；章鱼触手发光时最危险。</li>
+        <li><b>礁石</b>和<b>冰块</b>撞一下，掉一颗星。</li>
+        <li><b>鲨鱼</b>会一口吃掉小鱼！看到红色警告，赶快游出红色水带。</li>
+        <li><b>渔网</b>罩住小鱼时别害怕，快速连点屏幕就能挣脱。</li>
+        <li><b>金鱼结界</b>能挡一次危险，但挡不住大鲨鱼。</li>
+        <li><b>黄色墙</b>不能乱撞，没有结界就要回到检查点。</li>
+        <li>关卡里游过带圆圈的鱼，<b>用手指点它</b>就能捕获；大鱼要多点几下。捕到的鱼可以去<b>海边小馆</b>做菜换珍珠。</li>
+        <li>每局收集的珍珠会存进钱包，可以去<b>商店</b>买鲸鱼结界、磁铁和新皮肤。</li>
+        <li>过关得星星，再次挑战还能拿隐藏的第 4 颗星！</li>
+      </ul>
+    </div>
+    <button class="btn sm" data-go="sMenu">知道啦</button>
+  </section>
+
+  <section class="scr dim" id="sSet">
+    <h2 id="setTitle">设置</h2>
+    <div class="card">
+      <h3>语言</h3>
+      <div class="rowb" id="langRow"><button class="btn sm" data-lang="zh">中文</button><button class="btn sm" data-lang="en">English</button><button class="btn sm" data-lang="ja">日本語</button><button class="btn sm" data-lang="ru">Русский</button><button class="btn sm" data-lang="ar">العربية</button><button class="btn sm" data-lang="it">Italiano</button><button class="btn sm" data-lang="ko">한국어</button><button class="btn sm" data-lang="de">Deutsch</button><button class="btn sm" data-lang="es">Español</button><button class="btn sm" data-lang="th">ไทย</button><button class="btn sm" data-lang="fr">Français</button></div>
+      <h3 style="margin-top:16px">声音</h3>
+      <div class="rowb"><button class="btn sm" id="bMute">音效：开</button><button class="btn sm" id="bMusic">音乐：开</button></div>
+      <h3 style="margin-top:16px">剧情</h3>
+      <div class="rowb"><button class="btn sm" id="bAlways">进关剧情：只播一次</button></div>
+    </div>
+    <button class="btn sm float" data-go="sMenu">返回主菜单</button>
+  </section>
+
+  <section class="scr dim" id="sGal">
+    <h2>剧情回顾</h2>
+    <div class="grid10" id="galList"></div>
+    <button class="btn sm float" data-go="sMenu">返回主菜单</button>
+  </section>
+
+  <section class="scr" id="sStory">
+    <div class="card"><span id="stWho"></span><p id="stText"></p></div>
+    <p class="hint">点击屏幕继续</p>
+    <button class="btn sm" id="stSkip">长按跳过</button>
+  </section>
+
+  <section class="scr dim" id="sPause">
+    <h2>游戏暂停</h2>
+    <div class="col">
+      <button class="btn mint" id="bResume">继续游戏</button>
+      <button class="btn" id="bRestart">重新开始</button>
+      <button class="btn" id="bQuit">返回主菜单</button>
+      <div class="rowb" id="devPause" hidden><button class="btn sm" data-dp="end">跳到终点前</button><button class="btn sm" data-dp="boss">跳到 Boss</button><button class="btn sm sun" data-dp="win">直接过关</button></div>
+    </div>
+  </section>
+
+  <section class="scr dim" id="sEnd">
+    <h2 id="endTitle"></h2>
+    <div class="card" id="endCard"></div>
+    <div class="rowb" id="endBtns"></div>
+  </section>
+</div>
+
+<script>
