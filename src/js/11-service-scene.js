@@ -27,7 +27,7 @@ function svRender(){const v=SV;v.dirty=0;if(!SVE)return;
   v.seats.forEach((s,i)=>{const e=SVE.sb[i];e.hidden=!s;if(!s)return;const d=dById(s.d);e.className='sb'+(s.o?' vip':'')+(s.sig?' sig':'')+(v.shelf.some(p=>p.d===s.d)?' can':'');e.querySelector('.di').textContent=d.ic;e.querySelector('.dnm').textContent=(s.sig?'⭐ ':'')+(s.o?s.name+'：':'')+d.n});
   $('svShelf').innerHTML='<span class="lbl">出菜口</span>'+v.shelf.map((p,j)=>`<button class="plate ${p.q==='perfect'?'pf':''} ${p.fin?'fin':'raw'} ${p.hand?'hd':''}" data-pl="${j}">${dById(p.d).ic}</button>`).join('')+'<span class="sp"></span><span class="bell">🛎️</span>';
   v.st.forEach((s,i)=>{const e=SVE.st[i],ph=s.d?s.ph:'idle',keep=e.classList.contains('chop')?' chop':'';e.className=`stn k-${s.k} ${ph}`+keep+(v.staff.chef&&!s.hand?' hasChef':'')+(s.d&&s.hand?' hand':'');e.querySelector('.fd').textContent=s.d?(ph==='burn'?'💨':dById(s.d).ic):'';
-    e.querySelector('.tx').textContent=(s.d&&s.hand&&ph!=='burn'?'⭐ ':'')+(ph==='work'?(s.k==='cut'?'连点切菜！':'连点装盘！'):ph==='perfect'?'出锅！':ph==='ok'?'快出锅！':ph==='burn'?'焦了，点一下清理':ph==='cook'&&s.hand?'招牌菜，盯着火候':'');
+    e.querySelector('.tx').textContent=(s.d&&s.hand&&ph!=='burn'?'⭐ ':'')+(ph==='work'?(s.k==='cut'?'连点切菜！':'连点装盘！'):s.open?'还剩 '+s.left+' 份':ph==='perfect'?'出锅！':ph==='ok'?'快出锅！':ph==='burn'?'焦了，点一下清理':ph==='cook'&&s.hand?'招牌菜，盯着火候':ph==='cook'&&s.k==='umu'?'焖着，别打开':'');
     if(!TIME[s.k])e.querySelector('.dial').style.background=`conic-gradient(#4fe0b5 ${s.d?s.n/s.need*100:0}%,rgba(6,40,70,.15) 0)`});
   const ids=[...new Set(v.seats.filter(Boolean).map(s=>s.d))];
   $('svMenu').innerHTML=ids.length?ids.map(id=>{const d=dById(id),m=startKind(id),ok=svPending(id)>0&&(v.banq||canMake(d,SAVE.fish))&&v.st.some(x=>x.k===m&&!x.d);

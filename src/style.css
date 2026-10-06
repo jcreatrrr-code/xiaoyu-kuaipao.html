@@ -118,6 +118,8 @@ h2{margin:0;font-weight:400;font-size:30px;color:#fff;text-shadow:0 3px 0 rgba(6
 @keyframes flick{to{transform:scaleY(1.3);filter:brightness(1.25)}}
 .k-pot{background:linear-gradient(#8fb4c4,#4f7688)}.k-pot::before{content:"";position:absolute;left:20%;right:20%;top:36px;bottom:22px;border-radius:8px 8px 28px 28px;background:linear-gradient(#e6ebee,#9aa8b5);box-shadow:-13px -22px 0 -17px #9aa8b5,13px -22px 0 -17px #9aa8b5}
 .k-pot .fl{height:22px}
+.k-umu{background:linear-gradient(#7a5a3e,#3f2c1e)}.k-umu::before{content:"";position:absolute;left:14%;right:14%;top:38px;bottom:20px;border-radius:50% 50% 12px 12px;background:radial-gradient(circle at 28% 78%,#3c3c3c 0 9px,transparent 10px),radial-gradient(circle at 70% 80%,#464646 0 10px,transparent 11px),linear-gradient(#6a9a40,#3d6b26)}.k-umu .fl{opacity:.25;height:16px}
+.k-umu.cook .smk,.k-umu.perfect .smk,.k-umu.ok .smk{animation:steam 2.2s infinite}
 .k-cut{background:linear-gradient(#f0d9b0,#d9b98a)}.k-cut::before{content:"";position:absolute;inset:30px 14px 22px;border-radius:14px;background:linear-gradient(#e0b070,#c99450);box-shadow:inset 0 -4px 0 rgba(0,0,0,.12)}
 .k-asm{background:linear-gradient(#cdeee2,#8fd0ba)}.k-asm::before{content:"";position:absolute;left:50%;top:50%;width:92px;height:92px;margin:-44px 0 0 -46px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 9px #eef3f6,0 3px 0 rgba(6,40,70,.2)}
 .dial{position:relative;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;z-index:1;box-shadow:0 2px 0 rgba(0,0,0,.25);margin-top:6px}
