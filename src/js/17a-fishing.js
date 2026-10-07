@@ -7,18 +7,30 @@ d73:['遮目鱼一条、椰浆、姜、青葱、盐',['遮目鱼刺多，买的�
 d74:['鲯鳅鱼排、盐、青柠',['鱼排擦干，两面抹盐。','烤架或平底锅中大火，每面三四分钟，烤到鱼肉刚好不透明。','挤上青柠汁。'],'鲯鳅在夏威夷叫 mahi-mahi，肉白而结实，最常见的做法就是烤。']});
 /* 鱼：性格 k，长度范围（厘米），体重系数 kg（每米长度的立方），出没的远近 zone（0 天边，1 船边），各时段的多少 w：白天、黄昏、夜里、清晨 */
 const FSP=[
- {id:'milkfish',n:'遮目鱼',k:'calm',len:[35,100],kg:9,sh:'slim',zone:[.35,.85],w:[3,3,2,3],tip:'成群在船边慢慢游，什么时候都有'},
- {id:'flyfish',n:'飞鱼',k:'jump',len:[18,40],kg:6,sh:'wing',zone:[.25,.7],w:[1,4,1,2],tip:'傍晚最多，咬钩以后会跳出水面'},
- {id:'skipjack',n:'鲣鱼',k:'dart',len:[40,90],kg:14,sh:'tuna',zone:[.03,.4],w:[3,1,.3,2],tip:'白天在远处成群，力气大，会突然乱窜'},
- {id:'parrot',n:'鹦嘴鱼',k:'calm',len:[25,70],kg:16,sh:'parrot',zone:[.6,.97],w:[3,1,.4,2],tip:'白天在船边的珊瑚旁'},
- {id:'grouper',n:'石斑鱼',k:'sink',len:[35,100],kg:17,sh:'grouper',zone:[.6,.97],w:[.5,1,3,1],tip:'夜里在船底附近，咬住了就往下钻'},
- {id:'mahi',n:'鲯鳅',k:'jump',len:[60,140],kg:8,sh:'mahi',zone:[.03,.35],w:[1.5,.6,.2,1],tip:'白天在最远的地方，个头最大，也会跳'}];
-const FK={calm:'老实',dart:'乱窜',sink:'下沉',jump:'跃水'},FKEEP=6;
+ {id:'milkfish',n:'遮目鱼',k:'calm',len:[35,100],kg:9,sh:'slim',zone:[.35,.85],w:[3,3,2,3],tip:'成群在船边慢慢游，什么时候都有',zw:.3},
+ {id:'flyfish',n:'飞鱼',k:'jump',len:[18,40],kg:6,sh:'wing',zone:[.25,.7],w:[1,4,1,2],tip:'傍晚最多，咬钩以后会跳出水面',zw:.25},
+ {id:'skipjack',n:'鲣鱼',k:'dart',len:[40,90],kg:14,sh:'tuna',zone:[.03,.4],w:[3,1,.3,2],tip:'白天在远处成群，力气大，会突然乱窜',zw:.21},
+ {id:'parrot',n:'鹦嘴鱼',k:'calm',len:[25,70],kg:16,sh:'parrot',zone:[.6,.97],w:[3,1,.4,2],tip:'白天在船边的珊瑚旁',zw:.26},
+ {id:'grouper',n:'石斑鱼',k:'sink',len:[35,100],kg:17,sh:'grouper',zone:[.6,.97],w:[.5,1,3,1],tip:'夜里在船底附近，咬住了就往下钻',zw:.18},
+ {id:'mahi',n:'鲯鳅',k:'jump',len:[60,140],kg:8,sh:'mahi',zone:[.03,.35],w:[1.5,.6,.2,1],tip:'白天在最远的地方，个头最大，也会跳',zw:.17}];
+const FK={calm:'老实',dart:'乱窜',sink:'下沉',jump:'跃水'},FKEEP=5;
 const DRK=[{id:'tea',ic:'🍋',n:'冰柠檬茶',who:'阿珍',say:'我算过了，这杯算你的。',e:'水下的鱼影看得更清楚，稀有的鱼身上会闪光'},
  {id:'coffee',ic:'☕',n:'热咖啡',who:'阿强',say:'可以。',e:'真咬钩时浮漂会亮一圈，点的时间也更宽'},
  {id:'coco',ic:'🥥',n:'椰子水',who:'小帆',say:'刚从树上摘的！',e:'遛鱼时线的安全区更宽，绷紧也能多撑一会儿'}];
 const DRKP=10,DRKT=240;
+/* 钓具箱：鱼竿、鱼线、鱼钩各选一样，鱼饵一次用一种；潮印是放鱼回海换来的 */
+const GEAR={rod:{n:'鱼竿',l:[{id:'hand',n:'贝壳钩手线',d:'小帆偷拿来的，只有一根线'},{id:'mm',n:'墨墨钓竿',d:'收线快一些，绿区宽一点',shop:1},{id:'bamboo',n:'老舵的老竹竿',d:'收线最快，绿区最宽',tide:90,ch3:1}]},
+ line:{n:'鱼线',l:[{id:'coir',n:'椰子纤维线',d:'绷进红色很快就会断开'},{id:'nylon',n:'尼龙线',d:'线绷紧时能多撑一会儿',tide:20},{id:'braid',n:'编织线',d:'线绷紧时能撑很久',tide:60}]},
+ hook:{n:'鱼钩',l:[{id:'shell',n:'贝壳钩',d:'爷爷磨的'},{id:'iron',n:'铁钩',d:'真咬钩时点的时间更宽；鱼跳起来时扬竿更从容，没扬到也只掉一点',tide:30}]}};
+const BAIT=[{id:'dough',ic:'🍙',n:'面团',d:'什么鱼都吃一点，用不完'},{id:'shrimp',ic:'🦐',n:'虾仁',d:'鱼来得快一倍',p:20,pk:10},
+ {id:'squid',ic:'🦑',n:'鱿鱼条',d:'大鱼更爱咬，远处的鲣鱼和鲯鳅更多',p:25,pk:5},{id:'glow',ic:'✨',n:'萤光饵',d:'发光的三星鱼多来三倍',tide:10,pk:5}];
+const RACKP=120;
 SAVE=Object.assign({fsh:{dex:{},day:'',kept:0,n:0,air:0,airMax:0,free:'',dr:null}},SAVE);
+function fsInit(){const f=SAVE.fsh,d={tide:0,tideAll:0,rel:0,gear:{rod:'hand',line:'coir',hook:'shell',bait:'dough'},own:{},baits:{},auto:{own:0,on:0,ts:0}};for(const k in d)if(f[k]===undefined)f[k]=d[k];
+  if(SAVE.tools.rod&&!f.own.mm){f.own.mm=1;if(f.gear.rod==='hand')f.gear.rod='mm'}}
+const gOwn=(slot,it)=>!it.tide&&!it.shop||!!SAVE.fsh.own[it.id];
+const gLv=slot=>GEAR[slot].l.findIndex(x=>x.id===SAVE.fsh.gear[slot]);
+const fsBait=()=>{const g=SAVE.fsh.gear;if(g.bait!=='dough'&&!(SAVE.fsh.baits[g.bait]>0))g.bait='dough';return g.bait};
 /* 解锁剧情：小帆用爷爷磨的贝壳钩教小鱼钓鱼 */
 Object.assign(SCN,{fDeck:{bg:'shore',deck:1,dusk:1,cast:[['kid',.3,'g'],['xiaofan',.58,'g',1]]},
  fCrew:{bg:'shore',deck:1,dusk:1,cast:[['kid',.16,'g'],['xiaofan',.36,'g',1],['xiaoman',.56,'g',1],['aqiang',.72,'g',1],['octo',.9,'g',1]]},
@@ -34,6 +46,13 @@ STORY.fish0=[['旁白','那天傍晚，船尾挂起一盏灯。小鱼抱着抄�
  ['旁白','浮漂沉下去的那一刻，小鱼忽然知道，水下那条鱼在想什么。','fNight'],
  ['小鱼','明天就把这钩子还给你——它咬了！它咬了！','fNight',{em:'!',shake:1}],['旁白','主菜单多了一个去处：船尾钓鱼。','fNight']];
 GAL.splice(GAL.findIndex(g=>g[0]==='post13')+1,0,['fish0','第二章之后 · 船尾的贝壳钩']);
+/* 托竿架：第三章遇到老舵以后，用潮印找他换 */
+SCN.fRack={bg:'shore',deck:1,dusk:1,cast:[['kid',.3,'g'],['laoduo',.62,'g',1]]};
+STORY.fish1=[['老舵','听说船尾有个小子，钓上来的鱼大半都放回去了。','fRack'],['小鱼','……是我。菜篮装不下了。','fRack',{em:'…'}],
+ ['老舵','我年轻的时候也这样。后来做了这个。','fRack'],['旁白','老舵把一个旧木架绑在栏杆上，架子顶上挂着一个小铜铃。','fRack'],
+ ['老舵','竿子架上去，铃一响，它自己会收。你不在船上的时候，它也替你守着。','fRack'],['老舵','钓上来的，它都替你放回去。规矩不能坏。','fRack',{cut:1}],
+ ['小鱼','那我呢？','fRack',{em:'?'}],['老舵','你？喝你的柠檬茶去。','fRack'],['旁白','船尾多了一根托竿。','fRack']];
+GAL.splice(GAL.findIndex(g=>g[0]==='fish0')+1,0,['fish1','船尾 · 老舵的托竿架']);
 /* 低保真的钓鱼音乐 */
 TRK.fish={bpm:70,root:51,mo:12,bell:1,kick:1,ch:[[0,4,11],[-3,3,7],[-7,0,4],[-5,2,5]],
  A:'7 . . 4 . 2 . 0 - - . . 4 . 7 . 11 - . 9 . 7 . 4 - - . 2 . . . .',
@@ -58,17 +77,17 @@ function drawFsp(c,id,cx,cy,L,d,t,st){const f=FISH[id].c,sp=FSP.find(s=>s.id===i
 let FS=null;
 const fsPhase=tod=>tod<.25?0:tod<.45?1:tod<.8?2:3;
 function fshDay(){const f=SAVE.fsh;if(f.day!==today()){f.day=today();f.kept=0}}
-function fsRoll(){const ph=fsPhase(FS.tod),tot=FSP.reduce((a,s)=>a+s.w[ph],0);let r=Math.random()*tot;for(const s of FSP){r-=s.w[ph];if(r<=0)return s}return FSP[0]}
-function fsSpawn(init,near){const s=fsRoll(),fr=Math.pow(Math.random(),1.6),r=Math.random(),tea=FS.cup&&FS.cup.id==='tea';
+function fsRoll(){const ph=fsPhase(FS.tod),sq=fsBait()==='squid',wt=s=>s.w[ph]*(sq&&s.zone[1]<.5?2:1),tot=FSP.reduce((a,s)=>a+wt(s),0);let r=Math.random()*tot;for(const s of FSP){r-=wt(s);if(r<=0)return s}return FSP[0]}
+function fsSpawn(init,near){const s=fsRoll(),bt=fsBait(),fr=Math.pow(Math.random(),bt==='squid'?.8:1.6),r=Math.random(),tea=FS.cup&&FS.cup.id==='tea',s3=(tea?.08:.05)*(bt==='glow'?3:1);
   const z=near?near.z:s.zone[0]+Math.random()*(s.zone[1]-s.zone[0]);
-  const sh={s,fr,len:Math.round(s.len[0]+fr*(s.len[1]-s.len[0])),st:r<(tea?.08:.05)?3:r<.3?2:1,z,x:init?Math.random():near?near.x:(Math.random()<.5?-.08:1.08),tz:z,tx:Math.random(),st2:'roam',cool:0,ph:Math.random()*9};
+  const sh={s,fr,len:Math.round(s.len[0]+fr*(s.len[1]-s.len[0])),st:r<s3?3:r<.3?2:1,z,x:init?Math.random():near?near.x:(Math.random()<.5?-.08:1.08),tz:z,tx:Math.random(),st2:'roam',cool:0,ph:Math.random()*9};
   if(near){sh.x=clamp(near.x+(Math.random()<.5?-1:1)*.18,0,1)}FS.sh.push(sh);return sh}
-function startFish(){G=null;state='menu';hud.hidden=true;$('toast').className='';fshDay();
-  FS={t:0,tod:.3,ph:'idle',sh:[],bob:null,hold:false,pow:0,pdir:1,aim:.5,F:null,bite:null,pity:0,air:0,wt:0,chk:0,hint:'',rip:[],spl:[],cup:SAVE.fsh.dr&&SAVE.fsh.dr.left>0?SAVE.fsh.dr:null,clk:0,ps:4};
+function startFish(){G=null;state='menu';hud.hidden=true;$('toast').className='';fsInit();fshDay();
+  FS={t:0,tod:.3,ph:'idle',sh:[],bob:null,hold:false,pow:0,pdir:1,aim:.5,F:null,bite:null,pity:0,air:0,wt:0,chk:0,hint:'',rip:[],spl:[],cup:SAVE.fsh.dr&&SAVE.fsh.dr.left>0?SAVE.fsh.dr:null,clk:0,ps:4,at:20+Math.random()*25,ab:null};
   for(let i=0;i<4;i++)fsSpawn(true);$('fhCard').hidden=true;$('fhPanel').hidden=true;show('');$('fishHud').hidden=false;fhTop();
-  if(!SAVE.fsh.n)setTimeout(()=>{if(FS)toast('慢慢来。这里没有倒计时',2.6)},600)}
-function quitFish(){if(!FS)return;SAVE.fsh.dr=FS.cup&&FS.cup.left>0?FS.cup:null;persist();FS=null;$('fishHud').hidden=true;toMenu()}
-function fhTop(){fshDay();const f=SAVE.fsh,left=Math.max(0,FKEEP-f.kept);$('fhKeep').textContent=`🧺 今天还能留 ${left} 条`;const c=FS&&FS.cup,dk=c&&DRK.find(d=>d.id===c.id);
+  if(!SAVE.fsh.n)setTimeout(()=>{if(FS)toast('慢慢来。这里没有倒计时',2.6)},600);fsAway()}
+function quitFish(){if(!FS)return;SAVE.fsh.dr=FS.cup&&FS.cup.left>0?FS.cup:null;SAVE.fsh.auto.ts=Date.now();persist();FS=null;$('fishHud').hidden=true;toMenu()}
+function fhTop(){fshDay();const f=SAVE.fsh,bt=BAIT.find(b=>b.id===fsBait());$('fhKeep').textContent=`🌊 ${f.tide}`;$('fhKeep').title='潮印';$('fhBait').textContent=`${bt.ic}${bt.id==='dough'?' 面团':' ×'+f.baits[bt.id]}`;const c=FS&&FS.cup,dk=c&&DRK.find(d=>d.id===c.id);
   $('fhDrink').hidden=!dk;if(dk)$('fhDrink').textContent=`${dk.ic} ${dk.n} 还剩 ${Math.max(1,Math.ceil(c.left/60))} 分钟`}
 function fhHint(s){if(FS.hint===s)return;FS.hint=s;$('fhHint').textContent=s;$('fhHint').hidden=!s}
 /* 坐标：鱼影和浮漂用 x（0 到 1，左到右）和 z（0 天边，1 船边） */
@@ -83,17 +102,23 @@ function fsDown(x){if(!FS||!$('fhCard').hidden||!$('fhPanel').hidden)return;cons
   if(ph==='wait'){const b=FS.bite;if(b&&b.k==='sink'){fsHook();return}
     if(b){b.sh.st2='flee';b.sh.cool=6;FS.bite=null;toast('太急了！它吓跑了',1.8);snd(300,.25,'sine',.06,180);return}
     fsBack(FS.wt>3);return}
-  if(ph==='fight'){FS.hold=true;const F=FS.F;if(F.jump>0&&!F.ok){F.ok=1;F.d=Math.max(0,F.d-10);toast('扬竿！',1);snd(880,.12,'triangle',.1,1320)}}}
+  if(ph==='fight'){FS.hold=true;const F=FS.F;if(F.jump>0&&!F.ok){F.ok=1;F.d=Math.max(0,F.d-8);toast('扬竿！',1);snd(880,.12,'triangle',.1,1320)}}}
 function fsMove(x){if(FS&&FS.ph==='charge')FS.aim=clamp(x,.06,.94)}
 function fsUp(){if(!FS)return;FS.hold=false;if(FS.ph==='charge')fsCast()}
-function fsHook(){const b=FS.bite,sh=b.sh,k=sh.s.k,str={calm:.5,dart:.72,sink:.95,jump:.68}[k]*(.6+.8*sh.fr);FS.bite=null;
-  FS.F={sh,d:100,T:.35,danger:0,str,bt:1.5+Math.random()*1.5,burst:0,jt:2+Math.random()*1.5,jump:0,ok:0,z0:FS.bob.z,x0:FS.bob.x,first:1};FS.ph='fight';sh.st2='hook';
+/* 遛鱼：白线是松紧，按住往右、松开往左，有惯性；绿区是鱼让你收线的空当，鱼一挣扎绿区就跑。白线在绿区里才收得动线 */
+const fsZw=sh=>{const c=FS.cup&&FS.cup.id==='coco';return sh.s.zw*(1-.2*sh.fr)+[0,.02,.04][Math.max(0,gLv('rod'))]+(c?.05:0)};
+function fsUse(){const g=SAVE.fsh.gear,b=g.bait;if(b==='dough')return;SAVE.fsh.baits[b]=Math.max(0,(SAVE.fsh.baits[b]||0)-1);if(!SAVE.fsh.baits[b]){g.bait='dough';toast(`${BAIT.find(x=>x.id===b).n}用完了，换回面团`,2)}persist();fhTop()}
+function fsHook(){const b=FS.bite,sh=b.sh,k=sh.s.k,str={calm:.5,dart:.72,sink:.95,jump:.68}[k]*(.6+.8*sh.fr);FS.bite=null;fsUse();const zw=fsZw(sh);
+  FS.F={sh,d:100,T:.15,v:0,c:.5,tc:.5,zw,ct:.8,danger:0,str,bt:1.5+Math.random()*1.5,burst:0,jt:2+Math.random()*1.5,jump:0,ok:0,z0:FS.bob.z,x0:FS.bob.x,first:1};FS.ph='fight';sh.st2='hook';
   snd(520,.16,'triangle',.12,1040);CSND.splash();if(navigator.vibrate)try{navigator.vibrate(40)}catch(e){}}
 function fsLand(){const F=FS.F;FS.ph='land';FS.landT=0;FS.land=F.sh;FS.sh=FS.sh.filter(s=>s!==F.sh);FS.F=null;FS.air=0;FS.pity=0;CSND.splash();SFX.win()}
 function fsEscape(msg){const F=FS.F,sh=F.sh;sh.st2='roam';sh.cool=5;sh.back=1;sh.z=clamp(F.z,.02,.97);sh.x=clamp(F.x,0,1);sh.tx=Math.random();toast(msg,2.6);snd(300,.3,'sine',.06,150);fsBack(true)}
 function fishUpdate(dt){const f=FS;f.t+=dt;f.tod=(f.tod+dt/480)%1;
   if(f.cup){f.cup.left-=dt;if(f.cup.left<=0){f.cup=null;SAVE.fsh.dr=null;persist();toast('杯子空了',1.6)}if((f.chk-=dt)<=0){f.chk=1;fhTop()}}
   const tea=f.cup&&f.cup.id==='tea',cof=f.cup&&f.cup.id==='coffee',coco=f.cup&&f.cup.id==='coco';
+  {const au=SAVE.fsh.auto;if(au.own&&au.on){au.ts=Date.now();if(f.ab){f.ab.t+=dt;if((f.ab.r-=dt)<=0){f.ab.r=.28;snd(1480,.08,'triangle',.06)}
+    if(f.ab.t>=2.2){const r=fsAutoFish();f.ab=null;f.at=40+Math.random()*40;persist();fhTop();toast(`🔔 托竿上来一条${r.sh.s.n}，${r.sh.len} 厘米，放回去了 +${r.tv} 潮印`,2.8);CSND.splash()}}
+    else if($('fhPanel').hidden&&$('fhCard').hidden&&(f.at-=dt)<=0)f.ab={t:0,r:0}}}
   /* 鱼影慢慢游 */
   for(const s of f.sh){s.ph+=dt;s.cool=Math.max(0,s.cool-dt);if(s.st2==='hook'||s.st2==='nib')continue;
     if(s.st2==='go'&&f.bob){const dx=f.bob.x-s.x,dz=f.bob.z-s.z,dd=Math.hypot(dx,dz*.7);const v=.07*dt;if(dd<.02){s.st2='nib';const n={calm:1,dart:2,sink:1,jump:2}[s.s.k];f.bite={sh:s,k:'gap',t:.5+Math.random()*.8,n:Math.floor(Math.random()*(n+1))+(Math.random()<.5?1:0)};continue}
@@ -110,50 +135,58 @@ function fishUpdate(dt){const f=FS;f.t+=dt;f.tod=(f.tod+dt/480)%1;
   if(ph==='fly'){b.fly+=dt/.55;if(b.fly>=1){b.fly=1;f.ph='wait';f.wt=0;f.chk2=0;f.rip.push({x:b.x,z:b.z,t:0,r:1});CSND.splash()}fhHint('')}
   if(ph==='wait'){f.wt+=dt;const bt=f.bite;
     if(!bt){fhHint(SAVE.fsh.n<3?'等浮漂整个沉下去再点。轻轻点头的，是它在试探。点一下可以收竿':'等浮漂整个沉下去……');
-      if((f.chk2-=dt)<=0){f.chk2=1;if(!f.sh.some(s=>s.st2==='go')){const R=.16+f.pity*.06;
+      if((f.chk2-=dt)<=0){f.chk2=fsBait()==='shrimp'?.5:1;if(!f.sh.some(s=>s.st2==='go')){const R=.16+f.pity*.06;
         const near=f.sh.filter(s=>s.st2==='roam'&&!s.cool&&Math.hypot(s.x-b.x,(s.z-b.z)*1.4)<R);
         if(near.length&&Math.random()<.3+f.pity*.12)near[Math.floor(Math.random()*near.length)].st2='go';
-        else if(f.wt>(f.pity?5:9)&&!near.length)fsSpawn(false,{x:b.x,z:clamp(b.z+(Math.random()-.5)*.1,.03,.95)}).st2='go'}}}
+        else if(f.wt>(f.pity?5:9)*(fsBait()==='shrimp'?.5:1)&&!near.length)fsSpawn(false,{x:b.x,z:clamp(b.z+(Math.random()-.5)*.1,.03,.95)}).st2='go'}}}
     else{bt.t-=dt;
-      if(bt.k==='gap'&&bt.t<=0){if(bt.n>0){bt.n--;bt.k='dip';bt.t=.28;snd(640,.05,'sine',.05);f.rip.push({x:b.x,z:b.z,t:.5,r:.5})}else{bt.k='sink';bt.t=cof?1.05:.75;snd(440,.18,'triangle',.1,880);f.rip.push({x:b.x,z:b.z,t:0,r:1.3});if(navigator.vibrate)try{navigator.vibrate(60)}catch(e){}}}
+      if(bt.k==='gap'&&bt.t<=0){if(bt.n>0){bt.n--;bt.k='dip';bt.t=.28;snd(640,.05,'sine',.05);f.rip.push({x:b.x,z:b.z,t:.5,r:.5})}else{bt.k='sink';bt.t=(cof?1.05:.75)+(SAVE.fsh.gear.hook==='iron'?.3:0);snd(440,.18,'triangle',.1,880);f.rip.push({x:b.x,z:b.z,t:0,r:1.3});if(navigator.vibrate)try{navigator.vibrate(60)}catch(e){}}}
       else if(bt.k==='dip'&&bt.t<=0){bt.k='gap';bt.t=.45+Math.random()*.9}
-      else if(bt.k==='sink'&&bt.t<=0){bt.sh.st2='flee';bt.sh.cool=6;bt.sh.tx=bt.sh.x<.5?-.2:1.2;f.bite=null;toast('它把饵吃了就溜了……',2);fsBack(true)}
+      else if(bt.k==='sink'&&bt.t<=0){bt.sh.st2='flee';bt.sh.cool=6;bt.sh.tx=bt.sh.x<.5?-.2:1.2;f.bite=null;toast('它把饵吃了就溜了……',2);fsUse();fsBack(true)}
       fhHint(bt.k==='sink'?'就是现在！点一下！':'等浮漂整个沉下去……')}}
   if(ph==='back'){f.backT+=dt/.45;fhHint('');if(f.backT>=1){f.ph='idle';f.bob=null}}
-  if(ph==='fight'){const F=f.F,k=F.sh.s.k,rod=!!SAVE.tools.rod,lo=coco?.12:.18,hi=coco?.88:.8;
-    if(k==='dart'){F.bt-=dt;if(F.bt<=0){if(F.burst>0){F.burst=0;F.bt=1.4+Math.random()*1.8}else{F.burst=1;F.bt=.8;CSND.splash()}}}
-    if(k==='jump'){if(F.jump>0){F.jump-=dt;if(F.jump<=0){if(!F.ok){F.d+=10;toast('它甩了甩钩……',1.2)}F.jt=2.2+Math.random()*2}}else{F.jt-=dt;if(F.jt<=0&&F.d>12){F.jump=.95;F.ok=0;CSND.splash()}}}
-    const pull=F.str*(F.burst?2.1:1)*(k==='sink'?1.15:1);
-    if(F.jump>0){F.T=Math.max(.3,F.T-dt*.4)}
-    else if(f.hold){F.T+=(.32+pull*.45)*dt*.9;const slack=F.T<lo?.4:1;F.d-=20*(rod?1.2:1)/(.7+F.str*.4)*slack*dt*(F.burst?.35:1);
-      if((f.clk-=dt)<=0){f.clk=.07;snd(1900+Math.random()*300,.012,'square',.012)}}
-    else{F.T-=.75*dt;F.d+=pull*(k==='sink'?3.5:4.5)*dt}
-    F.T=clamp(F.T,0,1.05);if(F.T>hi)F.danger+=dt;else F.danger=Math.max(0,F.danger-dt*2);
-    const z=F.z0+(.97-F.z0)*(1-F.d/100),x=F.x0+(fsTip().x/CW-F.x0)*(1-F.d/100)*.7+Math.sin(f.t*(F.burst?7:2))*(F.burst?.05:.02);F.z=z;F.x=x;f.bob.z=clamp(z,.02,.97);f.bob.x=x;
+  if(ph==='fight'){const F=f.F,k=F.sh.s.k,rl=Math.max(0,gLv('rod')),ll=Math.max(0,gLv('line')),iron=SAVE.fsh.gear.hook==='iron',half=F.zw/2;
+    if(k==='dart'){F.bt-=dt;if(F.bt<=0){if(F.burst>0){F.burst=0;F.bt=1.4+Math.random()*1.8}else{F.burst=1;F.bt=.8;F.ct=0;CSND.splash()}}}
+    if(k==='jump'){if(F.jump>0){F.jump-=dt;if(F.jump<=0){if(!F.ok){F.d+=iron?5:10;toast('它甩了甩钩……',1.2)}F.jt=2.2+Math.random()*2}}else{F.jt-=dt;if(F.jt<=0&&F.d>12){F.jump=iron?1.3:.95;F.ok=0;F.ct=0;CSND.splash()}}}
+    /* 绿区跟着鱼跑：老实的慢慢晃，乱窜的猛地一甩，下沉的往紧的那头拽，跃水的跳一下换个地方 */
+    const mn=half+.02,mx=.96-half;F.ct-=dt;
+    if(F.ct<=0){const r=Math.random();if(k==='sink'){F.tc=mn+(mx-mn)*(.45+r*.55);F.ct=1.2+Math.random()*1.4}
+      else if(k==='dart'&&F.burst){F.tc=clamp(F.c+(F.c<.5?1:-1)*(.2+r*.2),mn,mx);F.ct=.9}else{F.tc=mn+(mx-mn)*r;F.ct=(k==='calm'?1.8:1.2)+Math.random()*1.4}}
+    const sp={calm:.16,dart:.2,sink:.2,jump:.18}[k]*(.75+F.str*.5)*(F.burst?2.2:1)*(F.jump>0?1.1:1),dc=F.tc-F.c;
+    F.c+=Math.sign(dc)*Math.min(Math.abs(dc),sp*dt)+Math.sin(f.t*2.3)*.03*dt;F.c=clamp(F.c,mn,mx);
+    /* 白线：按住往右推，松开往左落；下沉的鱼一直往回拽，乱窜时拽得更狠 */
+    const acc=(f.hold?1.5:-1.3)-(k==='sink'?.3:0)-(F.burst?.4:0);F.v=(F.v+acc*dt)*(1-2*dt);F.T+=F.v*dt;
+    if(F.T<0){F.T=0;F.v=Math.max(0,F.v)}if(F.T>1){F.T=1;F.v=Math.min(0,F.v)}
+    const lo=F.c-half,hi=F.c+half,pull=F.str*(F.burst?2:1);
+    if(F.T>=lo&&F.T<=hi){F.d-=12*[1,1.1,1.2][rl]/(.7+F.str*.4)*dt*(F.burst?.5:1);if(f.hold&&(f.clk-=dt)<=0){f.clk=.07;snd(1900+Math.random()*300,.012,'square',.012)}}
+    else if(F.T<lo)F.d+=(2+pull*2)*dt;else{F.d+=1*dt;F.danger+=dt}
+    if(F.T<=hi)F.danger=Math.max(0,F.danger-dt*1.5);
+    const z=F.z0+(.97-F.z0)*(1-clamp(F.d,0,100)/100),x=F.x0+(fsTip().x/CW-F.x0)*(1-clamp(F.d,0,100)/100)*.7+(F.c-.5)*.12+Math.sin(f.t*(F.burst?7:2))*(F.burst?.04:.015);F.z=z;F.x=x;f.bob.z=clamp(z,.02,.97);f.bob.x=clamp(x,0,1);
     if(Math.random()<dt*(F.burst?8:2))f.spl.push({x:x*CW+(Math.random()-.5)*3,y:fsY(z),vx:(Math.random()-.5)*14,vy:-10-Math.random()*8,t:0});
-    fhHint(F.jump>0&&!F.ok?'它跳起来了！快点一下扬竿！':F.burst?'它在乱窜！松一松手':F.T>hi?'线太紧了！松开放一放':SAVE.fsh.n<3?'按住收线，松开放线。别让线绷到红色':'');
-    if(F.danger>(rod?1.8:1.3)+(coco?.4:0)+(SAVE.fsh.n<3?1:0))fsEscape('线绷得太紧，它挣脱了。别急，它可能还会回来');
+    fhHint(F.jump>0&&!F.ok?'它跳起来了！快点一下扬竿！':F.T>hi?'线太紧了！松开放一放':F.burst?'它在乱窜！绿区跑了，快追上':F.T<lo?'线松了，鱼在往外游。按住收线':SAVE.fsh.n<3?'按住白线往右，松开往左。让白线待在绿色里':'');
+    if(F.danger>1+[0,.3,.6][ll]+(f.cup&&f.cup.id==='coco'?.3:0)+(SAVE.fsh.n<3?.8:0))fsEscape('线绷得太紧，它挣脱了。别急，它可能还会回来');
     else if(F.d>=130)fsEscape('它游远了，线收不回来……');else if(F.d<=0)fsLand()}
   if(ph==='land'){f.landT+=dt/.8;fhHint('');if(f.landT>=1){f.ph='card';fsCard(f.land)}}
   ambSet({wave:.06,wind:.012},f.t);if(SAVE.music!==0&&!SAVE.mute&&Math.random()<dt*3)nz(.015,'highpass',3500,0,.025)}
 
 const SAYK=['……刚才我就是被这么拽着跑的吧。','它看我的眼神，和我看墨墨的一样。','我当鱼的时候，可没这么傻。','这条要是拍下来，阿潮肯定说是假的。','明天就……算了，再钓一条。','对不住了。不过你真的很好看。'];
 const SAYR=['小帆：“它会记得你的。”','小帆：“放它回去，明天它带朋友来。”','小鱼：“去吧。别再咬陌生人的钩了。”','小帆：“爷爷说，海里的鱼是借给我们看的。”'];
+const fsTide=sh=>1+(sh.st-1)*2+Math.round(sh.fr*3)+(sh.s.zw<=.18?1:0);
 function fsCard(sh){const s=sh.s,f=SAVE.fsh,rec=f.dex[s.id]||(f.dex[s.id]={n:0,best:0,kg:0,st:0}),kg=Math.max(.1,s.kg*Math.pow(sh.len/100,3)),nw=!rec.n,best=sh.len>rec.best;
-  rec.n++;if(best){rec.best=sh.len;rec.kg=+kg.toFixed(1)}rec.st=Math.max(rec.st,sh.st);f.n++;persist();fshDay();const left=Math.max(0,FKEEP-f.kept);FS.cur=sh;
+  rec.n++;if(best){rec.best=sh.len;rec.kg=+kg.toFixed(1)}rec.st=Math.max(rec.st,sh.st);f.n++;persist();fshDay();const has=SAVE.fish[s.id]||0,left=Math.max(0,FKEEP-has);sh.tv=fsTide(sh)+(best&&!nw?2:0);FS.cur=sh;
   const say=sh.back?'是刚才跑掉的那条！':sh.st>=3?'它在发光……！':SAYK[Math.floor(Math.random()*SAYK.length)];
   $('fhCard').innerHTML=`<canvas id="fhFish" width="64" height="32"></canvas><h3>${s.n} <span class="fst">${'★'.repeat(sh.st)}${'☆'.repeat(3-sh.st)}</span></h3>
    <p class="fbig">${sh.len} 厘米 · ${kg<1?kg.toFixed(2):kg.toFixed(1)} 公斤</p>${nw?'<p class="fnew">📖 图鉴新收录</p>':best?'<p class="fnew">🏅 新纪录！</p>':''}
    <p class="fsay">小鱼：“${say}”</p><p class="note">${FK[s.k]} · ${s.tip}</p>
-   <div class="rowb"><button class="btn mint" data-fk="keep" ${left?'':'disabled'}>🧺 留下${left?`（今天还能留 ${left} 条）`:'（今天够了）'}</button><button class="btn" data-fk="rel">🌊 放回去</button></div>`;
+   <div class="rowb"><button class="btn mint" data-fk="keep" ${left?'':'disabled'}>🧺 留下${left?`（菜篮里${s.n} ${has}/${FKEEP}）`:`（菜篮里${s.n}满了）`}</button><button class="btn sun" data-fk="rel">🌊 放回去 +${sh.tv} 潮印</button></div><p class="note">留下的鱼营业时当食材；放回去的鱼换潮印，潮印在🎒钓具箱里换鱼饵和钓具</p>`;
   $('fhCard').hidden=false;const c=$('fhFish').getContext('2d');FS.cardT=0;fsCardDraw()}
 function fsCardDraw(){const e=$('fhFish');if(!e||!FS||!FS.cur||$('fhCard').hidden)return;const c=e.getContext('2d'),sh=FS.cur;c.clearRect(0,0,64,32);drawFsp(c,sh.s.id,32,17,Math.min(52,24+sh.fr*28),1,FS.t,sh.st)}
 $('fhCard').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled||!FS)return;const sh=FS.cur,s=sh.s;
-  if(b.dataset.fk==='keep'){fshDay();SAVE.fsh.kept++;SAVE.fish[s.id]=(SAVE.fish[s.id]||0)+1;toast(`${s.n}放进鱼篓了，营业时能用`,2);SFX.save()}
-  else{toast(SAYR[Math.floor(Math.random()*SAYR.length)],2.6);snd(500,.3,'sine',.06,900);FS.rip.push({x:FS.bob?FS.bob.x:.5,z:.9,t:0,r:1.4})}
+  if(b.dataset.fk==='keep'){fshDay();SAVE.fsh.kept++;SAVE.fsh.keptAll=(SAVE.fsh.keptAll||0)+1;SAVE.fish[s.id]=(SAVE.fish[s.id]||0)+1;toast(`${s.n}放进鱼篓了，营业时能用`,2);SFX.save()}
+  else{const f=SAVE.fsh;f.tide+=sh.tv;f.tideAll+=sh.tv;f.rel++;toast(`🌊 +${sh.tv} 潮印 · ${SAYR[Math.floor(Math.random()*SAYR.length)]}`,2.6);snd(500,.3,'sine',.06,900);FS.rip.push({x:FS.bob?FS.bob.x:.5,z:.9,t:0,r:1.4})}
   persist();$('fhCard').hidden=true;FS.cur=null;FS.ph='idle';FS.bob=null;fhTop()};
 function fsBook(){const f=SAVE.fsh,got=FSP.filter(s=>f.dex[s.id]).length;
-  $('fhPanel').innerHTML=`<h3>钓鱼手帐</h3><p class="note">认识了 ${got} / ${FSP.length} 种 · 一共钓上 ${f.n} 条 · 空军 ${f.air} 竿（最长连空 ${f.airMax} 竿）</p><div class="fbook">${FSP.map(s=>{const r=f.dex[s.id];
+  $('fhPanel').innerHTML=`<h3>钓鱼手帐</h3><p class="note">认识了 ${got} / ${FSP.length} 种 · 一共钓上 ${f.n} 条 · 空军 ${f.air} 竿（最长连空 ${f.airMax} 竿）<br>放回大海 ${f.rel} 条 · 一共得过 ${f.tideAll} 枚潮印</p><div class="fbook">${FSP.map(s=>{const r=f.dex[s.id];
     return r?`<div class="fbk"><canvas data-fb="${s.id}" width="40" height="22"></canvas><b>${s.n} <span class="fst">${'★'.repeat(r.st)}</span></b><span>${FK[s.k]} · 钓到 ${r.n} 条</span><span>最大 ${r.best} 厘米 · ${r.kg} 公斤</span><em>${s.tip}</em></div>`
       :`<div class="fbk no"><canvas data-fb="${s.id}" width="40" height="22"></canvas><b>？？？</b><em>${s.tip}</em></div>`}).join('')}</div><div class="rowb"><button class="btn sm" data-fp="x">合上</button></div>`;
   $('fhPanel').hidden=false;$('fhPanel').querySelectorAll('[data-fb]').forEach(e=>{const c=e.getContext('2d'),id=e.dataset.fb,s=FSP.find(x=>x.id===id);drawFsp(c,id,20,12,30,1,0,0);
@@ -161,11 +194,45 @@ function fsBook(){const f=SAVE.fsh,got=FSP.filter(s=>f.dex[s.id]).length;
 function fsDrinks(){fshDay();const free=SAVE.fsh.free!==today(),c=FS.cup;
   $('fhPanel').innerHTML=`<h3>来一杯</h3><p class="note">${free?'每天第一杯免费':'一杯 '+DRKP+' 颗珍珠'} · 一杯能喝 ${DRKT/60} 分钟 · 不喝也能钓</p>${DRK.map(d=>`<div class="fdk"><span class="ic">${d.ic}</span><div><b>${d.n}</b><span class="note">${d.who}：“${d.say}”</span><span>${d.e}</span></div><button class="btn sm ${c&&c.id===d.id?'off':'sun'}" data-dk="${d.id}" ${!free&&SAVE.wallet<DRKP?'disabled':''}>${c&&c.id===d.id?'再续一杯':free?'免费':'⚪ '+DRKP}</button></div>`).join('')}<div class="rowb"><button class="btn sm" data-fp="x">不用了</button></div>`;
   $('fhPanel').hidden=false}
+/* 钓具箱 */
+function fsGear(){fsInit();const f=SAVE.fsh,g=f.gear,ch3=cleared(VOL1+2);
+  const row=(slot,it)=>{const own=gOwn(slot,it),on=g[slot]===it.id;let btn;
+    if(on)btn='<button class="btn sm off" disabled>用着</button>';else if(own)btn=`<button class="btn sm mint" data-ge="${slot}:${it.id}">换上</button>`;
+    else if(it.shop)btn='<span class="note">墨墨商店有卖</span>';else if(it.ch3&&!ch3)btn='<span class="note">第三章以后</span>';
+    else btn=`<button class="btn sm sun" data-gb="${slot}:${it.id}" ${f.tide<it.tide?'disabled':''}>🌊 ${it.tide}</button>`;
+    return `<div class="fdk"><span class="ic">${on?'✅':own?'▫️':'🔒'}</span><div><b>${it.n}</b><span>${it.d}</span></div>${btn}</div>`};
+  const brow=b=>{const on=g.bait===b.id,n=b.id==='dough'?'∞':(f.baits[b.id]||0),can=b.tide?f.tide>=b.tide:SAVE.wallet>=b.p;
+    return `<div class="fdk"><span class="ic">${b.ic}</span><div><b>${b.n} <span class="note">有 ${n}</span></b><span>${b.d}</span></div><div class="fbtn">${b.pk?`<button class="btn sm sun" data-bb="${b.id}" ${can?'':'disabled'}>${b.pk} 个 · ${b.tide?'🌊 '+b.tide:'⚪ '+b.p}</button>`:''}${on?'<button class="btn sm off" disabled>用着</button>':(b.id==='dough'||f.baits[b.id]>0)?`<button class="btn sm mint" data-bu="${b.id}">用这个</button>`:''}</div></div>`};
+  const a=f.auto,rack=!ch3?'<span class="note">第三章以后</span>':a.own?`<button class="btn sm ${a.on?'off':'mint'}" data-ga="1">${a.on?'收起来':'架上去'}</button>`:`<button class="btn sm sun" data-gr="1" ${f.tide<RACKP?'disabled':''}>🌊 ${RACKP}</button>`;
+  $('fhPanel').innerHTML=`<h3>🎒 钓具箱</h3><p class="note">🌊 潮印 ${f.tide} · ⚪ 珍珠 ${SAVE.wallet} · 每放回一条鱼得潮印，越大越稀有得越多</p>
+   ${['rod','line','hook'].map(sl=>`<h4>${GEAR[sl].n}</h4>`+GEAR[sl].l.map(it=>row(sl,it)).join('')).join('')}<h4>鱼饵 <span class="note">鱼咬钩时用掉一个</span></h4>${BAIT.map(brow).join('')}
+   <h4>托竿</h4><div class="fdk"><span class="ic">🔔</span><div><b>老舵的托竿架</b><span>架上以后自己会上鱼（慢一些、鱼小一些），钓到的都放回去换潮印；你离开船尾，它也接着钓</span></div>${rack}</div>
+   <div class="rowb"><button class="btn sm" data-fp="x">合上</button></div>`;$('fhPanel').hidden=false}
+function fsGearClick(b){const f=SAVE.fsh,d=b.dataset;
+  if(d.ge){const[sl,id]=d.ge.split(':');f.gear[sl]=id;SFX.save()}
+  else if(d.gb){const[sl,id]=d.gb.split(':'),it=GEAR[sl].l.find(x=>x.id===id);if(f.tide<it.tide)return;f.tide-=it.tide;f.own[id]=1;f.gear[sl]=id;toast(`换上了${it.n}`,1.8);SFX.save()}
+  else if(d.bb){const bt=BAIT.find(x=>x.id===d.bb);if(bt.tide){if(f.tide<bt.tide)return;f.tide-=bt.tide}else{if(SAVE.wallet<bt.p)return;SAVE.wallet-=bt.p}
+    f.baits[bt.id]=(f.baits[bt.id]||0)+bt.pk;f.gear.bait=bt.id;toast(`墨墨：“${bt.n}，亏本卖！”`,1.8);SFX.save()}
+  else if(d.bu){f.gear.bait=d.bu;SFX.tap()}
+  else if(d.ga){f.auto.on=f.auto.on?0:1;f.auto.ts=Date.now();if(FS){FS.at=20+Math.random()*25;FS.ab=null}SFX.tap()}
+  else if(d.gr){if(f.tide<RACKP)return;f.tide-=RACKP;f.auto.own=1;f.auto.on=1;f.auto.ts=Date.now();persist();$('fhPanel').hidden=true;$('fishHud').hidden=true;
+    playStory(STORY.fish1,()=>{SAVE.story.fish1=1;persist();if(FS){$('fishHud').hidden=false;FS.at=15;FS.ab=null;fhTop()}});return}
+  persist();fhTop();fsGear()}
+/* 托竿：在船尾时每隔一阵铃响上一条；不在船尾时按离开的时间算 */
+function fsAutoFish(){const s=fsRoll(),fr=Math.random()*.55,sh={s,fr,len:Math.round(s.len[0]+fr*(s.len[1]-s.len[0])),st:Math.random()<.15?2:1},f=SAVE.fsh,
+  rec=f.dex[s.id]||(f.dex[s.id]={n:0,best:0,kg:0,st:0}),kg=Math.max(.1,s.kg*Math.pow(sh.len/100,3));rec.n++;if(sh.len>rec.best){rec.best=sh.len;rec.kg=+kg.toFixed(1)}rec.st=Math.max(rec.st,sh.st);
+  const tv=Math.max(1,Math.round(fsTide(sh)*.5));f.n++;f.rel++;f.tide+=tv;f.tideAll+=tv;return{sh,tv}}
+function fsAway(){const a=SAVE.fsh.auto;if(!a.own||!a.on||!a.ts)return;const n=Math.min(20,Math.floor((Date.now()-a.ts)/150000));a.ts=Date.now();if(n<1)return;
+  let tv=0;const kinds={};for(let i=0;i<n;i++){const r=fsAutoFish();tv+=r.tv;kinds[r.sh.s.n]=(kinds[r.sh.s.n]||0)+1}persist();fhTop();
+  $('fhPanel').innerHTML=`<h3>🔔 托竿守了一阵</h3><p>你不在的时候，托竿钓上来 ${n} 条，都放回去了。</p><p class="note">${Object.entries(kinds).map(([k,v])=>k+' ×'+v).join(' · ')}</p><p class="fbig">🌊 +${tv} 潮印</p><div class="rowb"><button class="btn sm mint" data-fp="x">好</button></div>`;$('fhPanel').hidden=false}
+window.addEventListener('pagehide',()=>{if(FS){SAVE.fsh.auto.ts=Date.now();persist()}});
 $('fhPanel').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled||!FS)return;
   if(b.dataset.fp){$('fhPanel').hidden=true;SFX.tap();return}
+  if(b.dataset.ge||b.dataset.gb||b.dataset.bb||b.dataset.bu||b.dataset.ga||b.dataset.gr){fsGearClick(b);return}
   if(b.dataset.dk){const free=SAVE.fsh.free!==today();if(!free){if(SAVE.wallet<DRKP)return;SAVE.wallet-=DRKP}else SAVE.fsh.free=today();
     const d=DRK.find(x=>x.id===b.dataset.dk);FS.cup={id:d.id,left:DRKT};SAVE.fsh.dr=FS.cup;persist();$('fhPanel').hidden=true;toast(`${d.who}：“${d.say}”`,2.4);SFX.save();fhTop()}};
 $('fhQuit').onclick=()=>{SFX.tap();quitFish()};
+$('fhGear').onclick=()=>{if(!FS)return;if(FS.ph==='fight'){toast('先把这条鱼拉上来',1.6);return}SFX.tap();fsGear()};
 $('fhBook').onclick=()=>{if(!FS)return;SFX.tap();fsBook()};
 $('fhCup').onclick=()=>{if(!FS)return;if(FS.ph==='fight'){toast('先把这条鱼拉上来',1.6);return}SFX.tap();fsDrinks()};
 const fsPt=e=>{const r=cv.getBoundingClientRect();return(e.clientX-r.left)/Math.max(1,r.width)};
@@ -211,7 +278,7 @@ function fishFrame(dt){if(!FS)return;fishUpdate(dt);if(!FS)return;const f=FS,t=f
   if(b){const fy=fsY(b.z),fx=b.x*CW;if(f.ph==='fly'){const u=b.fly;bx=lerp(tip.x,fx,u);by=lerp(tip.y,fy,u)-Math.sin(u*Math.PI)*(10+(1-b.z)*14)}
     else if(f.ph==='back'){const u=f.backT;bx=lerp(fx,tip.x,u);by=lerp(fy,tip.y,u)-Math.sin(u*Math.PI)*6}else{bx=fx;by=fy}
     const bt=f.bite,dip=bt&&bt.k==='dip'?1:0,sink=bt&&bt.k==='sink'||f.ph==='fight';
-    const sag=f.ph==='fight'?Math.round((1-F.T)*5):f.ph==='wait'?4:2,lc=f.ph==='fight'?(F.T>(f.cup&&f.cup.id==='coco'?.88:.8)?(Math.sin(t*20)>0?'#ff6a5a':'#ffd2c8'):'#ffffff'):'rgba(255,255,255,.75)';
+    const sag=f.ph==='fight'?Math.round((1-F.T)*5):f.ph==='wait'?4:2,lc=f.ph==='fight'?(F.T>F.c+F.zw/2?(Math.sin(t*20)>0?'#ff6a5a':'#ffd2c8'):'#ffffff'):'rgba(255,255,255,.75)';
     for(let i=0;i<=24;i++){const u=i/24,x=lerp(tip.x,bx,u),y=lerp(tip.y,by,u)+Math.sin(u*Math.PI)*sag;R(x,y,1,1,lc)}
     if(f.ph!=='fight'){if(sink){R(bx-1,by,3,1,'rgba(255,255,255,.5)');if(f.cup&&f.cup.id==='coffee'){El(bx,by,5+Math.round(Math.sin(t*12)),2,'rgba(255,240,150,.6)')}}else{R(bx,by-3+dip,1,2,'#ffffff');R(bx,by-1+dip,1,2,'#e0503f');R(bx-1,by+dip,3,1,'rgba(255,255,255,.5)')}}}
   if(F&&F.jump>0){const u=1-F.jump/.95,x=b.x*CW+u*8-4,y=fsY(b.z)-Math.sin(u*Math.PI)*14;drawFsp(px,F.sh.s.id,x,y,Math.round(6+F.sh.fr*7),u<.5?1:-1,t,F.sh.st)}
@@ -220,6 +287,10 @@ function fishFrame(dt){if(!FS)return;fishUpdate(dt);if(!FS)return;const f=FS,t=f
   R(0,gy,CW,CH2-gy,'#8a5a33');for(let i=0;i<5;i++)R(0,gy+3+i*Math.ceil((CH2-gy)/5),CW,1,'#714626');R(0,gy-2,CW,3,'#a8703f');R(0,gy-2,CW,1,'#c98f55');
   for(let x=3;x<CW;x+=11)R(x,gy-9,2,8,'#7d5229');R(0,gy-10,CW,2,'#9a6638');
   {const lx=Math.round(CW*.86);R(lx,gy-24,1,15,'#6b4226');R(lx-3,gy-24,4,1,'#6b4226');const sw=Math.round(Math.sin(t*1.1)*1);if(night>.2){El(lx-3+sw,gy-18,7,6,`rgba(255,200,110,${.18*night})`);El(lx-3+sw,gy-18,4,3,`rgba(255,210,130,${.25*night})`)}R(lx-5+sw,gy-21,4,5,night>.2?'#ffcf6a':'#e0503f');R(lx-5+sw,gy-21,4,1,'#6b4226');R(lx-5+sw,gy-17,4,1,'#6b4226')}
+  if(SAVE.fsh.auto.own&&SAVE.fsh.auto.on){const rx=Math.round(CW*.7),sh=f.ab?Math.round(Math.sin(t*30)*1.5):0,tx=rx-8+sh,ty=gy-28+(f.ab?2:0),wx=Math.round(CW*.62),wy=fsY(.7);
+    R(rx-1,gy-12,3,4,'#5a3a1a');for(let i=0;i<=14;i++){const u=i/14;R(lerp(rx,tx,u),lerp(gy-10,ty,u),1,1,i<3?'#5a3a1a':'#c9a26a')}
+    for(let i=0;i<=16;i++){const u=i/16;R(lerp(tx,wx,u),lerp(ty,wy,u)+Math.sin(u*Math.PI)*3,1,1,'rgba(255,255,255,.8)')}
+    R(tx-1,ty+1,3,2,'#e8b84a');R(tx,ty+3,1,1,'#a87a2a');R(wx,wy-1,1,2,f.ab?'#ffffff':'#e0503f');if(f.ab)El(wx,wy,3+Math.round(Math.sin(t*12)),1,'rgba(255,255,255,.5)')}
   const sip=f.cup&&(t%14)<1.4;
   R(kx-4,gy-9,9,8,'#ff9f1c');R(kx-4,gy-9,9,1,'#ffb84d');El(kx,gy-13,3,3,'#5a3a22');R(kx-1,gy-10,3,1,'#e8b48a');R(kx+4,gy-8,4,2,'#ff9f1c');R(kx+7,gy-8,2,2,'#ffd9b3');
   if(sip){R(kx-6,gy-10,2,4,'#ff9f1c');R(kx-6,gy-12,2,2,'#ffd9b3')}else{R(kx-6,gy-7,2,4,'#ff9f1c')}
@@ -230,9 +301,10 @@ function fishFrame(dt){if(!FS)return;fishUpdate(dt);if(!FS)return;const f=FS,t=f
     else{El(cx+2,cy+3,3,3,'#8a5a2b');R(cx,cy+1,4,1,'#c99a5a');R(cx+3,cy-3,1,4,'#ff7aa8')}}
   if(f.ph==='charge'){const bw=Math.round(CW*.5),bx0=Math.round((CW-bw)/2),by0=gy+Math.round((CH2-gy)*.45);R(bx0-1,by0-1,bw+2,5,'rgba(10,20,40,.55)');R(bx0,by0,Math.round(bw*f.pow),3,'#ffd23f')}
   /* 遛鱼时的松紧条和距离 */
-  if(F){const coco=f.cup&&f.cup.id==='coco',lo=coco?.12:.18,hi=coco?.88:.8,bw=Math.round(CW*.62),bx0=Math.round((CW-bw)/2),by0=gy+Math.round((CH2-gy)*.42);
-    R(bx0-1,by0-5,bw+2,9,'rgba(10,20,40,.55)');R(bx0,by0,Math.round(bw*lo),3,'#6a7f9a');R(bx0+Math.round(bw*lo),by0,Math.round(bw*(hi-lo)),3,'#5fd08a');R(bx0+Math.round(bw*hi),by0,bw-Math.round(bw*hi),3,F.danger>0&&Math.sin(t*20)>0?'#ff8a7a':'#e0503f');
-    const nx=bx0+Math.round(bw*clamp(F.T,0,1));R(nx,by0-1,1,5,'#ffffff');R(bx0,by0-3,Math.round(bw*clamp(1-F.d/100,0,1)),1,'#ffd23f');R(bx0+bw-1,by0-4,1,3,'#ffd23f')}
+  if(F){const lo=F.c-F.zw/2,hi=F.c+F.zw/2,bw=Math.round(CW*.72),bx0=Math.round((CW-bw)/2),by0=gy+Math.round((CH2-gy)*.42),inz=F.T>=lo&&F.T<=hi;
+    R(bx0-1,by0-5,bw+2,10,'rgba(10,20,40,.6)');R(bx0,by0,bw,4,'#4a5d78');R(bx0+Math.round(bw*lo),by0,Math.max(2,Math.round(bw*F.zw)),4,inz?'#7ef0a8':'#3fae6c');
+    R(bx0+bw-3,by0,3,4,F.danger>0&&Math.sin(t*20)>0?'#ff8a7a':'#e0503f');if(F.danger>0){R(bx0+Math.round(bw*hi)+1,by0,bw-Math.round(bw*hi)-1,4,`rgba(224,80,63,${Math.min(.8,.25+F.danger*.4)})`)}
+    const nx=bx0+Math.round(bw*clamp(F.T,0,1));R(nx-1,by0-2,3,8,'rgba(10,20,40,.6)');R(nx,by0-1,1,6,'#ffffff');R(bx0,by0-3,Math.round(bw*clamp(1-F.d/100,0,1)),1,'#ffd23f');R(bx0+bw-1,by0-4,1,3,'#ffd23f')}
   if(f.ph==='land'&&f.land){const u=f.landT,sx=b?b.x*CW:CW/2,sy=b?fsY(b.z):gy-20,x=lerp(sx,kx+4,u),y=lerp(sy,gy-14,u)-Math.sin(u*Math.PI)*22;drawFsp(px,f.land.s.id,x,y,Math.round(8+f.land.fr*8),-1,t,f.land.st)}
   /* 颗粒和暗角 */
   for(let i=0,n=Math.round(CW*CH2*.012);i<n;i++)R(Math.random()*CW,Math.random()*CH2,1,1,Math.random()<.5?'rgba(255,255,255,.06)':'rgba(0,0,0,.07)');
@@ -240,4 +312,4 @@ function fishFrame(dt){if(!FS)return;fishUpdate(dt);if(!FS)return;const f=FS,t=f
   if(night>0){px.fillStyle=`rgba(20,16,60,${.12*night})`;px.fillRect(0,0,CW,CH2)}
   ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.imageSmoothingEnabled=false;ctx.drawImage(pcv,0,0,CW,CH2,0,0,CW*ps*cv.width/W,CH2*ps*cv.width/W);ctx.restore();
   if(FS.cur)fsCardDraw()}
-window.__F={get FS(){return FS},startFish,quitFish,fsDown,fsUp,fsMove,update:fishUpdate,FSP};
+window.__F={get FS(){return FS},startFish,quitFish,fsDown,fsUp,fsMove,update:fishUpdate,FSP,fsGear,fsAway};
