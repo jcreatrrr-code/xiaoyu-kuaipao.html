@@ -35,8 +35,7 @@ async (args)=>{const [mode,li,secs]=args;const T=window.__T,K=window.__K;K.SAVE.
      if(e.k===3&&sx>-e.r-40&&sx<e.r+120)ty=Math.min(ty,e.y-e.r-45);
      if((e.k===1||e.k===2)&&sx>-e.r-30&&sx<g.speed*1.6){const ta=Math.max(0,sx-e.r-20)/g.speed,y0=e.k===1?d.yMin-40-Math.max(0,A.LAVA.W()-e.w)*H/A.LAVA.fall:e.y,ya=y0+ta*H/A.LAVA.fall,yb=y0+(sx+e.r+40)/g.speed*H/A.LAVA.fall;
        if(yb>g.fish.y-60&&ya<g.fish.y+60)ty=ya>mid?Math.max(d.yMin+50,Math.min(ty,ya-90)):Math.min(d.yMax-50,yb+90)}}
-   if(B&&B.k==='light'&&!B.done&&B.t>=0){const n=B.L.length;let tgt=B.cur&&!B.cur.done?B.cur:null;if(!tgt){let bd=1e9;for(const l of B.L){if(l.done)continue;const p=A.LT.pos(l.i,n),q=Math.hypot(p[0]-B.px,p[1]-B.py);if(q<bd){bd=q;tgt=l}}B.cur=tgt}
-     if(tgt){const p=A.LT.pos(tgt.i,n);B.tx=p[0];B.ty=p[1]+40;if(Math.hypot(B.px-p[0],B.py-p[1])<60&&A.ltDim(B,tgt)&&!tgt.done){A.lightTry(B,tgt);taps++}}}}
+   if(B&&B.k==='light'&&!B.done&&B.t>=0&&fr%6===0){for(const l of B.L)if(!l.done&&A.ltDim(B,l)&&B.dz<=0){A.lightTry(B,l);taps++;break}}}
   ty=Math.max(ty===d.yMin?d.yMin:d.yMin+40,Math.min(d.yMax-40,ty));
   if(g.lcap){if(fr%12==0)T.capgo(g.lcap.di)}else if(g.trap){if(fr%6==0)T.press();}else{ if(g.fish.y>ty)T.press();else T.release(); }
   T.update(1/60);fr++; if(fr>60*secs)break;}
