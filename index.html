@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>小鱼快跑</title>
-<meta name="version" content="2.9.0">
+<meta name="version" content="2.9.1">
 <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Yusei+Magic&family=Comfortaa:wght@600;700&family=Baloo+Bhaijaan+2:wght@500;700&family=Jua&family=Itim&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -380,7 +380,7 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
       <button class="btn" id="bHelp">玩法说明</button>
       <button class="btn" id="bSet">设置</button>
     </div>
-    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v2.9.0</p>
+    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v2.9.1</p>
     <button class="btn sm float" data-go="sMenu">返回主菜单</button>
   </section>
 
@@ -1686,7 +1686,7 @@ function refreshMenu(){$('menuWal').textContent=SAVE.wallet;$('bMute').textConte
 function showLevels(mode){
   if(cleared(4)&&!SAVE.story.guest){playStory(STORY.guest,()=>{SAVE.story.guest=1;persist();showLevels(mode)});return}
   {const tot=starTotal(),nx=STARGIFT[SAVE.sg||0],t='⭐ 已集 '+tot+' 颗星'+(nx?(tot>=nx[0]?' · 下次通关领取礼物':' · 再集 '+(nx[0]-tot)+' 颗有礼物'):'');$('starInfo').textContent=t;$('starInfo').dataset.raw=t}
-  lastMode=mode;document.querySelectorAll('#modeTabs .tab').forEach(t=>t.classList.toggle('on',t.dataset.mode===mode));const em=mode==='endless';$('lvGrid').hidden=em;$('lvInfo').hidden=em;$('endPanel').hidden=!em;$('sLevels').classList.toggle('map',!em);if(em){WM=null;$('volTabs').hidden=true;show('sLevels');return}
+  lastMode=mode;document.querySelectorAll('#modeTabs .tab').forEach(t=>t.classList.toggle('on',t.dataset.mode===mode));const em=mode==='endless';$('lvGrid').hidden=em;$('lvInfo').hidden=em;$('endPanel').hidden=!em;$('sLevels').classList.toggle('map',!em);if(em){WM=null;cancelAnimationFrame(wmFr);$('volTabs').hidden=true;show('sLevels');return}
   const hi=mode==='hard'?1:0,sv=SAVE[mode];$('lvTitle').textContent=(hi?'困难模式':'普通模式')+' · 选择关卡';
   const vtab=v2Open(),vol=vtab&&!(hi&&!hard2Open())?(SAVE.vol||2):1,base=vol===2?VOL1:0;$('volTabs').hidden=!vtab;document.querySelectorAll('#volTabs .tab').forEach(t=>t.classList.toggle('on',+t.dataset.vol===vol));
   $('lvGrid').dataset.mode=mode;show('sLevels');renderMap(mode,vol,hi,sv,base)}
@@ -3849,7 +3849,7 @@ let WM=null,wmRaf=0;
 /* 地图上的小鱼用游戏里同一套画法画，换了皮肤（包括海天使）地图上也跟着换 */
 const WMF={w:110,h:96};let wmFr=0;
 function wmFishSvg(){const d=Math.min(3,devicePixelRatio||1);return`<div class="wmOff"><div class="wmFi"><canvas class="wmFc" width="${WMF.w*d}" height="${WMF.h*d}" aria-hidden="true"></canvas></div></div>`}
-function wmFishTick(){cancelAnimationFrame(wmFr);const fc=$('lvGrid').querySelector('.wmFc');if(!fc||!$('sLevels').classList.contains('on'))return;
+function wmFishTick(){cancelAnimationFrame(wmFr);const fc=$('lvGrid').querySelector('.wmFc'),L=$('sLevels');if(!fc||!WM||!L.classList.contains('on')||!L.classList.contains('map'))return;
   const d=fc.width/WMF.w,t=performance.now()/1000,pw=fc.width,ph=fc.height;
   ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,pw,ph);ctx.setTransform(d,0,0,d,0,0);
   try{drawFish(WMF.w/2,WMF.h/2,0,t,{s:.62,...skin()})}catch(e){}

@@ -6,7 +6,7 @@ let WM=null,wmRaf=0;
 /* 地图上的小鱼用游戏里同一套画法画，换了皮肤（包括海天使）地图上也跟着换 */
 const WMF={w:110,h:96};let wmFr=0;
 function wmFishSvg(){const d=Math.min(3,devicePixelRatio||1);return`<div class="wmOff"><div class="wmFi"><canvas class="wmFc" width="${WMF.w*d}" height="${WMF.h*d}" aria-hidden="true"></canvas></div></div>`}
-function wmFishTick(){cancelAnimationFrame(wmFr);const fc=$('lvGrid').querySelector('.wmFc');if(!fc||!$('sLevels').classList.contains('on'))return;
+function wmFishTick(){cancelAnimationFrame(wmFr);const fc=$('lvGrid').querySelector('.wmFc'),L=$('sLevels');if(!fc||!WM||!L.classList.contains('on')||!L.classList.contains('map'))return;
   const d=fc.width/WMF.w,t=performance.now()/1000,pw=fc.width,ph=fc.height;
   ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,pw,ph);ctx.setTransform(d,0,0,d,0,0);
   try{drawFish(WMF.w/2,WMF.h/2,0,t,{s:.62,...skin()})}catch(e){}
