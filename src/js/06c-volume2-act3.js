@@ -11,7 +11,7 @@ LV.push(
  {name:'同席',vol:2,fish:['sard','bream'],len:200,theme:23,boss:'light',gtxt:'把灯塔的光还给大海',pool:{pearls:2,lava:2,pumice:2,lamp:1,rockB:1,shield:1},goal:{k:'boss'},extra:[20,30]});
 Object.assign(FISH,{grouper:{n:'石斑鱼',c:['#f6e2c8','#a8643a','#5a3018'],s:1,x:1},tako:{n:'小章鱼',c:['#ffe0d8','#e0705a','#9a3a2a'],s:1,x:1},parrot:{n:'鹦嘴鱼',c:['#e0fff4','#3fc8a8','#2a7aa0'],s:1,x:1}});
 Object.assign(NODE,{grouper:{tool:'',hp:2,f:.86,no:''},tako:{tool:'opot',hp:1,f:.3,no:'小章鱼躲在浮石底下，要用章鱼罐',pot:1},parrot:{tool:'',hp:1,f:.5,no:''}});
-Object.assign(BOSSMSG,{light:'灯塔的光在一明一暗地跳！点灯塔游过去，在它暗下去的那一下再点一次，把光还给大海'});
+Object.assign(BOSSMSG,{light:'看金圈！金圈收拢到哪盏灯塔，那盏灯就会暗一下。趁它暗着点它，小鱼冲过去把光还给大海'});
 Object.assign(TIPS,{lava:'海面上出现黑影，就是熔岩块要掉下来了！别待在黑影正下方',pumice:'浮石会慢慢往下压，从它底下钻过去，别被挤到',sline:'太黑了！顺着星星连成的线游，线上没有礁石，还会加速'});
 /* 熔岩块：先在海面投下影子，再砸进海里，落到海底变成一块烫石头 */
 const LAVA={W:()=>G&&G.mode==='hard'?.75:.95,fall:1};
@@ -91,30 +91,33 @@ function a3BG(th,sc,t){
 const LT={geo(){const x0=16,x1=VW-16,y0=yMin+8,y1=yMax-8,vert=(y1-y0)>(x1-x0)*1.2;return{x0,x1,y0,y1,vert}},
  pos(i,n){const o=LT.geo(),cols=Math.ceil(n/2),top=i%2===0,c=Math.floor(i/2),w=o.x1-o.x0,h=o.y1-o.y0;
   return o.vert?[o.x0+w*(i%2?.74:.26),o.y0+h*(.2+.62*(i/(n-1)))]:[o.x0+w*(.1+.8*(c+(top?.25:.75))/cols),o.y0+h*(top?.2:.8)]}};
+/* 还光：每次只有一盏灯是「目标」，金圈收拢到它身上，它就暗下去一会儿；在暗着的时候点它，小鱼冲过去把光还回大海 */
 function lightMk(g,hd,fin){const B={k:'light',mini:1,fin,tries:0,
-  reset(){const hd=G.mode==='hard',n=hd?8:6;this.n=0;this.need=n;this.T=hd?80:90;this.hp=3;this.t=this.seen?-3:-7;this.seen=1;this.slow=0;this.mark=0;this.big=0;this.help=0;this.dz=0;
+  reset(){const hd=G.mode==='hard',n=hd?8:6;this.n=0;this.need=n;this.T=hd?80:90;this.hp=hd?3:4;this.t=this.seen?-3:-7;this.seen=1;this.slow=0;this.mark=0;this.big=0;this.help=0;this.dz=0;
+    this.tg=null;this.ph='';this.pt=0;this.gt=.6;this.last=null;this.perf=0;
     const o=LT.geo();this.px=(o.x0+o.x1)/2;this.py=(o.y0+o.y1)/2;this.tx=this.px;this.ty=this.py;
-    this.L=Array.from({length:n},(_,i)=>({i,P:(hd?2:2.4)+Math.random()*.9,ph:Math.random()*4,dw:hd?.42:.6,done:0,ba:Math.random()*TAU,fk:hd?Math.random()*3:99}))}};
+    this.L=Array.from({length:n},(_,i)=>({i,done:0,ba:Math.random()*TAU,fk:hd?Math.random()*3:99}))}};
   B.reset();return B}
-const ltC=(B,l)=>{const s=B.slow>0?.7:1;return((B.t*s+l.ph)%l.P+l.P)%l.P},ltDim=(B,l)=>l.done||B.big>0&&B.bigL===l||ltC(B,l)>l.P-l.dw,ltSoon=(B,l)=>{const c=ltC(B,l);return c>l.P-l.dw-.55&&c<=l.P-l.dw};
-function lightPt(cx,cy,down){const B=G.boss;if(B.t<-3){if(down){B.t=-3}return}const r=cv.getBoundingClientRect(),x=(cx-r.left)/S,y=(cy-r.top)/S;
-  if(!down){B.tx=x;B.ty=y;return}if(B.t<0)return;
-  const n=B.L.length;let best=null,bd=1e9;B.L.forEach((l,i)=>{if(l.done)return;const[lx,ly]=LT.pos(i,n),d=Math.hypot(lx-x,ly-y);if(d<bd){bd=d;best=l}});
-  if(best&&bd<80*Math.max(1,U*.8)){const[lx,ly]=LT.pos(best.i,n);if(Math.hypot(B.px-lx,B.py-ly)<70){lightTry(B,best);return}B.tx=lx;B.ty=ly;B.go=best;return}
-  B.tx=x;B.ty=y;B.go=null}
-function lightTry(B,l){const g=G,n=B.L.length,[lx,ly]=LT.pos(l.i,n);
-  if(ltDim(B,l)){l.done=1;B.n++;SFX.free();burst(lx,ly,'#fff8c0',24);burst(lx,ly,'#9ff0ff',16,1);g.bonus+=20;ftext('光回到海里了！',B.px-40,B.py-40,'#fff8c0');
+const ltTg=B=>(G.mode==='hard'?1.3:1.8)*Math.pow(.96,B.n),ltDw=B=>(G.mode==='hard'?.6:.9)*(B.mark>0?1.5:1);
+const ltDim=(B,l)=>l.done||B.big>0&&B.bigL===l||B.tg===l&&B.ph==='dark',ltSoon=(B,l)=>B.tg===l&&B.ph==='ring';
+function lightPt(cx,cy,down){const B=G.boss;if(B.t<-3){if(down){B.t=-3}return}if(!down||B.t<0)return;const r=cv.getBoundingClientRect(),x=(cx-r.left)/S,y=(cy-r.top)/S;
+  const n=B.L.length;let best=null,bd=1e9;B.L.forEach((l,i)=>{if(l.done)return;const[lx,ly]=LT.pos(i,n),d=Math.min(Math.hypot(lx-x,ly-20-y),Math.hypot(lx-x,ly+10-y));if(d<bd){bd=d;best=l}});
+  if(best&&bd<70*Math.max(1,U*.8))lightTry(B,best)}
+function lightTry(B,l){const g=G,n=B.L.length,[lx,ly]=LT.pos(l.i,n);if(B.dz>0)return;
+  if(ltDim(B,l)){const pf=B.tg===l&&B.ph==='dark'&&B.pt<ltDw(B)*.45;l.done=1;B.n++;B.tx=lx;B.ty=ly+34;B.dash=1;SFX.free();burst(lx,ly-20,'#fff8c0',24);burst(lx,ly-20,'#9ff0ff',16,1);g.bonus+=pf?30:20;
+    ftext(pf?'完美！光回到海里了！':'光回到海里了！',lx-60,ly-60,pf?'#ffe27a':'#fff8c0');if(pf)B.perf++;if(B.tg===l||B.bigL===l){if(B.tg===l){B.tg=null;B.ph='';B.gt=.55}if(B.bigL===l)B.big=0}
     if(B.n>=B.need){bossWin(B,'灯塔的光都回到了海里！');g.fish.y=(yMin+yMax)/2;g.inv=2;return}
     const h=[[2,'xiaofan'],[4,'laoduo'],[G.mode==='hard'?6:5,'dabai']].find(q=>q[0]===B.n);if(h)lightHelp(B,h[1])}
-  else{B.hp--;B.dz=.8;g.flash=.4;g.shake=.3;SFX.hit();const dx=B.px-lx,dy=B.py-ly,d=Math.hypot(dx,dy)||1;B.px+=dx/d*90;B.py+=dy/d*90;B.tx=B.px;B.ty=B.py;
-    ftext('太亮了，看不见！',B.px-40,B.py-40,'#ffb3b3');if(B.hp<=0)die('light')}}
-function lightHelp(B,who){B.help={who,t:3.2};if(who==='xiaofan')B.mark=10;if(who==='laoduo')B.slow=10;if(who==='dabai'){const left=B.L.filter(l=>!l.done);const l=left[Math.floor(Math.random()*left.length)];if(l){B.big=3;B.bigL=l}}}
-function lightUpd(B,dt){const g=G,hd=g.mode==='hard',o=LT.geo(),n=B.L.length;B.t+=dt;g.fish.y=(yMin+yMax)/2;g.fish.vy=0;B.slow=Math.max(0,B.slow-dt);B.mark=Math.max(0,B.mark-dt);B.big=Math.max(0,B.big-dt);B.dz=Math.max(0,B.dz-dt);if(B.help){B.help.t-=dt;if(B.help.t<=0)B.help=0}
+  else{B.hp--;B.dz=.7;g.flash=.4;g.shake=.3;SFX.hit();ftext(ltSoon(B,l)?'早了！等金圈收拢，灯暗了再点':'这盏灯还亮着，看金圈在哪儿',lx-80,ly-60,'#ffb3b3');if(B.hp<=0)die('light')}}
+function lightHelp(B,who){B.help={who,t:3.2};if(who==='xiaofan')B.mark=12;if(who==='laoduo')B.slow=12;if(who==='dabai'){const left=B.L.filter(l=>!l.done&&l!==B.tg);const l=left[Math.floor(Math.random()*left.length)];if(l){B.big=3.5;B.bigL=l}}}
+function lightUpd(B,dt){const g=G,hd=g.mode==='hard',o=LT.geo(),n=B.L.length;B.t+=dt;g.fish.y=(yMin+yMax)/2;g.fish.vy=0;B.slow=Math.max(0,B.slow-dt);B.mark=Math.max(0,B.mark-dt);B.big=Math.max(0,B.big-dt);if(B.big<=0)B.bigL=null;B.dz=Math.max(0,B.dz-dt);if(B.help){B.help.t-=dt;if(B.help.t<=0)B.help=0}
   if(B.t<-3){const k=clamp((B.t+5.5)/2,0,1),e=1-(1-k)*(1-k);B.px=B.tx=lerp(o.x0-80,(o.x0+o.x1)/2,e);B.py=B.ty=(o.y0+o.y1)/2;return}
-  {const dx=B.tx-B.px,dy=B.ty-B.py,d=Math.hypot(dx,dy),s=Math.min(d,(B.dz>0?140:430)*dt);if(d>1){B.px+=dx/d*s;B.py+=dy/d*s;B.pdx=dx}B.px=clamp(B.px,o.x0+10,o.x1-10);B.py=clamp(B.py,o.y0+10,o.y1-10)}
-  if(B.t<0)return;
-  for(const l of B.L){if(l.done)continue;l.ba+=dt*(hd?.9:.6)*(B.slow>0?.6:1);const[lx,ly]=LT.pos(l.i,n),dx=B.px-lx,dy=B.py-ly,d=Math.hypot(dx,dy);
-    if(B.dz<=0&&!ltDim(B,l)&&d>70&&d<(o.vert?o.x1-o.x0:o.y1-o.y0)*.75){const a=Math.atan2(dy,dx),df=Math.atan2(Math.sin(a-l.ba),Math.cos(a-l.ba));if(Math.abs(df)<.12){B.hp--;B.dz=1;g.flash=.35;SFX.hit();ftext('被灯光扫到了！',B.px-40,B.py-40,'#ffb3b3');if(B.hp<=0){die('light');return}}}}
+  {const dx=B.tx-B.px,dy=B.ty-B.py,d=Math.hypot(dx,dy),s=Math.min(d,(B.dash?1100:430)*dt);if(d>1){B.px+=dx/d*s;B.py+=dy/d*s;B.pdx=dx}else B.dash=0;B.px=clamp(B.px,o.x0+10,o.x1-10);B.py=clamp(B.py,o.y0+10,o.y1-10)}
+  if(B.t<0)return;const sp=dt*(B.slow>0?.7:1);
+  for(const l of B.L)if(!l.done)l.ba+=sp*(hd?.9:.6);
+  if(!B.tg){B.gt-=sp;if(B.gt<=0){const left=B.L.filter(l=>!l.done&&l!==B.bigL);const c=left.length>1?left.filter(l=>l!==B.last):left;if(c.length){B.tg=c[Math.floor(Math.random()*c.length)];B.last=B.tg;B.ph='ring';B.pt=0}}}
+  else if(B.ph==='ring'){B.pt+=sp;if(B.pt>=ltTg(B)){B.ph='dark';B.pt=0;SFX.tap()}}
+  else if(B.ph==='dark'){B.pt+=sp;if(B.pt>=ltDw(B)){const[lx,ly]=LT.pos(B.tg.i,n);ftext('灯又亮了，下一盏！',lx-60,ly-60,'#cfe6ff');B.tg=null;B.ph='';B.gt=.45}}
   if(B.t>=B.T)die('light')}
 function lightDraw(B,t){}
 function lightHud(B,t){const g=G,o=LT.geo(),n=B.L.length,hd=g.mode==='hard',L=Math.max(o.x1-o.x0,o.y1-o.y0);ctx.save();
@@ -126,16 +129,18 @@ function lightHud(B,t){const g=G,o=LT.geo(),n=B.L.length,hd=g.mode==='hard',L=Ma
     ctx.fillStyle='#3a3a52';ctx.beginPath();ctx.moveTo(lx-14,ly+30);ctx.lineTo(lx-8,ly-6);ctx.lineTo(lx+8,ly-6);ctx.lineTo(lx+14,ly+30);ctx.fill();ctx.fillStyle='#5a5a72';ctx.fillRect(lx-12,ly-14,24,8);
     ctx.fillStyle='#4a4a62';ctx.beginPath();ctx.ellipse(lx,ly+32,26,8,0,0,TAU);ctx.fill();
     if(l.done){ctx.fillStyle='#556';circ(lx,ly-20,9);ctx.save();ctx.globalCompositeOperation='lighter';ctx.fillStyle='rgba(160,240,255,.5)';circ(lx,ly-46,6+Math.sin(t*3+l.i)*2);ctx.restore()}
-    else{const soon=ltSoon(B,l),fake=hd&&((t+l.fk)%3.3)<.12,b=dim?.12:fake?.5:soon?.75+.25*Math.sin(t*40):1;ctx.save();ctx.shadowColor='#ffe27a';ctx.shadowBlur=30*b;ctx.fillStyle=dim?'#5a5a40':`rgba(255,243,176,${b})`;circ(lx,ly-20,10+b*4);ctx.restore();
+    else{const soon=ltSoon(B,l),fake=hd&&!soon&&((t+l.fk)%3.3)<.12,b=dim?.12:fake?.5:soon?.8+.2*Math.sin(t*20):1;ctx.save();ctx.shadowColor='#ffe27a';ctx.shadowBlur=30*b;ctx.fillStyle=dim?'#5a5a40':`rgba(255,243,176,${b})`;circ(lx,ly-20,10+b*4);ctx.restore();
       if(!dim){const gr=ctx.createRadialGradient(lx,ly-20,4,lx,ly-20,70*b);gr.addColorStop(0,'rgba(255,240,170,.45)');gr.addColorStop(1,'rgba(255,240,170,0)');ctx.fillStyle=gr;circ(lx,ly-20,70*b)}
-      if(B.mark>0&&soon){ctx.strokeStyle='#4fe0b5';ctx.lineWidth=3;ctx.beginPath();ctx.arc(lx,ly-20,30+Math.sin(t*10)*3,0,TAU);ctx.stroke()}}}
-  if(B.help){const h=B.help,nm={xiaofan:'小帆',laoduo:'老舵',dabai:'大白'}[h.who],tx={xiaofan:'我看得见！绿圈圈住的灯，马上就要暗了！',laoduo:'慢慢来。灯跳得再快，也有喘气的时候。',dabai:'（大白一头撞上灯塔，那盏灯暗了好一会儿）'}[h.who];
+      if(soon){const k=clamp(B.pt/ltTg(B),0,1),rr=22+86*(1-k);ctx.strokeStyle=B.mark>0?'#4fe0b5':'#ffd23f';ctx.lineWidth=4;ctx.globalAlpha=.4+.6*k;ctx.beginPath();ctx.arc(lx,ly-20,rr,0,TAU);ctx.stroke();ctx.globalAlpha=.35;ctx.lineWidth=2;ctx.beginPath();ctx.arc(lx,ly-20,22,0,TAU);ctx.stroke();ctx.globalAlpha=1}
+      if(dim){const k=B.tg===l?B.pt/ltDw(B):0,pu=1+.12*Math.sin(t*18);ctx.strokeStyle='#9ff0ff';ctx.lineWidth=4;ctx.beginPath();ctx.arc(lx,ly-20,26*pu,-Math.PI/2,-Math.PI/2+TAU*(1-k));ctx.stroke();
+        ctx.fillStyle='#9ff0ff';ctx.font=`bold ${18*U}px ${FONT}`;ctx.textAlign='center';ctx.fillText(tl('点！'),lx,ly-56)}}}
+  if(B.help){const h=B.help,nm={xiaofan:'小帆',laoduo:'老舵',dabai:'大白'}[h.who],tx={xiaofan:'我帮你盯着！接下来灯暗的时间长一点！',laoduo:'慢慢来。灯跳得再快，也有喘气的时候。',dabai:'（大白一头撞上灯塔，那盏灯暗了好一会儿）'}[h.who];
     ctx.fillStyle='rgba(6,40,70,.7)';const y=o.y1-56*U;ctx.fillRect(0,y,VW,50*U);ctx.fillStyle='#ffe27a';ctx.font=`${14*U}px ${FONT}`;ctx.textAlign='center';ctx.fillText(tl(nm),VW/2,y+18*U);ctx.fillStyle='#fff';ctx.fillText(tl(tx),VW/2,y+38*U)}
   ctx.save();ctx.translate(B.px,B.py);if((B.pdx||1)<0)ctx.scale(-1,1);drawFish(0,0,0,t,{s:.7,scared:B.dz>0,...skin()});ctx.restore();
   ctx.fillStyle='#fff';ctx.textAlign='center';const tl0=Math.ceil(B.T-Math.max(0,B.t)),y0=o.y0+22*U;ctx.font=`${17*U}px ${FONT}`;ctx.lineWidth=4*U;ctx.strokeStyle='rgba(6,40,70,.7)';
   if(B.t>=-3){const s1=tl('还回去的光 '+B.n+' / '+B.need)+'  '+'♥'.repeat(Math.max(0,B.hp)),s2=tl('还剩 '+Math.max(0,tl0)+' 秒');ctx.strokeText(s1,VW/2,y0);ctx.fillText(s1,VW/2,y0);ctx.fillStyle=tl0<=10?'#ff9f8f':'#fff';ctx.strokeText(s2,VW/2,y0+24*U);ctx.fillText(s2,VW/2,y0+24*U)}
   if(B.t<0){const cy=(o.y0+o.y1)/2,fs=(VW<500?14:17)*U;ctx.fillStyle='rgba(6,40,70,.66)';ctx.fillRect(0,cy-70*U,VW,140*U);ctx.fillStyle='#fff';ctx.font=`${fs}px ${FONT}`;
-    const L2=B.t<-3?[tl('海面上的灯塔一明一暗地跳着。'),tl('每一盏的光，都是从潮心里抽出来的。'),tl('点屏幕跳过')]:[tl('点一盏灯塔，小鱼就游过去'),tl('等它暗下去的那一下，再点一次'),tl(Math.ceil(-B.t)+' 秒后开始')];
+    const L2=B.t<-3?[tl('海面上的灯塔一明一暗地跳着。'),tl('每一盏的光，都是从潮心里抽出来的。'),tl('点屏幕跳过')]:[tl('金圈收拢到哪盏灯，哪盏灯就会暗一下'),tl('灯暗着的时候点它，小鱼就冲过去还光'),tl(Math.ceil(-B.t)+' 秒后开始')];
     L2.forEach((x,i)=>ctx.fillText(x,VW/2,cy-28*U+i*30*U))}
   ctx.restore()}
 cv.addEventListener('pointermove',e=>{const B=G&&G.boss;if(state==='play'&&B&&B.k==='light'&&!B.done&&B.t>=0&&e.buttons)lightPt(e.clientX,e.clientY,false)});
