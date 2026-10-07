@@ -83,7 +83,7 @@ function fsSpawn(init,near){const s=fsRoll(),bt=fsBait(),fr=Math.pow(Math.random
   const sh={s,fr,len:Math.round(s.len[0]+fr*(s.len[1]-s.len[0])),st:r<s3?3:r<.3?2:1,z,x:init?Math.random():near?near.x:(Math.random()<.5?-.08:1.08),tz:z,tx:Math.random(),st2:'roam',cool:0,ph:Math.random()*9};
   if(near){sh.x=clamp(near.x+(Math.random()<.5?-1:1)*.18,0,1)}FS.sh.push(sh);return sh}
 function startFish(){G=null;state='menu';hud.hidden=true;$('toast').className='';fsInit();fshDay();
-  FS={t:0,tod:.3,ph:'idle',sh:[],bob:null,hold:false,pow:0,pdir:1,aim:.5,F:null,bite:null,pity:0,air:0,wt:0,chk:0,hint:'',rip:[],spl:[],cup:SAVE.fsh.dr&&SAVE.fsh.dr.left>0?SAVE.fsh.dr:null,clk:0,ps:4,at:20+Math.random()*25,ab:null,wxT:5,rain:0,rainA:0,legT:4,cnt:0,iwaPet:0,iwaFly:-1};
+  FS={t:0,tod:.3,ph:'idle',sh:[],bob:null,hold:false,pow:0,pdir:1,aim:.5,F:null,bite:null,pity:0,air:0,wt:0,chk:0,hint:'',rip:[],spl:[],cup:SAVE.fsh.dr&&SAVE.fsh.dr.left>0?SAVE.fsh.dr:null,clk:0,ps:4,at:20+Math.random()*25,ab:null,wxT:5,rain:0,rainA:0,legT:4,cnt:0,iwaPet:0};
   for(let i=0;i<4;i++)fsSpawn(true);$('fhCard').hidden=true;$('fhPanel').hidden=true;show('');$('fishHud').hidden=false;fhTop();
   if(!SAVE.fsh.n)setTimeout(()=>{if(FS)toast('慢慢来。这里没有倒计时',2.6)},600);fsAway()}
 function quitFish(){if(!FS)return;const cnt=FS.cnt||0;setTimeout(()=>{if(cnt>=8)toast(`今天爆护了！一共上了 ${cnt} 条`,3)},400);SAVE.fsh.dr=FS.cup&&FS.cup.left>0?FS.cup:null;SAVE.fsh.auto.ts=Date.now();persist();FS=null;$('fishHud').hidden=true;toMenu()}
@@ -114,7 +114,7 @@ function fsHook(){const b=FS.bite;let sh=b.sh;if(!sh.s.leg&&!FS.noJunk&&Math.ran
   snd(520,.16,'triangle',.12,1040);CSND.splash();if(navigator.vibrate)try{navigator.vibrate(40)}catch(e){}}
 function fsLand(){const F=FS.F;FS.ph='land';FS.landT=0;FS.land=F.sh;FS.sh=FS.sh.filter(s=>s!==F.sh);FS.F=null;FS.air=0;FS.pity=0;FS.cnt++;CSND.splash();SFX.win()}
 function fsEscape(msg){const F=FS.F,sh=F.sh;sh.st2='roam';sh.cool=5;sh.back=1;sh.z=clamp(F.z,.02,.97);sh.x=clamp(F.x,0,1);sh.tx=Math.random();toast(msg,2.6);snd(300,.3,'sine',.06,150);fsBack(true)}
-function fishUpdate(dt){const f=FS;f.t+=dt;f.tod=(f.tod+dt/480)%1;fsWeather(dt);fsLegend(dt);if(f.chumAt&&(f.chumAt.t-=dt)<=0)f.chumAt=null;if(f.iwaPet>0)f.iwaPet-=dt;if(f.iwaFly>=0){f.iwaFly+=dt/1.4;if(f.iwaFly>=1)f.iwaFly=-1}fsChumBtn();
+function fishUpdate(dt){const f=FS;f.t+=dt;f.tod=(f.tod+dt/480)%1;fsWeather(dt);fsLegend(dt);if(f.chumAt&&(f.chumAt.t-=dt)<=0)f.chumAt=null;if(f.iwaPet>0)f.iwaPet-=dt;fsIwaUpd(dt);fsChumBtn();
   if(f.cup){f.cup.left-=dt;if(f.cup.left<=0){f.cup=null;SAVE.fsh.dr=null;persist();toast('杯子空了',1.6)}if((f.chk-=dt)<=0){f.chk=1;fhTop()}}
   const tea=f.cup&&f.cup.id==='tea',cof=f.cup&&f.cup.id==='coffee',coco=f.cup&&f.cup.id==='coco';
   {const au=SAVE.fsh.auto;if(au.own&&au.on){au.ts=Date.now();if(f.ab){f.ab.t+=dt;if((f.ab.r-=dt)<=0){f.ab.r=.28;snd(1480,.08,'triangle',.06)}
@@ -188,7 +188,7 @@ $('fhCard').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled||!F
   if(b.dataset.fk==='keep'){fshDay();SAVE.fsh.kept++;SAVE.fsh.keptAll=(SAVE.fsh.keptAll||0)+1;SAVE.fish[s.id]=(SAVE.fish[s.id]||0)+1;toast(`${s.n}放进鱼篓了，营业时能用`,2);SFX.save()}
   else{const f=SAVE.fsh;f.tide+=sh.tv;f.tideAll+=sh.tv;f.rel++;
     if(s.leg){f.leg=f.leg||{};const first=!f.leg[s.id];f.leg[s.id]=(f.leg[s.id]||0)+1;FS.legDone=s.id;toast(`🌊 +${sh.tv} 潮印`,2);const k=s.id==='gt'?'legGT':'legMoon';if(first)after=()=>{$('fishHud').hidden=true;playStory(STORY[k],()=>{SAVE.story[k]=1;persist();if(FS){$('fishHud').hidden=false;fhTop()}})}}
-    else if(SAVE.story.fish2&&sh.fr<.22&&Math.random()<.3){toast(`🌊 +${sh.tv} 潮印 · 伊瓦一个俯冲，把它叼走了！嗒嗒嗒`,2.6);FS.iwaFly=0}
+    else if(SAVE.story.fish2&&sh.fr<.22&&Math.random()<.3){toast(`🌊 +${sh.tv} 潮印 · 伊瓦一个俯冲，把它叼走了！嗒嗒嗒`,2.6);fsIwaSnatch()}
     else toast(`🌊 +${sh.tv} 潮印 · ${SAYR[Math.floor(Math.random()*SAYR.length)]}`,2.6);snd(500,.3,'sine',.06,900);FS.rip.push({x:FS.bob?FS.bob.x:.5,z:.9,t:0,r:1.4})}
   persist();$('fhCard').hidden=true;FS.cur=null;FS.ph='idle';FS.bob=null;fhTop();if(after)after()};
 function fsJunkCard(sh){const j=sh.s;FS.cur=sh;SAVE.fsh.junk=(SAVE.fsh.junk||0)+1;persist();
@@ -318,8 +318,7 @@ function fishFrame(dt){if(!FS)return;fishUpdate(dt);if(!FS)return;const f=FS,t=f
     if(id==='tea'){R(cx,cy,4,6,'rgba(220,240,255,.55)');R(cx,cy+6-Math.round(5*lv),4,Math.round(5*lv),'#f2d25a');R(cx+1,cy+2,1,1,'#ffffff');R(cx+3,cy-2,1,3,'#5fc87a')}
     else if(id==='coffee'){R(cx,cy+1,4,5,'#f4ecdc');R(cx+4,cy+2,1,2,'#f4ecdc');R(cx,cy+1,4,1,lv>.1?'#6a4020':'#d8ccb4');if(Math.sin(t*2)>-.5){R(cx+1,cy-2-Math.round((t*3)%3),1,2,'rgba(255,255,255,.45)')}}
     else{El(cx+2,cy+3,3,3,'#8a5a2b');R(cx,cy+1,4,1,'#c99a5a');R(cx+3,cy-3,1,4,'#ff7aa8')}}
-  if(SAVE.story.fish2){const ix=Math.round(CW*.2),iy=spn==='stern'?gy-10:gy-7;if(spn!=='stern'){R(ix,iy,2,gy-iy+3,'#7a5a3a');R(ix-1,iy,4,1,'#8a6a4a')}f.iwaPos={x:ix,y:iy};
-    if(f.iwaFly>=0)drawIwa(ix,iy,t,{fly:f.iwaFly});else drawIwa(ix,iy,t,{pet:f.iwaPet>0?f.iwaPet/1.2:0})}else f.iwaPos=null;
+  f.nightV=night;if(SAVE.story.fish2)fsIwaDraw(spn,gy,t);else f.iwaPos=null;
   if(f.ph==='charge'){const bw=Math.round(CW*.5),bx0=Math.round((CW-bw)/2),by0=gy+Math.round((CH2-gy)*.45);R(bx0-1,by0-1,bw+2,5,'rgba(10,20,40,.55)');R(bx0,by0,Math.round(bw*f.pow),3,'#ffd23f')}
   /* 遛鱼时的松紧条和距离 */
   if(F){const lo=F.c-F.zw/2,hi=F.c+F.zw/2,bw=Math.round(CW*.66),bx0=Math.round((CW-bw)/2),by0=gy+Math.round((CH2-gy)*.5),inz=F.T>=lo&&F.T<=hi,tight=F.T>hi,
@@ -344,4 +343,4 @@ function fishFrame(dt){if(!FS)return;fishUpdate(dt);if(!FS)return;const f=FS,t=f
   if(night>0){px.fillStyle=`rgba(20,16,60,${.12*night})`;px.fillRect(0,0,CW,CH2)}
   ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.imageSmoothingEnabled=false;ctx.drawImage(pcv,0,0,CW,CH2,0,0,CW*ps*cv.width/W,CH2*ps*cv.width/W);ctx.restore();
   if(FS.cur)fsCardDraw()}
-window.__F={get FS(){return FS},startFish,quitFish,fsDown,fsUp,fsMove,update:fishUpdate,FSP,fsGear,fsAway,fsGo,fsSpots,fsChum,fsPhoto,fsPet,fsHook};
+window.__F={get FS(){return FS},startFish,quitFish,fsDown,fsUp,fsMove,update:fishUpdate,FSP,fsGear,fsAway,fsGo,fsSpots,fsChum,fsPhoto,fsPet,fsHook,fsIw,fsIwSet};
