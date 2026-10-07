@@ -236,3 +236,5 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
 .fpass b{display:block;font-size:16px;margin-bottom:4px}.fpass span{display:block;font-size:13px}.fpass i{position:absolute;right:12px;top:10px;font-style:normal;font-size:28px;opacity:.8}
 .frank{margin:6px 0 10px}.frank div{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px}.frank div.me{background:rgba(255,207,106,.35);font-weight:bold}.frank b{flex:1;text-align:left}.frank em{font-style:normal;opacity:.85}
 #fhPanel .fdk.no{opacity:.55}
+#bookInfo{position:sticky;top:-10px;z-index:3;flex-shrink:0}
+#fhPanel>.rowb:last-child{position:sticky;bottom:-18px;margin:12px -20px -18px;padding:10px 20px calc(12px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid rgba(27,42,65,.12);z-index:2}

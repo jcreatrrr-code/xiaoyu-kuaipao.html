@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>小鱼快跑</title>
-<meta name="version" content="2.6.0">
+<meta name="version" content="2.6.1">
 <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Yusei+Magic&family=Comfortaa:wght@600;700&family=Baloo+Bhaijaan+2:wght@500;700&family=Jua&family=Itim&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -245,6 +245,8 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
 .fpass b{display:block;font-size:16px;margin-bottom:4px}.fpass span{display:block;font-size:13px}.fpass i{position:absolute;right:12px;top:10px;font-style:normal;font-size:28px;opacity:.8}
 .frank{margin:6px 0 10px}.frank div{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px}.frank div.me{background:rgba(255,207,106,.35);font-weight:bold}.frank b{flex:1;text-align:left}.frank em{font-style:normal;opacity:.85}
 #fhPanel .fdk.no{opacity:.55}
+#bookInfo{position:sticky;top:-10px;z-index:3;flex-shrink:0}
+#fhPanel>.rowb:last-child{position:sticky;bottom:-18px;margin:12px -20px -18px;padding:10px 20px calc(12px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid rgba(27,42,65,.12);z-index:2}
 </style>
 </head>
 <body>
@@ -316,7 +318,7 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
       <button class="btn" id="bHelp">玩法说明</button>
       <button class="btn" id="bSet">设置</button>
     </div>
-    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v2.6.0</p>
+    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v2.6.1</p>
     <button class="btn sm float" data-go="sMenu">返回主菜单</button>
   </section>
 
@@ -3162,7 +3164,7 @@ const DRKP=10,DRKT=240;
 const GEAR={rod:{n:'鱼竿',l:[{id:'hand',n:'贝壳钩手线',d:'小帆偷拿来的，只有一根线'},{id:'mm',n:'墨墨钓竿',d:'收线快一些，绿区宽一点',shop:1},{id:'bamboo',n:'老舵的老竹竿',d:'收线最快，绿区最宽',tide:90,ch3:1}]},
  line:{n:'鱼线',l:[{id:'coir',n:'椰子纤维线',d:'绷进红色很快就会断开'},{id:'nylon',n:'尼龙线',d:'线绷紧时能多撑一会儿',tide:20},{id:'braid',n:'编织线',d:'线绷紧时能撑很久',tide:60}]},
  hook:{n:'鱼钩',l:[{id:'shell',n:'贝壳钩',d:'爷爷磨的'},{id:'iron',n:'铁钩',d:'真咬钩时点的时间更宽；鱼跳起来时扬竿更从容，没扬到也只掉一点',tide:30}]}};
-const BAIT=[{id:'dough',ic:'🍙',n:'面团',d:'什么鱼都吃一点，用不完'},{id:'shrimp',ic:'🦐',n:'虾仁',d:'鱼来得快一倍',p:20,pk:10},
+const BAIT=[{id:'dough',ic:'🍞',n:'面包',d:'撕一小块搓在钩上，什么鱼都吃一点，用不完'},{id:'shrimp',ic:'🦐',n:'虾仁',d:'鱼来得快一倍',p:20,pk:10},
  {id:'squid',ic:'🦑',n:'鱿鱼条',d:'大鱼更爱咬，远处的鲣鱼和鲯鳅更多',p:25,pk:5},{id:'glow',ic:'✨',n:'萤光饵',d:'发光的三星鱼多来三倍',tide:10,pk:5}];
 const RACKP=120;
 SAVE=Object.assign({fsh:{dex:{},day:'',kept:0,n:0,air:0,airMax:0,free:'',dr:null}},SAVE);
