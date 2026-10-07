@@ -1,7 +1,7 @@
 /* ---------- audio ---------- */
 let AC=null;
 function snd(f,d,type,v,to){if(SAVE.mute)return;try{
-  AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();
+  AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state!=='running')AC.resume();
   const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime;o.type=type||'sine';o.frequency.setValueAtTime(f,t);
   if(to)o.frequency.exponentialRampToValueAtTime(to,t+d);g.gain.setValueAtTime(v||.1,t);g.gain.exponentialRampToValueAtTime(.001,t+d);
   o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d)}catch(e){}}

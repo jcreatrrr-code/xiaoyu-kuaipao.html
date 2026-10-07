@@ -138,7 +138,7 @@ function fsPhoto(sh){const c=document.createElement('canvas'),S=4,w=90,h=120;c.w
   g.fillStyle='#fff8ec';g.fillRect(0,92*S,w*S,28*S);const t=document.createElement('canvas');t.width=w;t.height=92;const tc=t.getContext('2d');drawFsp(tc,sh.s.id,48,52,54,1,0,sh.st);
   g.imageSmoothingEnabled=false;g.drawImage(t,0,0,w,92,0,0,w*S,92*S);g.fillStyle='#2a2a44';g.textAlign='center';g.font=`bold ${8*S}px sans-serif`;g.fillText(sh.s.n+' '+'★'.repeat(sh.st),w*S/2,102*S);
   g.font=`${5*S}px sans-serif`;const d=new Date();g.fillText(`${sh.len} 厘米 · ${fsSpot().n} · ${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`,w*S/2,110*S);g.fillStyle='#8a8a9a';g.font=`${4*S}px sans-serif`;g.fillText('小鱼快跑 · 钓鱼手帐',w*S/2,116*S);
-  c.toBlob(b=>{if(!b)return;const name=`小鱼快跑-${sh.s.n}-${sh.len}cm.png`;try{const file=new File([b],name,{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file]}).catch(()=>{});return}}catch(e){}
+  c.toBlob(b=>{if(!b)return;const name=`小鱼快跑-${sh.s.n}-${sh.len}cm.png`;if(window.XY_APP&&appShareImage(b,name))return;try{const file=new File([b],name,{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file]}).catch(()=>{});return}}catch(e){}
     const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);toast('照片存好了',1.6)},'image/png');SAVE.fsh.photos=(SAVE.fsh.photos||0)+1;persist()}
 
 /* 各钓点的远景和近景 */

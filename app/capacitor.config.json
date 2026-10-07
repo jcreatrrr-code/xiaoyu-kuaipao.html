@@ -1,0 +1,12 @@
+{
+  "appId": "com.jcreatrrr.xiaoyukuaipao",
+  "appName": "小鱼快跑",
+  "webDir": "www",
+  "backgroundColor": "#0b6fb0",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#0b6fb0",
+    "scrollEnabled": false,
+    "allowsLinkPreview": false
+  }
+}

@@ -1,3 +1,13 @@
 # 测试脚本跑出来的截图
 tests/*.png
 __pycache__/
+# App 工程：只保留 iPhone 用到的三个插件，Mac 上不装 Node 也能直接用 Xcode 打开
+app/node_modules/*
+!app/node_modules/@capacitor/
+app/node_modules/@capacitor/*
+!app/node_modules/@capacitor/filesystem/
+!app/node_modules/@capacitor/preferences/
+!app/node_modules/@capacitor/share/
+app/node_modules/@capacitor/*/android/
+app/package-lock.json.bak
+app/www/

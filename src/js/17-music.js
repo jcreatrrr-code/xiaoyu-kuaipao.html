@@ -81,10 +81,12 @@ Object.assign(TRK,{
   B:'16 - 14 . 12 - 11 . 12 - 14 . 16 - 19 . 17 - 16 . 14 . 12 . 11 - 9 . 7 - - .'}});
 for(const k in TRK){const t=TRK[k],a=t.A.split(' '),b=t.B.split(' ');t.seq=[...a,...a,...b,...a]}
 const MUS={cur:null,step:0,next:0,out:null,lp:null,noise:null,chk:0};
-function initAudio(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();
+function initAudio(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state!=='running')AC.resume();
   if(!MUS.out){MUS.out=AC.createGain();MUS.out.gain.value=.5;MUS.lp=AC.createBiquadFilter();MUS.lp.type='lowpass';MUS.lp.frequency.value=6000;MUS.out.connect(MUS.lp);MUS.lp.connect(AC.destination);
     const n=AC.sampleRate*.2,buf=AC.createBuffer(1,n,AC.sampleRate),d=buf.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;MUS.noise=buf}}catch(e){}}
 document.addEventListener('pointerdown',initAudio,true);document.addEventListener('keydown',initAudio,true);
+/* 手机切到后台再回来时声音会被系统挂起，回到前台就接着放 */
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&AC&&AC.state!=='running')try{AC.resume()}catch(e){}});
 function mNote(midi,t,dur,type,vol){const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=440*Math.pow(2,(midi-69)/12);
   g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.015);g.gain.exponentialRampToValueAtTime(.0008,t+dur);o.connect(g);g.connect(MUS.out);o.start(t);o.stop(t+dur+.03)}
 function mKick(t){const o=AC.createOscillator(),g=AC.createGain();o.frequency.setValueAtTime(120,t);o.frequency.exponentialRampToValueAtTime(45,t+.12);g.gain.setValueAtTime(.16,t);g.gain.exponentialRampToValueAtTime(.001,t+.16);o.connect(g);g.connect(MUS.out);o.start(t);o.stop(t+.18)}

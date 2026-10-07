@@ -369,6 +369,6 @@ function applyLang(){const L=SAVE.lang;document.documentElement.lang=L==='zh'?'z
   locAll();if(G)G.hudKey=''}
 new MutationObserver(ms=>{for(const m of ms){if(m.type==='characterData'){if(m.target.nodeType===3)locNode(m.target)}else for(const a of m.addedNodes){if(a.nodeType===3)locNode(a);else if(a.nodeType===1){const w=document.createTreeWalker(a,NodeFilter.SHOW_TEXT),ns=[];let n;while((n=w.nextNode()))ns.push(n);ns.forEach(locNode)}}}}).observe($('app'),{subtree:true,childList:true,characterData:true});
 $('langRow').onclick=e=>{const b=e.target.closest('[data-lang]');if(!b)return;SAVE.lang=b.dataset.lang;persist();SFX.tap();applyLang();
-  if(b.dataset.lang==='zh'){const n=Date.now();devTap=n-devT<1500?devTap+1:1;devT=n;if(devTap>=5){devTap=0;SAVE.dev=SAVE.dev?0:1;persist();refreshMenu();toast(SAVE.dev?'开发者模式已开启，主菜单右上角有扳手按钮':'开发者模式已关闭',3)}}else devTap=0};
+  if(b.dataset.lang==='zh'){const n=Date.now();devTap=n-devT<1500?devTap+1:1;devT=n;if(devTap>=5&&!window.XY_APP){devTap=0;SAVE.dev=SAVE.dev?0:1;persist();refreshMenu();toast(SAVE.dev?'开发者模式已开启，主菜单右上角有扳手按钮':'开发者模式已关闭',3)}}else devTap=0};
 $('bSet').onclick=()=>{SFX.tap();show('sSet')};
 
