@@ -22,7 +22,7 @@ const DRKP=10,DRKT=240;
 const GEAR={rod:{n:'鱼竿',l:[{id:'hand',n:'贝壳钩手线',d:'小帆偷拿来的，只有一根线'},{id:'mm',n:'墨墨钓竿',d:'收线快一些，绿区宽一点',shop:1},{id:'bamboo',n:'老舵的老竹竿',d:'收线最快，绿区最宽',tide:90,ch3:1}]},
  line:{n:'鱼线',l:[{id:'coir',n:'椰子纤维线',d:'绷进红色很快就会断开'},{id:'nylon',n:'尼龙线',d:'线绷紧时能多撑一会儿',tide:20},{id:'braid',n:'编织线',d:'线绷紧时能撑很久',tide:60}]},
  hook:{n:'鱼钩',l:[{id:'shell',n:'贝壳钩',d:'爷爷磨的'},{id:'iron',n:'铁钩',d:'真咬钩时点的时间更宽；鱼跳起来时扬竿更从容，没扬到也只掉一点',tide:30}]}};
-const BAIT=[{id:'dough',ic:'🍙',n:'面团',d:'什么鱼都吃一点，用不完'},{id:'shrimp',ic:'🦐',n:'虾仁',d:'鱼来得快一倍',p:20,pk:10},
+const BAIT=[{id:'dough',ic:'🍞',n:'面包',d:'撕一小块搓在钩上，什么鱼都吃一点，用不完'},{id:'shrimp',ic:'🦐',n:'虾仁',d:'鱼来得快一倍',p:20,pk:10},
  {id:'squid',ic:'🦑',n:'鱿鱼条',d:'大鱼更爱咬，远处的鲣鱼和鲯鳅更多',p:25,pk:5},{id:'glow',ic:'✨',n:'萤光饵',d:'发光的三星鱼多来三倍',tide:10,pk:5}];
 const RACKP=120;
 SAVE=Object.assign({fsh:{dex:{},day:'',kept:0,n:0,air:0,airMax:0,free:'',dr:null}},SAVE);
