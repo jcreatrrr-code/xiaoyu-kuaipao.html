@@ -108,8 +108,11 @@ function wmGo(){const w=WM;if(!w||w.moving)return;SFX.tap();if(w.sel===w.ids.len
 $('lvGrid').onclick=e=>{const b=e.target.closest('.wmN');if(!b||!WM||WM.moving)return;const k=+b.dataset.k;
   if(!WM.open(k)){SFX.tap();b.classList.remove('nope');void b.offsetWidth;b.classList.add('nope');toast('通关上一关后揭晓',2);return}
   if(k===WM.sel){wmGo();return}SFX.tap();wmMove(k)};
-$('lvBack').onclick=()=>{WM=null;cancelAnimationFrame(wmRaf);cancelAnimationFrame(wmFr);toMenu();try{SFX.tap()}catch(e){}};
-$('lvGo').onclick=()=>wmGo();
+const wmOn=()=>$('sLevels').classList.contains('on')&&$('sLevels').classList.contains('map');
+function wmBack(){if(!wmOn())return;WM=null;cancelAnimationFrame(wmRaf);cancelAnimationFrame(wmFr);try{toMenu()}catch(e){show('sMenu')}try{SFX.tap()}catch(e){}}
+function wmTapBtn(el,fn){let id=null;el.addEventListener('pointerdown',e=>{id=e.pointerId});el.addEventListener('pointercancel',()=>{id=null});
+  el.addEventListener('pointerup',e=>{if(id!==e.pointerId)return;id=null;const r=el.getBoundingClientRect();if(e.clientX>=r.left-8&&e.clientX<=r.right+8&&e.clientY>=r.top-8&&e.clientY<=r.bottom+8)fn()});el.onclick=fn}
+wmTapBtn($('lvBack'),wmBack);wmTapBtn($('lvGo'),()=>{if(wmOn())wmGo()});
 $('lvGrid').addEventListener('wheel',e=>{if(WM&&WM.land&&Math.abs(e.deltaY)>Math.abs(e.deltaX)){$('lvGrid').scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
 /* 手机浏览器的地址栏收起、弹出也会触发尺寸变化，只有转屏或宽度变了才重画 */
 {let rt=0;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{const w=WM,b=$('lvGrid');if(!w||!$('sLevels').classList.contains('on')||!$('sLevels').classList.contains('map')||w.moving)return;
