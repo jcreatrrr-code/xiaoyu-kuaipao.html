@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>小鱼快跑</title>
-<meta name="version" content="2.8.1">
+<meta name="version" content="2.8.2">
 <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Yusei+Magic&family=Comfortaa:wght@600;700&family=Baloo+Bhaijaan+2:wght@500;700&family=Jua&family=Itim&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -379,7 +379,7 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
       <button class="btn" id="bHelp">玩法说明</button>
       <button class="btn" id="bSet">设置</button>
     </div>
-    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v2.8.1</p>
+    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v2.8.2</p>
     <button class="btn sm float" data-go="sMenu">返回主菜单</button>
   </section>
 
@@ -3946,8 +3946,11 @@ function wmGo(){const w=WM;if(!w||w.moving)return;SFX.tap();if(w.sel===w.ids.len
 $('lvGrid').onclick=e=>{const b=e.target.closest('.wmN');if(!b||!WM||WM.moving)return;const k=+b.dataset.k;
   if(!WM.open(k)){SFX.tap();b.classList.remove('nope');void b.offsetWidth;b.classList.add('nope');toast('通关上一关后揭晓',2);return}
   if(k===WM.sel){wmGo();return}SFX.tap();wmMove(k)};
-$('lvBack').onclick=()=>{WM=null;cancelAnimationFrame(wmRaf);cancelAnimationFrame(wmFr);toMenu();try{SFX.tap()}catch(e){}};
-$('lvGo').onclick=()=>wmGo();
+const wmOn=()=>$('sLevels').classList.contains('on')&&$('sLevels').classList.contains('map');
+function wmBack(){if(!wmOn())return;WM=null;cancelAnimationFrame(wmRaf);cancelAnimationFrame(wmFr);try{toMenu()}catch(e){show('sMenu')}try{SFX.tap()}catch(e){}}
+function wmTapBtn(el,fn){let id=null;el.addEventListener('pointerdown',e=>{id=e.pointerId});el.addEventListener('pointercancel',()=>{id=null});
+  el.addEventListener('pointerup',e=>{if(id!==e.pointerId)return;id=null;const r=el.getBoundingClientRect();if(e.clientX>=r.left-8&&e.clientX<=r.right+8&&e.clientY>=r.top-8&&e.clientY<=r.bottom+8)fn()});el.onclick=fn}
+wmTapBtn($('lvBack'),wmBack);wmTapBtn($('lvGo'),()=>{if(wmOn())wmGo()});
 $('lvGrid').addEventListener('wheel',e=>{if(WM&&WM.land&&Math.abs(e.deltaY)>Math.abs(e.deltaX)){$('lvGrid').scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
 /* 手机浏览器的地址栏收起、弹出也会触发尺寸变化，只有转屏或宽度变了才重画 */
 {let rt=0;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{const w=WM,b=$('lvGrid');if(!w||!$('sLevels').classList.contains('on')||!$('sLevels').classList.contains('map')||w.moving)return;
