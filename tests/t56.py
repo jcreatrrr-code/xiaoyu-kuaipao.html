@@ -51,6 +51,20 @@ async def main():
           return {eruptions:n,er:g.E.filter(e=>e.er).length,lava:g.E.filter(e=>e.t==='lava').length}}""")
         print('lava coast 20s:',er)
         if not(er['eruptions']>=3 and er['er']>=6):ok=False;print('  !! volcano should erupt every few seconds')
+        # 还光：记顺序 Boss，五轮 3/4/6/7/9 盏，点错扣心并重放
+        for mode in ['simple','hard']:
+            await pg.goto(GAME);await pg.wait_for_timeout(300)
+            lt=await pg.evaluate("""m=>{const T=window.__T,A=T.a3;T.startGame(m,T.LV.findIndex(l=>l.boss==='light'));const g=T.G;g.started=true;const e=g.E.find(e=>e.t==='boss');g.scroll=e.x-T.dims().fishSX+4;
+              let B=null;for(let i=0;i<60*5&&!(g.boss&&g.boss.k==='light');i++){g.inv=1e9;T.update(1/60)}B=g.boss;if(!B)return {err:'no boss'};
+              const lens=[],hp0=B.hp,lamps=B.L.length;let wrong=null,replayed=0,showTap=0;B.t=0;
+              for(let i=0;i<60*240&&!B.done&&g.boss===B;i++){g.inv=1e9;T.update(1/60);
+                if(B.ph==='show'&&!showTap){const h=B.hp,ii=B.ii;A.lightTry(B,B.L[0]);showTap=(B.hp===h&&B.ii===ii)?1:-1}
+                if(B.ph==='input'&&B.dz<=0){if(B.ii===0&&lens[lens.length-1]!==B.r+':'+B.seq.length)lens.push(B.r+':'+B.seq.length);
+                  if(B.r===2&&wrong===null&&B.ii===2){const bad=B.L.find(l=>l.i!==B.seq[2]),seq=B.seq.join();A.lightTry(B,bad);wrong={hp:hp0-B.hp,ph:B.ph,ii:B.ii,same:B.seq.join()===seq};continue}
+                  A.lightTry(B,A.ltNext(B))}}
+              return {lens,lamps,hp0,wrong,showTap,done:!!B.done,win:B.done&&g.boss===B}}""",mode)
+            print('light boss',mode,lt)
+            if lt.get('err') or [x.split(':')[1] for x in lt['lens']]!=['3','4','6','7','9'] or not lt['done'] or lt['showTap']!=1 or lt['wrong']!={'hp':1,'ph':'wait','ii':0,'same':True} or lt['lamps']!=(6 if mode=='simple' else 8) or lt['hp0']!=(5 if mode=='simple' else 3):ok=False;print('  !! light memory boss wrong')
         print('errors',errs)
         await b.close()
         if errs or bad or not ok:sys.exit(1)
