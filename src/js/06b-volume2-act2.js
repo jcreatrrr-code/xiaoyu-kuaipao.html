@@ -13,13 +13,13 @@ Object.assign(FISH,{turbo:{n:'夜光螺',c:['#fff4e0','#c89a5a','#7a5a30'],s:1,x
 Object.assign(NODE,{turbo:{tool:'',hp:1,f:.88,no:''},lobster:{tool:'lpot',hp:2,f:.9,no:'龙虾躲在石缝里，需要龙虾笼'},skipjack:{tool:'rod',hp:1,f:.22,no:'鲣鱼要用钓竿一条一条钓'}});
 Object.assign(BOSSMSG,{herd:'鱼群被灯光困住了！拖着小鱼去赶，把鱼群赶进潟湖口'});
 Object.assign(TIPS,{fork:'前面分成上下两条路！跟着星星的倒影游，走错的那条尽头只剩一道窄缝',vent:'海底的热泉冒小泡泡时，马上要喷热水了，别待在它上面',lamp:'别游进灯光的虚线圈里！有的灯大得躲不开，被吸住了就按箭头方向点屏幕挣脱'});
-const FORK={L:640,th:.07,a:.5,b:.78,gh:()=>G&&G.mode==='hard'?66:84,W:()=>G&&G.mode==='hard'?96:120};
+const FORK={L:640,th:.07,a:.5,b:.78,gh:()=>G&&G.mode==='hard'?74:84,W:()=>G&&G.mode==='hard'?108:120};
 /* 岔路弯道：前半段石墙往对的那条路拱，后半段对的那条路外侧再长出一块石头，整条路是个 S 形 */
 const a2C=(e,xr)=>e.c+(e.up?-1:1)*(e.A||0)*(xr>0&&xr<e.L*.5?Math.sin(Math.PI*xr/(e.L*.5)):0),
  a2D=(e,xr)=>{if(!e.A||xr<=e.L*.5||xr>=e.L)return 0;const B=Math.max(0,(e.up?e.c:1-e.c)-FORK.th-FORK.W()/(yMax-yMin));return B*Math.sin(Math.PI*(xr-e.L*.5)/(e.L*.5))},
  a2Lane=(e,xr)=>{const c=a2C(e,xr),D=a2D(e,xr);return e.up?[D,c-FORK.th]:[c+FORK.th,1-D]};
 Object.assign(PAT,{
- fork(g,x,d){const c=g.r(.42,.58),up=g.r()<.5,L=FORK.L,e={t:'fork',x,c,up,L,gs:g.r(.25,.75),A:g.mode==='simple'?.11:.13};g.E.push(e);
+ fork(g,x,d){const c=g.r(.42,.58),up=g.r()<.5,L=FORK.L,e={t:'fork',x,c,up,L,gs:g.r(.25,.75),A:g.mode==='simple'?.11:.12};g.E.push(e);
    const no=up?(1+c+FORK.th)/2:(c-FORK.th)/2;arc(g,x-280,c,c,3);for(let i=0;i<10;i++){const xr=60+i*55,[a,b]=a2Lane(e,xr);g.E.push({t:'pearl',x:x+xr,f:(a+b)/2})}arc(g,x+60,no,no,3);
    if(g.mode!=='simple')g.E.push({t:'jelly',x:x+L*.3,f:no,amp:.05,ph:g.r(0,6),sp:1});g.x+=L-200},
  vent(g,x,d){const hd=g.mode!=='simple',n=(hd?3:2)+(g.r()<d?1:0),p0=g.r(0,3);let top=g.r()<.5;for(let i=0;i<n;i++){g.E.push({t:'vent',x:x+i*210,ph:p0+i*1.15,top,h:hd?.5:.45});top=g.r()<.65?!top:top}arc(g,x-200,.5,.5,4);g.x+=(n-1)*210},

@@ -13,7 +13,7 @@ function renderMap(mode,vol,hi,sv,base,still){
   cancelAnimationFrame(wmRaf);
   const box=$('lvGrid'),land=matchMedia('(orientation:landscape)').matches,key=mode+vol;
   const ids=LV.map((L,i)=>i).filter(i=>volOf(i)===vol),feast=vol===2&&!hi&&cleared(VOL1+11),n=ids.length+(feast?1:0);
-  const open=k=>k>=ids.length||ids[k]===0||sv.st[ids[k]-1]>0,done=k=>k<ids.length?sv.st[ids[k]]>0:!!SAVE.feast2,lit=k=>k<ids.length?cleared(ids[k]):done(k);
+  const open=k=>k>=ids.length||ids[k]===0||hi&&ids[k]===VOL1||sv.st[ids[k]-1]>0,done=k=>k<ids.length?sv.st[ids[k]]>0:!!SAVE.feast2,lit=k=>k<ids.length?cleared(ids[k]):done(k);
   let front=0;for(let k=0;k<ids.length;k++)if(open(k))front=k;
   SAVE.mapAt=SAVE.mapAt||{};const was=SAVE.mapAt[key],walk=!still&&was!==undefined&&was<front?was:-1;
   if(was!==front){SAVE.mapAt[key]=front;persist()}

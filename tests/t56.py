@@ -64,7 +64,14 @@ async def main():
                   A.lightTry(B,A.ltNext(B))}}
               return {lens,lamps,hp0,wrong,showTap,done:!!B.done,win:B.done&&g.boss===B}}""",mode)
             print('light boss',mode,lt)
-            if lt.get('err') or [x.split(':')[1] for x in lt['lens']]!=['3','4','6','7','9'] or not lt['done'] or lt['showTap']!=1 or lt['wrong']!={'hp':1,'ph':'wait','ii':0,'same':True} or lt['lamps']!=(6 if mode=='simple' else 8) or lt['hp0']!=(5 if mode=='simple' else 3):ok=False;print('  !! light memory boss wrong')
+            if lt.get('err') or [x.split(':')[1] for x in lt['lens']]!=(['3','4','5','6','7'] if mode=='simple' else ['3','4','6','7','9']) or not lt['done'] or lt['showTap']!=1 or lt['wrong']!={'hp':1,'ph':'wait','ii':0,'same':True} or lt['lamps']!=(6 if mode=='simple' else 8) or lt['hp0']!=(5 if mode=='simple' else 3):ok=False;print('  !! light memory boss wrong')
+        # v2.8.0：第二卷困难模式不再被第一卷的渔网/墙公式塞满；无尽模式按通关进度加入第二卷机关
+        await pg.goto(GAME);await pg.wait_for_timeout(300)
+        hv=await pg.evaluate("""()=>{const T=window.__T,K=window.__K,S=K.SAVE,out={};for(const li of [13,20,23]){T.startGame('hard',li);const E=T.G.E;out[li]={net:E.filter(e=>e.t==='net').length,wall:E.filter(e=>e.t==='wall').length,total:E.length}}
+          const pool=v=>{for(let i=0;i<24;i++)S.simple.st[i]=i<v?1:0;T.startGame('endless',0);return Object.keys(T.G.gen.pool(60*200*3.5)).filter(k=>['roots','vent','fork','lamp','pumice','lava','sline'].includes(k)).sort().join(',')};
+          out.e12=pool(12);out.e18=pool(18);out.e24=pool(24);return out}""")
+        print('hard vol2 / endless pools:',hv)
+        if any(hv[str(li)]['net']+hv[str(li)]['wall']>2 for li in [13,20,23]) or hv['e12']!='' or hv['e18']!='fork,roots,vent' or hv['e24']!='fork,lamp,lava,pumice,roots,sline,vent':ok=False;print('  !! hard vol2 or endless pool wrong')
         print('errors',errs)
         await b.close()
         if errs or bad or not ok:sys.exit(1)

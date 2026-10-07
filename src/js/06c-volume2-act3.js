@@ -14,7 +14,7 @@ Object.assign(NODE,{grouper:{tool:'',hp:2,f:.86,no:''},tako:{tool:'opot',hp:1,f:
 Object.assign(BOSSMSG,{light:'灯塔会一盏接一盏地亮。记住亮的顺序，轮到你时照着点一遍。一共五轮，灯会越来越多'});
 Object.assign(TIPS,{lava:'海面上出现黑影，就是熔岩块要掉下来了！别待在黑影正下方',pumice:'浮石会慢慢往下压，从它底下钻过去，别被挤到',sline:'太黑了！顺着星星连成的线游，线上没有礁石，还会加速'});
 /* 熔岩块：先在海面投下影子，再砸进海里，落到海底变成一块烫石头 */
-const LAVA={W:()=>G&&G.mode==='hard'?.75:.95,fall:1};
+const LAVA={W:()=>G&&G.mode==='hard'?.85:.95,fall:1};
 SFX.boom=()=>{snd(110,.45,'sawtooth',.13,35);setTimeout(()=>snd(70,.5,'square',.08,30),90)};
 Object.assign(PAT,{
  lava(g,x,d){const hd=g.mode!=='simple',n=(hd?3:2)+(g.r()<d?1:0);const sp=hd?125:150,q0=g.r(.3,.9);for(let i=0;i<n;i++)g.E.push({t:'lava',x:x+i*sp,r:g.r(24,34),q:clamp(q0+g.r(-.08,.08),.2,.95),k:0,y:0});arc(g,x-240,.5,.5,3);g.x+=(n-1)*sp},
@@ -30,10 +30,10 @@ const a3SlY=(e,xr)=>{const p=e.pts;if(xr<=0)return p[0][1];for(let i=0;i<p.lengt
 const a3Pd=(e,sx)=>{const p=clamp(1-(sx-fishSX)/(VW*.85),0,1);return e.h0+(e.h1-e.h0)*(1-(1-p)*(1-p))};
 /* 熔岩海岸：火山隔几秒喷一次，震屏、泛红，前方连着砸下几块熔岩 */
 function a3Tick(g,dt){if(g.ink>0)g.ink-=dt;if(!g.L||g.L.theme!==20||g.boss)return;const hd=g.mode!=='simple';g.erF=Math.max(0,(g.erF||0)-dt*1.6);
-  if(g.erT==null)g.erT=3;g.erT-=dt;if(g.erT>0||g.t<2)return;g.erT=(hd?3.6:5.5)+Math.random()*2;g.erF=1;g.shake=Math.max(g.shake,.45);SFX.boom();
+  if(g.erT==null)g.erT=3;g.erT-=dt;if(g.erT>0||g.t<2)return;g.erT=(hd?4.2:5.5)+Math.random()*2;g.erF=1;g.shake=Math.max(g.shake,.45);SFX.boom();
   if(!g.tips.erupt){g.tips.erupt=1;toast('火山喷发了！看清海面上的黑影，一块接一块躲开',2.6,1)}
-  const n=hd?3+(Math.random()<.5?1:0):2,x0=g.scroll+fishSX+g.speed*(LAVA.W()+.3*LAVA.fall)+60;
-  for(let i=0;i<n;i++)g.E.push({t:'lava',x:x0+i*(hd?115:160)+Math.random()*30,r:24+Math.random()*10,q:.3,k:0,y:0,er:1})}
+  const n=hd?3:2,x0=g.scroll+fishSX+g.speed*(LAVA.W()+.3*LAVA.fall)+60;
+  for(let i=0;i<n;i++)g.E.push({t:'lava',x:x0+i*(hd?135:160)+Math.random()*30,r:24+Math.random()*10,q:.3,k:0,y:0,er:1})}
 function a3Hit(g,e,sx,y,dx,dt){const F=g.fish,H=yMax-yMin;
   if(e.t==='lava'){if(e.k===0&&sx-fishSX<g.speed*(LAVA.W()+e.q*LAVA.fall)+20){e.k=1;e.w=0}
     if(e.k===1){e.w+=dt;if(e.w>=LAVA.W()){e.k=2;e.y=yMin-40;burst(sx,yMin,'#ff9a5a',10)}}
@@ -91,17 +91,17 @@ function a3BG(th,sc,t){
 const LT={geo(){const x0=16,x1=VW-16,y0=yMin+8,y1=yMax-8,vert=(y1-y0)>(x1-x0)*1.2;return{x0,x1,y0,y1,vert}},
  pos(i,n){const o=LT.geo(),cols=Math.ceil(n/2),top=i%2===0,c=Math.floor(i/2),w=o.x1-o.x0,h=o.y1-o.y0;
   return o.vert?[o.x0+w*(i%2?.74:.26),o.y0+h*(.2+.62*(i/(n-1)))]:[o.x0+w*(.1+.8*(c+(top?.25:.75))/cols),o.y0+h*(top?.38:.84)]}};
-/* 还光：灯塔一盏接一盏地亮，记住顺序，轮到你时照着点一遍；五轮，从 3 盏到 9 盏 */
-const LTR=[3,4,6,7,9],LTN=[392,440,523,587,659,784,880,1047];
+/* 还光：灯塔一盏接一盏地亮，记住顺序，轮到你时照着点一遍；五轮，简单 3→7 盏，困难 3→9 盏 */
+const ltR=()=>G.mode==='hard'?[3,4,6,7,9]:[3,4,5,6,7],LTN=[392,440,523,587,659,784,880,1047];
 function lightMk(g,hd,fin){const B={k:'light',mini:1,fin,tries:0,
-  reset(){const hd=G.mode==='hard',n=hd?8:6;this.r=0;this.need=LTR.length;this.hp=hd?3:5;this.t=this.seen?-3:-7;this.seen=1;this.help=0;this.dz=0;this.slow=0;this.num=0;this.hint=0;
+  reset(){const hd=G.mode==='hard',n=hd?8:6;this.r=0;this.need=5;this.hp=hd?3:5;this.t=this.seen?-3:-7;this.seen=1;this.help=0;this.dz=0;this.slow=0;this.num=0;this.hint=0;
     this.seq=[];this.ph='';this.pt=0;this.si=0;this.ii=0;this.on=0;this.miss=0;this.perf=0;
     const o=LT.geo();this.px=(o.x0+o.x1)/2;this.py=(o.y0+o.y1)/2;this.tx=this.px;this.ty=this.py;
     this.L=Array.from({length:n},(_,i)=>({i,done:0,lit:0,bad:0}));ltRound(this,.8)}};
   B.reset();return B}
 const ltOn=B=>(G.mode==='hard'?.5:.7)*(B.slow?1.3:1),ltOff=B=>(G.mode==='hard'?.2:.3)*(B.slow?1.3:1),ltNext=B=>B.ph==='input'?B.L[B.seq[B.ii]]:null;
 function ltBeep(i){snd(LTN[i%LTN.length],.32,'triangle',.11)}
-function ltRound(B,w){const n=B.L.length,k=LTR[B.r];B.seq=[];for(let i=0;i<k;i++){let j;do j=Math.floor(Math.random()*n);while(j===B.seq[i-1]);B.seq.push(j)}B.miss=0;ltReplay(B,w)}
+function ltRound(B,w){const n=B.L.length,k=ltR()[B.r];B.seq=[];for(let i=0;i<k;i++){let j;do j=Math.floor(Math.random()*n);while(j===B.seq[i-1]);B.seq.push(j)}B.miss=0;ltReplay(B,w)}
 function ltReplay(B,w){B.ph='wait';B.pt=w;B.si=0;B.ii=0;B.on=0}
 function lightPt(cx,cy,down){const B=G.boss;if(B.t<-3){if(down){B.t=-3}return}if(!down||B.t<0)return;const r=cv.getBoundingClientRect(),x=(cx-r.left)/S,y=(cy-r.top)/S;
   const n=B.L.length;let best=null,bd=1e9;B.L.forEach((l,i)=>{const[lx,ly]=LT.pos(i,n),d=Math.min(Math.hypot(lx-x,ly-20-y),Math.hypot(lx-x,ly+10-y));if(d<bd){bd=d;best=l}});
