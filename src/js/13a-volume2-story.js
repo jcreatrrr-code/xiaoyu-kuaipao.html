@@ -1,5 +1,5 @@
 /* 第二幕工具 */
-TOOLS.push({id:'lpot',ic:'🪤',n:'龙虾笼',d:'放在石缝边引出龙虾，没有它进不了火山岛',p:550,ch:17},{id:'rod',ic:'🎣',n:'钓竿',d:'一竿一条钓鲣鱼，没有它进不了灯塔环',p:600,ch:18});
+TOOLS.push({id:'lpot',ic:'🪤',n:'龙虾笼',d:'放在石缝边引出龙虾，没有它进不了火山岛',p:550,ch:17},{id:'rod',ic:'🎣',n:'钓竿',d:'一竿一条钓鲣鱼，没有它进不了灯塔环。船尾钓鱼时也用得上：收线更快，线能多绷一会儿',p:600,ch:18});
 Object.assign(TOOLN,{lpot:['🪤','龙虾笼','龙虾躲在石缝里，先去墨墨的杂货铺买一个龙虾笼'],rod:['🎣','钓竿','鲣鱼要用钓竿钓，先去墨墨的杂货铺买一根']});
 /* ---------- 第二卷 南方环礁：人物、过场场景、剧本 ---------- */
 Object.assign(PEOPLE,{xiaofan:{H:'#2a1a12',T:'#e8553a',L:'#f2c14e',D:'#c98a5a',pony:1},laoduo:{H:'#f1f1f1',T:'#8a5a3a',L:'#3a4a5a',D:'#c98a5a',hat:'#d9c08a'},ayao:{H:'#3a2a1a',T:'#ffd23f',L:'#5a4a3a',D:'#ffd9b3',hat:'#c9a85a'}});
@@ -71,7 +71,7 @@ function atollShore(t,gy,hy,o){for(const f of LHX){const x=Math.round(CW*f);R(x-
 function lhLamps(t,hy,o){if(o.lhDark||(!o.night&&!o.dusk))return;LHX.forEach((f,i)=>{let on=1;if(o.lhOut){const off=1.2+i*.7;on=t<off?(Math.sin(t*6+i)>-.6?1:0):t<off+.7?(Math.sin(t*38)>0?1:0):0}
   if(!on)return;const x=Math.round(CW*f);El(x,hy-11,5,3,'rgba(255,240,170,.35)');R(x-1,hy-12,3,2,'#fff6c0');R(x+2,hy-12,10,1,'rgba(255,240,170,.45)');R(x-11,hy-12,10,1,'rgba(255,240,170,.45)')})}
 /* 远洋号甲板：天、海、船舷和木甲板 */
-function deckScene(t,gy,hy,o){const sky=o.night?['#0e1838','#2a3a6a']:['#7fcbff','#dff4ff'];for(let i=0;i<6;i++)R(0,Math.floor(hy*i/6),CW,Math.ceil(hy/6)+1,mixc(sky[0],sky[1],i/5));
+function deckScene(t,gy,hy,o){const sky=o.night?['#0e1838','#2a3a6a']:o.dusk?['#8a6ab0','#ffc08a']:['#7fcbff','#dff4ff'];for(let i=0;i<6;i++)R(0,Math.floor(hy*i/6),CW,Math.ceil(hy/6)+1,mixc(sky[0],sky[1],i/5));
   if(!o.night){El(CW*.8,hy*.35,5,5,'#fff27a');for(let i=0;i<3;i++){const cx=((i*47+t*4)%(CW+30))-15,cy=hy*(.2+i*.22);El(cx,cy,6,2,'#ffffff');El(cx+4,cy-1,4,2,'#ffffff')}}
   R(0,hy,CW,gy-hy,'#2f8fc4');R(0,hy,CW,2,'#3fa9d8');for(let i=0;i<9;i++){const y=hy+2+(i*5)%Math.max(1,gy-hy-8),x=((i*23+t*(9+i%3))%(CW+8))-4;R(x,y,4,1,'#bfe6ff')}
   if(o.ring){const cx=Math.round(CW*.66);El(cx,hy+1,16,2,'#f3e2b0');El(cx,hy+1,11,1,'#3fd0c0');R(cx-13,hy-3,1,3,'#8a5a2b');R(cx-15,hy-4,4,1,'#3fae6a');R(cx+10,hy-3,1,3,'#8a5a2b');R(cx+8,hy-4,4,1,'#3fae6a')}
