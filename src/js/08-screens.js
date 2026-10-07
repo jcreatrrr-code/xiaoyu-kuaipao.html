@@ -58,13 +58,11 @@ $('bShop').onclick=()=>{SFX.tap();showShop()};
 function refreshMenu(){$('menuWal').textContent=SAVE.wallet;$('bMute').textContent='音效：'+(SAVE.mute?'关':'开');const b=SAVE.end;$('bestTxt').textContent=b.score?`最高 ${b.score} 分 · ${b.dist} 米`:'不停向前，刷新你的纪录！'}
 function showLevels(mode){
   if(cleared(4)&&!SAVE.story.guest){playStory(STORY.guest,()=>{SAVE.story.guest=1;persist();showLevels(mode)});return}
-  {const tot=starTotal(),nx=STARGIFT[SAVE.sg||0];$('starInfo').textContent='⭐ 已集 '+tot+' 颗星'+(nx?(tot>=nx[0]?' · 下次通关领取礼物':' · 再集 '+(nx[0]-tot)+' 颗有礼物'):'')}
-  lastMode=mode;document.querySelectorAll('#modeTabs .tab').forEach(t=>t.classList.toggle('on',t.dataset.mode===mode));$('lvGrid').hidden=mode==='endless';$('endPanel').hidden=mode!=='endless';if(mode==='endless'){show('sLevels');return}
+  {const tot=starTotal(),nx=STARGIFT[SAVE.sg||0],t='⭐ 已集 '+tot+' 颗星'+(nx?(tot>=nx[0]?' · 下次通关领取礼物':' · 再集 '+(nx[0]-tot)+' 颗有礼物'):'');$('starInfo').textContent=t;$('starInfo').dataset.raw=t}
+  lastMode=mode;document.querySelectorAll('#modeTabs .tab').forEach(t=>t.classList.toggle('on',t.dataset.mode===mode));const em=mode==='endless';$('lvGrid').hidden=em;$('lvInfo').hidden=em;$('endPanel').hidden=!em;$('sLevels').classList.toggle('map',!em);if(em){WM=null;$('volTabs').hidden=true;show('sLevels');return}
   const hi=mode==='hard'?1:0,sv=SAVE[mode];$('lvTitle').textContent=(hi?'困难模式':'普通模式')+' · 选择关卡';
   const vtab=!hi&&v2Open(),vol=vtab?(SAVE.vol||2):1,base=vol===2?VOL1:0;$('volTabs').hidden=!vtab;document.querySelectorAll('#volTabs .tab').forEach(t=>t.classList.toggle('on',+t.dataset.vol===vol));
-  $('lvGrid').innerHTML=LV.map((L,i)=>{if(volOf(i)!==vol)return'';const open=i===0||sv.st[i-1]>0;if(!open)return i===1||sv.st[i-2]>0?'<button class="lv" disabled><b>🔒 ？？？</b><em>通关上一关后揭晓</em><span class="mini"></span></button>':'';let st='';for(let k=0;k<3;k++)st+=`<i class="st ${sv.st[i]>k?'f':''}"></i>`;if(sv.s4[i])st+='<i class="st f"></i>';
-    return`<button class="lv" data-lv="${i}" ${open?'':'disabled'}><b>${open?'':'🔒 '}第${i-base+1}关 ${L.name}</b><em>${goalText(L,hi)}</em><em>${L.tool?TOOLN[L.tool][0]+(SAVE.tools[L.tool]?' 带着':' 需要')+TOOLN[L.tool][1]:cleared(i)?'🌊 海域已恢复':'海域褪色中'}</em><span class="mini">${st}</span></button>`}).join('')+(vol===2&&!hi&&cleared(VOL1+11)?`<button class="lv" data-feast="1"><b>🔥 特别关 石焖宴</b><em>${SAVE.feast2?'已办成 · 可以再开一次':'全岛的人都在等着开席'}</em><em>十二位客人，至少上九道</em><span class="mini"></span></button>`:'');
-  $('lvGrid').dataset.mode=mode;show('sLevels')}
+  $('lvGrid').dataset.mode=mode;show('sLevels');renderMap(mode,vol,hi,sv,base)}
 const STARGIFT=[[4,'gold',2,'金鱼结界 ×2'],[9,'life',1,'生命星 ×1'],[14,'pearl',150,'150 颗珍珠'],[20,'whale',2,'鲸鱼结界 ×2'],[27,'revive',1,'复活海星 ×1'],[34,'pearl',400,'400 颗珍珠'],[42,'double',3,'双倍珍珠袋 ×3'],[52,'pearl',800,'800 颗珍珠'],[66,'revive',3,'复活海星 ×3'],[80,'pearl',1500,'1500 颗珍珠'],[96,'pearl',3000,'3000 颗珍珠']];
 const starTotal=()=>['simple','hard'].reduce((a,m)=>a+SAVE[m].st.reduce((x,y)=>x+y,0)+SAVE[m].s4.reduce((x,y)=>x+(y?1:0),0),0);
 if(SAVE.starPaid===undefined)SAVE.starPaid=starTotal();
@@ -104,7 +102,6 @@ $('bHelp').onclick=()=>show('sHelp');
 $('bMusic').onclick=()=>{SAVE.music=SAVE.music===0?1:0;persist();refreshMenu();SFX.tap()};
 $('bMute').onclick=()=>{SAVE.mute=SAVE.mute?0:1;persist();refreshMenu();SFX.tap()};
 $('volTabs').onclick=e=>{const b=e.target.closest('[data-vol]');if(b){SFX.tap();SAVE.vol=+b.dataset.vol;persist();showLevels(lastMode)}};
-$('lvGrid').onclick=e=>{const b=e.target.closest('.lv');if(b&&b.dataset.feast){startFeast2();return}if(b&&!b.disabled)launch($('lvGrid').dataset.mode,+b.dataset.lv)};
 $('bPause').onclick=pause;
 $('bResume').onclick=()=>{show('');state='play'};
 $('bRestart').onclick=()=>startGame(...lastArgs);
