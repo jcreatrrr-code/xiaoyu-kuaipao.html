@@ -1,6 +1,8 @@
 /* ---------- developer mode ---------- */
 let devMode='simple',devTap=0,devT=0;
-$('setTitle').onclick=()=>{const n=Date.now();devTap=n-devT<1500?devTap+1:1;devT=n;if(devTap>=5){devTap=0;SAVE.dev=SAVE.dev?0:1;persist();refreshMenu();toast(SAVE.dev?'开发者模式已开启，主菜单右上角有扳手按钮':'开发者模式已关闭',3)}};
+/* App 版不提供开发者模式 */
+if(window.XY_APP&&(SAVE.dev||SAVE.god)){SAVE.dev=0;SAVE.god=0}
+$('setTitle').onclick=()=>{const n=Date.now();devTap=n-devT<1500?devTap+1:1;devT=n;if(devTap>=5&&!window.XY_APP){devTap=0;SAVE.dev=SAVE.dev?0:1;persist();refreshMenu();toast(SAVE.dev?'开发者模式已开启，主菜单右上角有扳手按钮':'开发者模式已关闭',3)}};
 function showDev(){
   const ops=[['god','无敌：'+(SAVE.god?'开':'关')],['unlock','解锁全部关卡'],['seen','剧情全部标记已看'],['unseen','剧情全部标记未看'],['pearl','+5000 珍珠'],['gear','道具各 +5，工具全给'],['fish','鱼和食材各 +10'],['rep','声望 +300'],['banq','直接打宴席挑战'],['reset','重置存档']];
   $('devOps').innerHTML=ops.map(o=>`<button class="btn sm ${o[0]==='reset'?'coral':o[0]==='god'&&SAVE.god?'mint':''}" data-dev="${o[0]}">${o[1]}</button>`).join('');

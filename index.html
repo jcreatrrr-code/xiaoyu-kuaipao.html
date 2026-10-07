@@ -4,13 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>小鱼快跑</title>
-<meta name="version" content="2.8.3">
+<meta name="version" content="2.9.0">
 <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Yusei+Magic&family=Comfortaa:wght@600;700&family=Baloo+Bhaijaan+2:wght@500;700&family=Jua&family=Itim&display=swap" rel="stylesheet">
 <style>
 :root{
   --sea:#0b6fb0;--ink:#0d3b5c;--muted:#56788f;--card:#fffdf4;
   --sun:#ffd23f;--sun-d:#d99400;--coral:#ff7a6b;--coral-d:#cf4a40;--mint:#4fe0b5;--mint-d:#1c9c7a;--sky:#7fd8ff;--sky-d:#2a8fc4;
   box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--sea:#06304f;--card:#fff8e2}}
 :root[data-theme="dark"]{--sea:#06304f;--card:#fff8e2}
@@ -18,7 +19,7 @@
 html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
 body{height:100%;margin:0;background:var(--sea);color:var(--ink);overflow:hidden;
   font-family:"ZCOOL KuaiLe","PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
-  -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
 [hidden]{display:none!important}
 html[lang=ja] body{font-family:"Yusei Magic","Hiragino Maru Gothic ProN","ZCOOL KuaiLe","PingFang SC",system-ui,sans-serif}
 html[lang=ru] body{font-family:"Comfortaa","ZCOOL KuaiLe",system-ui,sans-serif;font-weight:600}
@@ -379,7 +380,7 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
       <button class="btn" id="bHelp">玩法说明</button>
       <button class="btn" id="bSet">设置</button>
     </div>
-    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v2.8.3</p>
+    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v2.9.0</p>
     <button class="btn sm float" data-go="sMenu">返回主菜单</button>
   </section>
 
@@ -571,7 +572,7 @@ const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(SAVE))}catch(e){}
 /* ---------- audio ---------- */
 let AC=null;
 function snd(f,d,type,v,to){if(SAVE.mute)return;try{
-  AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();
+  AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state!=='running')AC.resume();
   const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime;o.type=type||'sine';o.frequency.setValueAtTime(f,t);
   if(to)o.frequency.exponentialRampToValueAtTime(to,t+d);g.gain.setValueAtTime(v||.1,t);g.gain.exponentialRampToValueAtTime(.001,t+d);
   o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d)}catch(e){}}
@@ -2571,7 +2572,9 @@ for(const c of DEX)if(['d66','d67','d68','d69','d70','d71','d72'].includes(c.id)
 V2C3.forEach(c=>DEX.push(c));
 /* ---------- developer mode ---------- */
 let devMode='simple',devTap=0,devT=0;
-$('setTitle').onclick=()=>{const n=Date.now();devTap=n-devT<1500?devTap+1:1;devT=n;if(devTap>=5){devTap=0;SAVE.dev=SAVE.dev?0:1;persist();refreshMenu();toast(SAVE.dev?'开发者模式已开启，主菜单右上角有扳手按钮':'开发者模式已关闭',3)}};
+/* App 版不提供开发者模式 */
+if(window.XY_APP&&(SAVE.dev||SAVE.god)){SAVE.dev=0;SAVE.god=0}
+$('setTitle').onclick=()=>{const n=Date.now();devTap=n-devT<1500?devTap+1:1;devT=n;if(devTap>=5&&!window.XY_APP){devTap=0;SAVE.dev=SAVE.dev?0:1;persist();refreshMenu();toast(SAVE.dev?'开发者模式已开启，主菜单右上角有扳手按钮':'开发者模式已关闭',3)}};
 function showDev(){
   const ops=[['god','无敌：'+(SAVE.god?'开':'关')],['unlock','解锁全部关卡'],['seen','剧情全部标记已看'],['unseen','剧情全部标记未看'],['pearl','+5000 珍珠'],['gear','道具各 +5，工具全给'],['fish','鱼和食材各 +10'],['rep','声望 +300'],['banq','直接打宴席挑战'],['reset','重置存档']];
   $('devOps').innerHTML=ops.map(o=>`<button class="btn sm ${o[0]==='reset'?'coral':o[0]==='god'&&SAVE.god?'mint':''}" data-dev="${o[0]}">${o[1]}</button>`).join('');
@@ -2969,7 +2972,7 @@ function applyLang(){const L=SAVE.lang;document.documentElement.lang=L==='zh'?'z
   locAll();if(G)G.hudKey=''}
 new MutationObserver(ms=>{for(const m of ms){if(m.type==='characterData'){if(m.target.nodeType===3)locNode(m.target)}else for(const a of m.addedNodes){if(a.nodeType===3)locNode(a);else if(a.nodeType===1){const w=document.createTreeWalker(a,NodeFilter.SHOW_TEXT),ns=[];let n;while((n=w.nextNode()))ns.push(n);ns.forEach(locNode)}}}}).observe($('app'),{subtree:true,childList:true,characterData:true});
 $('langRow').onclick=e=>{const b=e.target.closest('[data-lang]');if(!b)return;SAVE.lang=b.dataset.lang;persist();SFX.tap();applyLang();
-  if(b.dataset.lang==='zh'){const n=Date.now();devTap=n-devT<1500?devTap+1:1;devT=n;if(devTap>=5){devTap=0;SAVE.dev=SAVE.dev?0:1;persist();refreshMenu();toast(SAVE.dev?'开发者模式已开启，主菜单右上角有扳手按钮':'开发者模式已关闭',3)}}else devTap=0};
+  if(b.dataset.lang==='zh'){const n=Date.now();devTap=n-devT<1500?devTap+1:1;devT=n;if(devTap>=5&&!window.XY_APP){devTap=0;SAVE.dev=SAVE.dev?0:1;persist();refreshMenu();toast(SAVE.dev?'开发者模式已开启，主菜单右上角有扳手按钮':'开发者模式已关闭',3)}}else devTap=0};
 $('bSet').onclick=()=>{SFX.tap();show('sSet')};
 
 /* ---------- 第二卷新文字的英文（其他语言暂用英文代替） ---------- */
@@ -3196,10 +3199,12 @@ Object.assign(TRK,{
   B:'16 - 14 . 12 - 11 . 12 - 14 . 16 - 19 . 17 - 16 . 14 . 12 . 11 - 9 . 7 - - .'}});
 for(const k in TRK){const t=TRK[k],a=t.A.split(' '),b=t.B.split(' ');t.seq=[...a,...a,...b,...a]}
 const MUS={cur:null,step:0,next:0,out:null,lp:null,noise:null,chk:0};
-function initAudio(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();
+function initAudio(){try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state!=='running')AC.resume();
   if(!MUS.out){MUS.out=AC.createGain();MUS.out.gain.value=.5;MUS.lp=AC.createBiquadFilter();MUS.lp.type='lowpass';MUS.lp.frequency.value=6000;MUS.out.connect(MUS.lp);MUS.lp.connect(AC.destination);
     const n=AC.sampleRate*.2,buf=AC.createBuffer(1,n,AC.sampleRate),d=buf.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;MUS.noise=buf}}catch(e){}}
 document.addEventListener('pointerdown',initAudio,true);document.addEventListener('keydown',initAudio,true);
+/* 手机切到后台再回来时声音会被系统挂起，回到前台就接着放 */
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&AC&&AC.state!=='running')try{AC.resume()}catch(e){}});
 function mNote(midi,t,dur,type,vol){const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=440*Math.pow(2,(midi-69)/12);
   g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.015);g.gain.exponentialRampToValueAtTime(.0008,t+dur);o.connect(g);g.connect(MUS.out);o.start(t);o.stop(t+dur+.03)}
 function mKick(t){const o=AC.createOscillator(),g=AC.createGain();o.frequency.setValueAtTime(120,t);o.frequency.exponentialRampToValueAtTime(45,t+.12);g.gain.setValueAtTime(.16,t);g.gain.exponentialRampToValueAtTime(.001,t+.16);o.connect(g);g.connect(MUS.out);o.start(t);o.stop(t+.18)}
@@ -3711,7 +3716,7 @@ function fsPhoto(sh){const c=document.createElement('canvas'),S=4,w=90,h=120;c.w
   g.fillStyle='#fff8ec';g.fillRect(0,92*S,w*S,28*S);const t=document.createElement('canvas');t.width=w;t.height=92;const tc=t.getContext('2d');drawFsp(tc,sh.s.id,48,52,54,1,0,sh.st);
   g.imageSmoothingEnabled=false;g.drawImage(t,0,0,w,92,0,0,w*S,92*S);g.fillStyle='#2a2a44';g.textAlign='center';g.font=`bold ${8*S}px sans-serif`;g.fillText(sh.s.n+' '+'★'.repeat(sh.st),w*S/2,102*S);
   g.font=`${5*S}px sans-serif`;const d=new Date();g.fillText(`${sh.len} 厘米 · ${fsSpot().n} · ${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`,w*S/2,110*S);g.fillStyle='#8a8a9a';g.font=`${4*S}px sans-serif`;g.fillText('小鱼快跑 · 钓鱼手帐',w*S/2,116*S);
-  c.toBlob(b=>{if(!b)return;const name=`小鱼快跑-${sh.s.n}-${sh.len}cm.png`;try{const file=new File([b],name,{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file]}).catch(()=>{});return}}catch(e){}
+  c.toBlob(b=>{if(!b)return;const name=`小鱼快跑-${sh.s.n}-${sh.len}cm.png`;if(window.XY_APP&&appShareImage(b,name))return;try{const file=new File([b],name,{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file]}).catch(()=>{});return}}catch(e){}
     const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500);toast('照片存好了',1.6)},'image/png');SAVE.fsh.photos=(SAVE.fsh.photos||0)+1;persist()}
 
 /* 各钓点的远景和近景 */
@@ -3956,6 +3961,14 @@ $('lvGrid').addEventListener('wheel',e=>{if(WM&&WM.land&&Math.abs(e.deltaY)>Math
 {let rt=0;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{const w=WM,b=$('lvGrid');if(!w||!$('sLevels').classList.contains('on')||!$('sLevels').classList.contains('map')||w.moving)return;
   const land=matchMedia('(orientation:landscape)').matches;if(land===w.land&&Math.abs(b.clientWidth-w.bw)<2&&Math.abs(b.clientHeight-w.bh)<160)return;wmSel[w.key]=w.sel;renderMap(w.mode,w.vol,w.hi,w.sv,w.base,1)},180)})}
 {const EN7={"开席":"Start the feast"};for(const k in EN7)if(!DICT[k]){const v=EN7[k];DICT[k]=[v,v,v,v]}for(const k in TLC)delete TLC[k]}
+/* ---------- iPhone App 版专用（网页版里 XY_APP 不存在，下面的都不会用到） ---------- */
+/* 拍照分享：先把照片存进 App 的临时文件夹，再弹出系统分享面板（可以存到相册、发微信等） */
+function appShareImage(blob,name){
+  const P=window.Capacitor&&Capacitor.Plugins,FS=P&&P.Filesystem,SH=P&&P.Share;if(!FS||!SH)return false;
+  const r=new FileReader();r.onload=async()=>{try{
+    const w=await FS.writeFile({path:name,data:String(r.result).split(',')[1],directory:'CACHE'});
+    await SH.share({title:name,files:[w.uri]})}catch(e){if(!/cancel/i.test(String(e&&e.message||e)))toast('照片没能分享出去',1.6)}};
+  r.readAsDataURL(blob);return true}
 /* ---------- cutscene sound ---------- */
 const AMB={buf:null,ch:{},on:0};
 function ambInit(){if(!AC||AMB.buf)return;try{const n=AC.sampleRate*2,b=AC.createBuffer(1,n,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;AMB.buf=b;

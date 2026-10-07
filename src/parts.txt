@@ -32,5 +32,6 @@ src/js/17a-fishing.js
 src/js/17b-fishing2.js
 src/js/17c-fishing3.js
 src/js/17d-world-map.js
+src/js/17e-app.js
 src/js/18-cutscene-sound.js
 src/tail.html

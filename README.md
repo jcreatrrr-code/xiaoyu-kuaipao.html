@@ -12,6 +12,9 @@
 | `src/parts.txt` | 拼接顺序 |
 | `tools/build.py` | 拼接脚本 |
 | `tests/` | 测试脚本和一键运行入口 |
+| `privacy.html` | 隐私政策页（App Store 要求），发布后地址是 GitHub Pages 上的 `privacy.html` |
+| `app/` | iPhone App 工程，说明见 `app/README.md` |
+| `tools/build_app.py`、`tools/make_app_art.py` | 生成 App 里用的游戏、App 图标和启动画面 |
 
 ## 改动流程
 

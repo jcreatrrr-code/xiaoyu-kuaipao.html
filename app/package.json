@@ -1,0 +1,21 @@
+{
+  "name": "xiaoyu-kuaipao-app",
+  "version": "2.9.0",
+  "private": true,
+  "description": "小鱼快跑 iOS App（Capacitor 外壳）",
+  "scripts": {
+    "web": "python3 ../tools/build_app.py",
+    "sync": "python3 ../tools/build_app.py && npx cap sync ios",
+    "open": "npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "8.5.2",
+    "@capacitor/filesystem": "8.1.4",
+    "@capacitor/ios": "8.5.2",
+    "@capacitor/preferences": "8.0.1",
+    "@capacitor/share": "8.0.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.2"
+  }
+}
