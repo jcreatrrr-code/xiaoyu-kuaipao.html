@@ -134,7 +134,7 @@ function update(dt){
     case'lava':case'pumice':case'sline':a3Hit(g,e,sx,y,dx,dt);break;
     case'pearl':if(sx>fx)e.miss=0;else if(sx<fx-(g.magnet?120:50)&&!e.miss&&!e.air){e.miss=1;if(g.combo>=3)ftext('连击断了',fx+30,F.y-56,'#b8c7d9');g.combo=0}
       if(g.magnet&&dist<190&&dist>=38&&!g.trap){const k=Math.min(1,dt*(dist<115?9:5));e.dx=(e.dx||0)-dx*k;e.py=(e.py||0)-dy*k}
-      if(dist<38&&!g.trap){e.gone=1;if(g.boss&&g.boss.k==='chase'&&!g.boss.done)g.boss.gap=Math.min(100,g.boss.gap+1.05);g.pearls+=e.air?2:1;if(e.air)burst(sx,y,'#ffe27a',6,1);g.combo++;g.comboT=3.5;g.maxCombo=Math.max(g.maxCombo,g.combo);SFX.pearl(g.combo);burst(sx,y,'#fff',4,1);
+      if(dist<38&&!g.trap){e.gone=1;if(g.boss&&g.boss.k==='chase'&&!g.boss.done)g.boss.gap=Math.min(100,g.boss.gap+1.05);g.pearls+=e.air?2:1;if(e.air)burst(sx,y,'#ffe27a',6,1);skinPick(sx,y);g.combo++;g.comboT=3.5;g.maxCombo=Math.max(g.maxCombo,g.combo);SFX.pearl(g.combo);burst(sx,y,'#fff',4,1);
         if(g.combo%10===0){g.pearls+=5;ftext(`连击 ${g.combo}！+5 ⚪`,fx+30,F.y-56,'#ffe27a');SFX.pearl(12)}}break;
     case'rock':{const hw=e.w/2-12,ry=e.top?fy(e.h)-12:fy(1-e.h)+12;
         if(Math.abs(dx)<hw+16&&(e.top?F.y-18<ry:F.y+18>ry))hurt(1)}break;

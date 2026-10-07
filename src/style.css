@@ -183,6 +183,7 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
 .gd{font:inherit;border:0;background:none;color:#fff;padding:4px 2px 18px;text-align:center;position:relative;cursor:pointer;margin-bottom:12px}
 .gd::after{content:"";position:absolute;left:-6px;right:-6px;bottom:0;height:10px;background:linear-gradient(#e6b878,#c99450);box-shadow:0 3px 0 #5a3a1a}
 .gd .gi{display:grid;place-items:center;width:60px;height:60px;margin:0 auto 5px;border-radius:16px;background:rgba(255,253,244,.94);font-size:32px;box-shadow:0 3px 0 rgba(0,0,0,.28);position:relative}
+.gd .gi img.skI{display:block;width:58px;height:auto}
 .gd .gi i{display:block;width:36px;height:36px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px rgba(6,40,70,.2)}
 .gd .gn{display:block;font-size:13.5px;line-height:1.2;min-height:33px;text-shadow:0 1px 0 rgba(0,0,0,.4)}
 .gd .gp{display:inline-block;font-size:13px;background:var(--sun);color:#6a4500;border-radius:99px;padding:0 9px;line-height:1.5}

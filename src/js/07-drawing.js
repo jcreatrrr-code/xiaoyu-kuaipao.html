@@ -27,20 +27,51 @@ function drawBG(th,sc,t){
 function drawFish(x,y,ang,t,o){
   o=o||{};ctx.save();ctx.translate(x,y);ctx.rotate(ang);const s=o.s||1;ctx.scale(s*(o.lx||1),s);
   if(o.sp==='angel'){drawAngel(t,o);ctx.restore();return}
-  const wag=Math.sin(t*14)*.35,c2=o.c2||'#ff7f1f';
-  ctx.save();ctx.translate(-23,0);ctx.rotate(wag);ctx.fillStyle=c2;ctx.beginPath();ctx.moveTo(0,0);ctx.quadraticCurveTo(-16,-6,-27,-21);ctx.quadraticCurveTo(-19,0,-27,21);ctx.quadraticCurveTo(-16,6,0,0);ctx.fill();ctx.restore();
-  ctx.fillStyle=c2;ctx.beginPath();ctx.moveTo(-12,-19);ctx.quadraticCurveTo(-3,-37,11,-20);ctx.fill();
-  const g=ctx.createRadialGradient(-4,-8,4,0,0,30);g.addColorStop(0,o.c0||'#ffe08a');g.addColorStop(1,o.c1||'#ffa01f');if(o.glow){ctx.shadowColor='#fff27a';ctx.shadowBlur=18}ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(0,0,28,23,0,0,TAU);ctx.fill();ctx.shadowBlur=0;
+  const sp=o.sp,wag=Math.sin(t*14)*.35,c2=o.c2||'#ff7f1f',edge=sp==='clown'?'#1b2a41':0;
+  if(sp==='tide')tideHalo(t,0);
+  if(sp==='octo')octoLegs(t,c2);
+  else{ctx.save();ctx.translate(-23,0);ctx.rotate(wag);ctx.fillStyle=c2;ctx.beginPath();ctx.moveTo(0,0);ctx.quadraticCurveTo(-16,-6,-27,-21);ctx.quadraticCurveTo(-19,0,-27,21);ctx.quadraticCurveTo(-16,6,0,0);ctx.fill();if(edge){ctx.strokeStyle=edge;ctx.lineWidth=2;ctx.stroke()}ctx.restore()}
+  if(sp==='panda'){ctx.fillStyle=c2;circ(-1,-21,8);circ(15,-17,7.5)}
+  else if(sp!=='octo'){ctx.fillStyle=c2;ctx.beginPath();ctx.moveTo(-12,-19);ctx.quadraticCurveTo(-3,-37,11,-20);ctx.fill();if(edge){ctx.strokeStyle=edge;ctx.lineWidth=2;ctx.stroke()}}
+  const g=ctx.createRadialGradient(-4,-8,4,0,0,30);
+  if(sp==='tide'){const pu=.5+.5*Math.sin(t*3);g.addColorStop(0,'rgba(244,255,251,.96)');g.addColorStop(1,'rgba(110,225,205,.72)');ctx.shadowColor='#7ff0d8';ctx.shadowBlur=16+pu*10}
+  else{g.addColorStop(0,o.c0||'#ffe08a');g.addColorStop(1,o.c1||'#ffa01f');if(o.glow){ctx.shadowColor='#fff27a';ctx.shadowBlur=18}else if(sp==='star'){ctx.shadowColor='#8fa0ff';ctx.shadowBlur=12}}
+  ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(0,0,28,23,0,0,TAU);ctx.fill();ctx.shadowBlur=0;
+  if(sp)skinPattern(sp,t);
   if(o.stripe){ctx.strokeStyle='rgba(0,40,60,.28)';ctx.lineWidth=4;ctx.lineCap='round';for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(-34+i*10,0,30,-.55,.2);ctx.stroke()}}
   if(o.bill){ctx.strokeStyle=c2;ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(26,1);ctx.lineTo(60,-3);ctx.stroke()}
   if(o.lamp){ctx.strokeStyle=c2;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(4,-22);ctx.quadraticCurveTo(22,-44,34,-24);ctx.stroke();ctx.fillStyle='#fff27a';ctx.shadowColor='#fff27a';ctx.shadowBlur=14;circ(34,-22,5);ctx.shadowBlur=0}
-  ctx.fillStyle='rgba(255,255,255,.38)';ctx.beginPath();ctx.ellipse(2,10,17,9,0,0,TAU);ctx.fill();
-  ctx.fillStyle=c2;ctx.beginPath();ctx.ellipse(-5,8,8,5,.6+wag*.6,0,TAU);ctx.fill();
-  if(o.dead){ctx.strokeStyle='#1b2a41';ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(8,-10);ctx.lineTo(18,0);ctx.moveTo(18,-10);ctx.lineTo(8,0);ctx.stroke()}
+  ctx.fillStyle=sp==='star'?'rgba(255,255,255,.12)':'rgba(255,255,255,.38)';ctx.beginPath();ctx.ellipse(2,10,17,9,0,0,TAU);ctx.fill();
+  if(sp!=='octo'){ctx.fillStyle=c2;ctx.beginPath();ctx.ellipse(-5,8,8,5,.6+wag*.6,0,TAU);ctx.fill();if(edge){ctx.strokeStyle=edge;ctx.lineWidth=1.5;ctx.stroke()}}
+  if(sp==='panda'){ctx.fillStyle=c2;ctx.beginPath();ctx.ellipse(13,-4,13,11,-.35,0,TAU);ctx.fill()}
+  if(o.dead){ctx.strokeStyle=sp==='panda'||sp==='star'?'#fff':'#1b2a41';ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(8,-10);ctx.lineTo(18,0);ctx.moveTo(18,-10);ctx.lineTo(8,0);ctx.stroke()}
   else{ctx.fillStyle='#fff';circ(13,-5,o.scared?11:9.5);ctx.fillStyle='#1b2a41';circ(15,-5,o.scared?4:5.4);ctx.fillStyle='#fff';circ(16.8,-7.2,2)}
   ctx.fillStyle='rgba(255,90,120,.45)';circ(7,8,4.5);
-  if(o.scared||o.dead){ctx.fillStyle='#8a3b00';circ(23,7,3.6)}else{ctx.strokeStyle='#8a3b00';ctx.lineWidth=2.2;ctx.lineCap='round';ctx.beginPath();ctx.arc(20,4,5.5,.25,1.5);ctx.stroke()}
+  const mc=sp==='star'?'#ffd6f0':sp==='octo'?'#5a2a7a':'#8a3b00';
+  if(o.scared||o.dead){ctx.fillStyle=mc;circ(23,7,3.6)}else{ctx.strokeStyle=mc;ctx.lineWidth=2.2;ctx.lineCap='round';ctx.beginPath();ctx.arc(20,4,5.5,.25,1.5);ctx.stroke()}
+  if(sp==='koi'){ctx.strokeStyle='#e8a090';ctx.lineWidth=1.6;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(25,7);ctx.quadraticCurveTo(29,13+wag*3,25,18);ctx.moveTo(22,9);ctx.quadraticCurveTo(24,15+wag*3,20,19);ctx.stroke()}
+  if(sp==='tide')tideHalo(t,1);
   ctx.restore()}
+/* v2.10.0 新皮肤的花纹，只画在身体里面 */
+const STARDOT=[[-14,-12,3.2,0],[-4,-16,2,1.3],[4,12,2.4,2.1],[-18,6,2,3.3],[-8,2,3.6,4.2],[18,-16,1.8,5],[-22,-4,1.6,.7],[10,4,1.8,2.7],[-12,16,1.8,3.9]];
+function skinPattern(sp,t){ctx.save();ctx.beginPath();ctx.ellipse(0,0,28,23,0,0,TAU);ctx.clip();
+  if(sp==='panda'){ctx.fillStyle='#1e2026';ctx.beginPath();ctx.ellipse(-27,-2,8,12,0,0,TAU);ctx.fill()}
+  else if(sp==='clown'){for(const [bx,bw] of [[5,4.5],[-9,4.5],[-23,3]]){ctx.fillStyle='#fff';ctx.strokeStyle='#1b2a41';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(bx,0,bw,30,0,0,TAU);ctx.fill();ctx.stroke()}}
+  else if(sp==='koi'){ctx.fillStyle='#ff4f3a';circ(9,-19,11);ctx.beginPath();ctx.ellipse(-10,-9,13,9,.3,0,TAU);ctx.fill();ctx.beginPath();ctx.ellipse(-21,9,6,5,0,0,TAU);ctx.fill()}
+  else if(sp==='octo'){ctx.fillStyle='rgba(255,255,255,.28)';circ(-12,-10,4);circ(-3,-15,3);circ(-16,2,2.6);circ(4,-12,2)}
+  else if(sp==='star'){const n=ctx.createRadialGradient(-8,6,1,-8,6,18);n.addColorStop(0,'rgba(255,120,220,.35)');n.addColorStop(1,'rgba(255,120,220,0)');ctx.fillStyle=n;circ(-8,6,18);
+    for(const [sx,sy,r,ph] of STARDOT){const a=.35+.65*Math.abs(Math.sin(t*2.2+ph));ctx.globalAlpha=a;ctx.fillStyle='#fff8d0';sparkle(sx,sy,r*(.7+.3*a))}ctx.globalAlpha=1}
+  else if(sp==='tide'){const pu=.5+.5*Math.sin(t*3);ctx.globalCompositeOperation='lighter';const c=ctx.createRadialGradient(-6,2,1,-6,2,15);c.addColorStop(0,`rgba(220,255,245,${.75+pu*.25})`);c.addColorStop(1,'rgba(120,240,210,0)');ctx.fillStyle=c;circ(-6,2,15);ctx.globalCompositeOperation='source-over';
+    ctx.strokeStyle=`rgba(255,255,255,${.35+pu*.3})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(-6,2,6+pu*3,0,TAU);ctx.stroke()}
+  ctx.restore()}
+function sparkle(x,y,r){ctx.beginPath();ctx.moveTo(x,y-r*2);ctx.quadraticCurveTo(x,y,x+r*2,y);ctx.quadraticCurveTo(x,y,x,y+r*2);ctx.quadraticCurveTo(x,y,x-r*2,y);ctx.quadraticCurveTo(x,y,x,y-r*2);ctx.fill()}
+/* 小墨墨：尾巴换成四条小触手 */
+function octoLegs(t,c){ctx.lineCap='round';for(let i=0;i<4;i++){const y0=-9+i*6,w=Math.sin(t*8+i*1.3),ex=-48+Math.abs(i-1.5)*4,ey=y0*1.6+w*7;
+  ctx.strokeStyle=c;ctx.lineWidth=7-i%2;ctx.beginPath();ctx.moveTo(-14,y0);ctx.quadraticCurveTo(-32,y0+w*-6,ex,ey);ctx.stroke();
+  ctx.fillStyle='#e6d4ff';circ(-30,y0+w*-3+1.5,1.6);circ(ex+6,ey-1,1.3)}}
+/* 潮心小鱼的光环：front=0 画后半圈，1 画前半圈 */
+function tideHalo(t,front){ctx.save();ctx.rotate(-.25);ctx.strokeStyle='rgba(190,255,235,.55)';ctx.lineWidth=2;ctx.beginPath();front?ctx.ellipse(0,0,44,13,0,0,Math.PI):ctx.ellipse(0,0,44,13,0,Math.PI,TAU);ctx.stroke();
+  ctx.shadowColor='#bfffee';ctx.shadowBlur=10;ctx.fillStyle='#effffa';for(let i=0;i<3;i++){const a=t*1.6+i*TAU/3,sy=Math.sin(a);if(front?sy<0:sy>=0)continue;circ(Math.cos(a)*44,sy*13,2.4+sy*.8)}ctx.restore()}
 /* 海天使皮肤：半透明发光的身体、扇动的小翅膀、橙红色的心 */
 function drawAngel(t,o){
   const fl=Math.sin(t*9),pu=.5+.5*Math.sin(t*3);
@@ -57,6 +88,18 @@ function drawAngel(t,o){
   else{ctx.fillStyle='#fff';circ(15,-5,o.scared?9:7.5);ctx.fillStyle='#1b2a41';circ(16.5,-5,o.scared?3.4:4.4);ctx.fillStyle='#fff';circ(18,-7,1.6)}
   ctx.fillStyle='rgba(255,120,150,.5)';circ(11,7,3.5);
   ctx.strokeStyle='#c0465a';ctx.lineWidth=2;ctx.lineCap='round';ctx.beginPath();if(o.scared||o.dead)ctx.arc(24,6,2.6,0,TAU);else ctx.arc(21,4,4.5,.25,1.5);ctx.stroke()}
+/* 星空小鱼的星尘、潮心小鱼的波纹 */
+function skinTrail(g,t,sp){if(sp==='angel')return angelTrail(g,t);
+  const a=g.str||(g.str=[]),dur=sp==='tide'?1.3:1.1;if(state==='play'&&a.lt!==t&&(sp!=='tide'||t-(a.lb||0)>.16)){a.lt=t;a.lb=t;a.push({x:g.scroll+fishSX-(sp==='tide'?20:30),y:g.fish.y+(sp==='tide'?0:(Math.random()-.5)*16),b:t,r:1.4+Math.random()*2.2,c:Math.random()<.35?'255,226,140':'220,228,255'})}
+  while(a.length&&(t-a[0].b>dur||a.length>90))a.shift();
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  for(const p of a){const k=(t-p.b)/dur,sx=p.x-g.scroll;
+    if(sp==='tide'){ctx.strokeStyle=`rgba(150,250,225,${(1-k)*.6})`;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(sx,p.y,8+k*26,4+k*12,0,0,TAU);ctx.stroke()}
+    else{ctx.fillStyle=`rgba(${p.c},${(1-k)*.9})`;sparkle(sx-k*14,p.y+Math.sin(p.b*7+k*4)*4,p.r*(1-k*.4))}}
+  ctx.restore()}
+const TRAIL={angel:1,star:1,tide:1};
+/* 吃到珍珠时皮肤的小花样 */
+function skinPick(x,y){const sp=(SKINS[SAVE.skin]||{}).sp;if(sp==='koi')burst(x,y,'#ffd23f',5,1);else if(sp==='panda'&&Math.random()<.3)ftext('🍃',x,y-20,'#7fd36a')}
 /* 海天使游过留下的荧光拖尾 */
 function angelTrail(g,t){
   const a=g.atr||(g.atr=[]);if(state==='play'&&a.lt!==t){a.lt=t;a.push({x:g.scroll+fishSX-30,y:g.fish.y+(Math.random()-.5)*14,b:t,r:2+Math.random()*3,c:Math.random()<.25?'255,170,140':'160,245,255'})}
@@ -185,7 +228,7 @@ function drawWorld(){
     if(B.ph==='idle'){drawShark(bx,by,t);const mx=bx-112,my=by+10,op=bossOpen(B),on=B.carry>0&&op;if(!op){ctx.fillStyle='#5f7fa3';ctx.beginPath();ctx.moveTo(bx-124,by-8);ctx.quadraticCurveTo(bx-84,by+30,bx-54,by+24);ctx.lineTo(bx-56,by+2);ctx.closePath();ctx.fill()}ctx.save();ctx.strokeStyle=on?'#4fe0b5':'rgba(255,255,255,.75)';ctx.globalAlpha=op?1:.25;ctx.lineWidth=on?5:3;ctx.setLineDash([10,8]);ctx.lineDashOffset=-t*40;ctx.beginPath();ctx.arc(mx,my,44+Math.sin(t*6)*3,0,TAU);ctx.stroke();ctx.restore();
       ctx.fillStyle='#fff';ctx.font=`${20*Math.max(1,U*.85)}px ${FONT}`;ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='rgba(6,40,70,.6)';const tx=on?'点我喂！':op?'咕——':'……';ctx.strokeText(tx,bx-30,by-78);ctx.fillText(tx,bx-30,by-78)}
     for(let i=0;i<B.carry;i++)drawFish(fishSX-50-i*28,F.y+22+Math.sin(t*6+i)*3,0,t+i,{s:.45,c0:'#bff0ff',c1:'#56b8f0',c2:'#2f8fd0'})}
-  const dead=state==='dying';if(SKINS[SAVE.skin]&&SKINS[SAVE.skin].sp==='angel'&&!dead)angelTrail(g,t);
+  const dead=state==='dying',ksp=(SKINS[SAVE.skin]||{}).sp;if(TRAIL[ksp]&&!dead)skinTrail(g,t,ksp);
   if(!(g.inv>0&&!g.trap&&Math.sin(t*30)>0)||dead){
     drawFish(fishSX,F.y,dead?Math.PI:clamp(F.vy/520,-.5,.5)+(g.trap?Math.sin(t*30)*.2:0),dead?0:t,{dead,scared:g.sharks.length>0||!!g.trap,...skin()})}
   if(g.orb){const o=g.orb;if(!(o.inv>0&&Math.sin(t*30)>0)){ctx.save();ctx.translate(fishSX-78,o.y);ctx.shadowColor='#9ff0ff';ctx.shadowBlur=26+Math.sin(t*4)*8;ctx.fillStyle='#dffaff';circ(0,0,15);ctx.shadowBlur=0;ctx.fillStyle='#9ff0ff';circ(0,0,9);ctx.fillStyle='#fff';for(let i=0;i<o.hp;i++)circ((i-(o.hp-1)/2)*11,-26,3.5);ctx.restore()}}

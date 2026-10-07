@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>小鱼快跑</title>
-<meta name="version" content="2.9.1">
+<meta name="version" content="2.10.0">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
 :root{
@@ -192,6 +192,7 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
 .gd{font:inherit;border:0;background:none;color:#fff;padding:4px 2px 18px;text-align:center;position:relative;cursor:pointer;margin-bottom:12px}
 .gd::after{content:"";position:absolute;left:-6px;right:-6px;bottom:0;height:10px;background:linear-gradient(#e6b878,#c99450);box-shadow:0 3px 0 #5a3a1a}
 .gd .gi{display:grid;place-items:center;width:60px;height:60px;margin:0 auto 5px;border-radius:16px;background:rgba(255,253,244,.94);font-size:32px;box-shadow:0 3px 0 rgba(0,0,0,.28);position:relative}
+.gd .gi img.skI{display:block;width:58px;height:auto}
 .gd .gi i{display:block;width:36px;height:36px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px rgba(6,40,70,.2)}
 .gd .gn{display:block;font-size:13.5px;line-height:1.2;min-height:33px;text-shadow:0 1px 0 rgba(0,0,0,.4)}
 .gd .gp{display:inline-block;font-size:13px;background:var(--sun);color:#6a4500;border-radius:99px;padding:0 9px;line-height:1.5}
@@ -380,7 +381,7 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
       <button class="btn" id="bHelp">玩法说明</button>
       <button class="btn" id="bSet">设置</button>
     </div>
-    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v2.9.1</p>
+    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v2.10.0</p>
     <button class="btn sm float" data-go="sMenu">返回主菜单</button>
   </section>
 
@@ -537,7 +538,14 @@ const ITEMS=[
 const SKINS=[{n:'橙色小鱼',p:0,c:['#ffe08a','#ffa01f','#ff7f1f']},{n:'蓝色小鱼',p:200,c:['#d2f4ff','#56b8f0','#2f8fd0']},
  {n:'粉色小鱼',p:200,c:['#ffe6f1','#ff8fc0','#f0589a']},{n:'翡翠小鱼',p:400,c:['#dcffee','#4fe0b5','#1c9c7a']},
  {n:'紫罗兰小鱼',p:300,c:['#efe0ff','#b57af2','#7d45c9']},{n:'墨墨小鱼',p:300,c:['#c8d0dc','#56627a','#2c3446']},{n:'黄金小鱼',p:800,c:['#fffbe0','#ffcf2e','#d99400']},
- {n:'海天使',p:3000,c:['#f2fdff','#9fe6ff','#ff6a4d'],sp:'angel',d:'会发光的海天使，游过的地方会留下荧光'}];
+ {n:'海天使',p:20000,c:['#f2fdff','#9fe6ff','#ff6a4d'],sp:'angel',d:'会发光的海天使，游过的地方会留下荧光'},
+ /* v2.10.0 新皮肤：只能往后加，存档里记的是序号 */
+ {n:'熊猫小鱼',p:8888,c:['#ffffff','#e6eaf0','#1e2026'],sp:'panda',d:'黑眼圈、小圆耳朵。吃到珍珠时偶尔冒出一片竹叶'},
+ {n:'小丑鱼',p:3000,c:['#ffb067','#ff7a1a','#ff6a00'],sp:'clown',d:'橙底三条白环，南方环礁的珊瑚礁里最常见的鱼'},
+ {n:'锦鲤',p:3888,c:['#ffffff','#f1ece4','#ff8a6a'],sp:'koi',d:'红白花斑的锦鲤，每吃到一颗珍珠都闪一下金光'},
+ {n:'小墨墨',p:12000,c:['#e6d4ff','#b57af2','#9a6ad6'],sp:'octo',d:'墨墨同款的小触手。被撞到时会喷一团墨'},
+ {n:'星空小鱼',p:20000,c:['#4a5fc0','#141c4a','#2a3a8a'],sp:'star',d:'身上的小星星会眨眼，游过的地方留下一串星尘'},
+ {n:'潮心小鱼',p:58888,c:['#f4fffb','#7fe8d0','#3fc0b0'],sp:'tide',d:'像潮心一样透亮，身边绕着一圈光环，游过的地方留下波纹',both:1}];
 SAVE=Object.assign({fish:{},dishes:{}},SAVE);
 const FISH={sard:{n:'沙丁鱼',c:['#eef7ff','#9cc4e8','#5f8fc0'],s:.72,hp:1,v:30},bream:{n:'鲷鱼',c:['#ffdcd4','#ff7a6b','#d94f45'],s:.88,hp:1,v:45},
  salmon:{n:'三文鱼',c:['#ffe6d4','#ff9a6a','#e0683a'],s:1,hp:2,v:60},puffer:{n:'河豚',c:['#fff8c8','#f2d24a','#c9a21a'],s:1.05,hp:2,v:35},tuna:{n:'金枪鱼',c:['#d4e2ff','#4a6fc0','#2a4690'],s:1.3,hp:3,v:85},
@@ -706,7 +714,7 @@ function useShield(){const g=G;g.shield=false;g.shieldUsed++;g.inv=1;SFX.pop();b
 function useWhale(shark){const g=G;g.whale=false;g.shieldUsed++;g.inv=shark?1.6:1;SFX.pop();SFX.free();burst(fishSX,g.fish.y,'#7fd8ff',20);burst(fishSX,g.fish.y,'#fff',10,1);ftext(shark?'鲸鱼结界挡住了鲨鱼！':'鲸鱼结界挡住了！',fishSX,g.fish.y-60,'#bff0ff')}
 const absorb=()=>G.shield?useShield():useWhale();
 function hurt(n){const g=G;if(SAVE.god&&SAVE.dev)return 0;if(g.inv>0)return 0;if(g.shield||g.whale){absorb();return 0}
-  if(g.boss&&g.boss.k==='chase'&&!g.boss.done)g.boss.gap-=22;g.life=Math.max(0,g.life-n);g.noDmg=false;g.combo=0;g.inv=1.4;g.shake=.3;SFX.hit();burst(fishSX,g.fish.y,'#ff6b6b',10);
+  if(g.boss&&g.boss.k==='chase'&&!g.boss.done)g.boss.gap-=22;g.life=Math.max(0,g.life-n);g.noDmg=false;g.combo=0;g.inv=1.4;g.shake=.3;SFX.hit();burst(fishSX,g.fish.y,'#ff6b6b',10);if((SKINS[SAVE.skin]||{}).sp==='octo')burst(fishSX-24,g.fish.y,'#3a2a55',18);
   ftext(n>=1?'-1 星':'-半星',fishSX,g.fish.y-50,'#ffb3b3');if(g.life<=0)die('hp');return 1}
 function die(c){const g=G;if(state!=='play')return;if(SAVE.god&&SAVE.dev){g.life=g.maxLife;g.inv=1;return}
   if(g.boss&&!g.boss.done){g.noDmg=false;g.boss.tries=(g.boss.tries||0)+1;bossRetry();return}
@@ -868,7 +876,7 @@ function update(dt){
     case'lava':case'pumice':case'sline':a3Hit(g,e,sx,y,dx,dt);break;
     case'pearl':if(sx>fx)e.miss=0;else if(sx<fx-(g.magnet?120:50)&&!e.miss&&!e.air){e.miss=1;if(g.combo>=3)ftext('连击断了',fx+30,F.y-56,'#b8c7d9');g.combo=0}
       if(g.magnet&&dist<190&&dist>=38&&!g.trap){const k=Math.min(1,dt*(dist<115?9:5));e.dx=(e.dx||0)-dx*k;e.py=(e.py||0)-dy*k}
-      if(dist<38&&!g.trap){e.gone=1;if(g.boss&&g.boss.k==='chase'&&!g.boss.done)g.boss.gap=Math.min(100,g.boss.gap+1.05);g.pearls+=e.air?2:1;if(e.air)burst(sx,y,'#ffe27a',6,1);g.combo++;g.comboT=3.5;g.maxCombo=Math.max(g.maxCombo,g.combo);SFX.pearl(g.combo);burst(sx,y,'#fff',4,1);
+      if(dist<38&&!g.trap){e.gone=1;if(g.boss&&g.boss.k==='chase'&&!g.boss.done)g.boss.gap=Math.min(100,g.boss.gap+1.05);g.pearls+=e.air?2:1;if(e.air)burst(sx,y,'#ffe27a',6,1);skinPick(sx,y);g.combo++;g.comboT=3.5;g.maxCombo=Math.max(g.maxCombo,g.combo);SFX.pearl(g.combo);burst(sx,y,'#fff',4,1);
         if(g.combo%10===0){g.pearls+=5;ftext(`连击 ${g.combo}！+5 ⚪`,fx+30,F.y-56,'#ffe27a');SFX.pearl(12)}}break;
     case'rock':{const hw=e.w/2-12,ry=e.top?fy(e.h)-12:fy(1-e.h)+12;
         if(Math.abs(dx)<hw+16&&(e.top?F.y-18<ry:F.y+18>ry))hurt(1)}break;
@@ -1422,20 +1430,51 @@ function drawBG(th,sc,t){
 function drawFish(x,y,ang,t,o){
   o=o||{};ctx.save();ctx.translate(x,y);ctx.rotate(ang);const s=o.s||1;ctx.scale(s*(o.lx||1),s);
   if(o.sp==='angel'){drawAngel(t,o);ctx.restore();return}
-  const wag=Math.sin(t*14)*.35,c2=o.c2||'#ff7f1f';
-  ctx.save();ctx.translate(-23,0);ctx.rotate(wag);ctx.fillStyle=c2;ctx.beginPath();ctx.moveTo(0,0);ctx.quadraticCurveTo(-16,-6,-27,-21);ctx.quadraticCurveTo(-19,0,-27,21);ctx.quadraticCurveTo(-16,6,0,0);ctx.fill();ctx.restore();
-  ctx.fillStyle=c2;ctx.beginPath();ctx.moveTo(-12,-19);ctx.quadraticCurveTo(-3,-37,11,-20);ctx.fill();
-  const g=ctx.createRadialGradient(-4,-8,4,0,0,30);g.addColorStop(0,o.c0||'#ffe08a');g.addColorStop(1,o.c1||'#ffa01f');if(o.glow){ctx.shadowColor='#fff27a';ctx.shadowBlur=18}ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(0,0,28,23,0,0,TAU);ctx.fill();ctx.shadowBlur=0;
+  const sp=o.sp,wag=Math.sin(t*14)*.35,c2=o.c2||'#ff7f1f',edge=sp==='clown'?'#1b2a41':0;
+  if(sp==='tide')tideHalo(t,0);
+  if(sp==='octo')octoLegs(t,c2);
+  else{ctx.save();ctx.translate(-23,0);ctx.rotate(wag);ctx.fillStyle=c2;ctx.beginPath();ctx.moveTo(0,0);ctx.quadraticCurveTo(-16,-6,-27,-21);ctx.quadraticCurveTo(-19,0,-27,21);ctx.quadraticCurveTo(-16,6,0,0);ctx.fill();if(edge){ctx.strokeStyle=edge;ctx.lineWidth=2;ctx.stroke()}ctx.restore()}
+  if(sp==='panda'){ctx.fillStyle=c2;circ(-1,-21,8);circ(15,-17,7.5)}
+  else if(sp!=='octo'){ctx.fillStyle=c2;ctx.beginPath();ctx.moveTo(-12,-19);ctx.quadraticCurveTo(-3,-37,11,-20);ctx.fill();if(edge){ctx.strokeStyle=edge;ctx.lineWidth=2;ctx.stroke()}}
+  const g=ctx.createRadialGradient(-4,-8,4,0,0,30);
+  if(sp==='tide'){const pu=.5+.5*Math.sin(t*3);g.addColorStop(0,'rgba(244,255,251,.96)');g.addColorStop(1,'rgba(110,225,205,.72)');ctx.shadowColor='#7ff0d8';ctx.shadowBlur=16+pu*10}
+  else{g.addColorStop(0,o.c0||'#ffe08a');g.addColorStop(1,o.c1||'#ffa01f');if(o.glow){ctx.shadowColor='#fff27a';ctx.shadowBlur=18}else if(sp==='star'){ctx.shadowColor='#8fa0ff';ctx.shadowBlur=12}}
+  ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(0,0,28,23,0,0,TAU);ctx.fill();ctx.shadowBlur=0;
+  if(sp)skinPattern(sp,t);
   if(o.stripe){ctx.strokeStyle='rgba(0,40,60,.28)';ctx.lineWidth=4;ctx.lineCap='round';for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(-34+i*10,0,30,-.55,.2);ctx.stroke()}}
   if(o.bill){ctx.strokeStyle=c2;ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(26,1);ctx.lineTo(60,-3);ctx.stroke()}
   if(o.lamp){ctx.strokeStyle=c2;ctx.lineWidth=2.5;ctx.beginPath();ctx.moveTo(4,-22);ctx.quadraticCurveTo(22,-44,34,-24);ctx.stroke();ctx.fillStyle='#fff27a';ctx.shadowColor='#fff27a';ctx.shadowBlur=14;circ(34,-22,5);ctx.shadowBlur=0}
-  ctx.fillStyle='rgba(255,255,255,.38)';ctx.beginPath();ctx.ellipse(2,10,17,9,0,0,TAU);ctx.fill();
-  ctx.fillStyle=c2;ctx.beginPath();ctx.ellipse(-5,8,8,5,.6+wag*.6,0,TAU);ctx.fill();
-  if(o.dead){ctx.strokeStyle='#1b2a41';ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(8,-10);ctx.lineTo(18,0);ctx.moveTo(18,-10);ctx.lineTo(8,0);ctx.stroke()}
+  ctx.fillStyle=sp==='star'?'rgba(255,255,255,.12)':'rgba(255,255,255,.38)';ctx.beginPath();ctx.ellipse(2,10,17,9,0,0,TAU);ctx.fill();
+  if(sp!=='octo'){ctx.fillStyle=c2;ctx.beginPath();ctx.ellipse(-5,8,8,5,.6+wag*.6,0,TAU);ctx.fill();if(edge){ctx.strokeStyle=edge;ctx.lineWidth=1.5;ctx.stroke()}}
+  if(sp==='panda'){ctx.fillStyle=c2;ctx.beginPath();ctx.ellipse(13,-4,13,11,-.35,0,TAU);ctx.fill()}
+  if(o.dead){ctx.strokeStyle=sp==='panda'||sp==='star'?'#fff':'#1b2a41';ctx.lineWidth=3;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(8,-10);ctx.lineTo(18,0);ctx.moveTo(18,-10);ctx.lineTo(8,0);ctx.stroke()}
   else{ctx.fillStyle='#fff';circ(13,-5,o.scared?11:9.5);ctx.fillStyle='#1b2a41';circ(15,-5,o.scared?4:5.4);ctx.fillStyle='#fff';circ(16.8,-7.2,2)}
   ctx.fillStyle='rgba(255,90,120,.45)';circ(7,8,4.5);
-  if(o.scared||o.dead){ctx.fillStyle='#8a3b00';circ(23,7,3.6)}else{ctx.strokeStyle='#8a3b00';ctx.lineWidth=2.2;ctx.lineCap='round';ctx.beginPath();ctx.arc(20,4,5.5,.25,1.5);ctx.stroke()}
+  const mc=sp==='star'?'#ffd6f0':sp==='octo'?'#5a2a7a':'#8a3b00';
+  if(o.scared||o.dead){ctx.fillStyle=mc;circ(23,7,3.6)}else{ctx.strokeStyle=mc;ctx.lineWidth=2.2;ctx.lineCap='round';ctx.beginPath();ctx.arc(20,4,5.5,.25,1.5);ctx.stroke()}
+  if(sp==='koi'){ctx.strokeStyle='#e8a090';ctx.lineWidth=1.6;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(25,7);ctx.quadraticCurveTo(29,13+wag*3,25,18);ctx.moveTo(22,9);ctx.quadraticCurveTo(24,15+wag*3,20,19);ctx.stroke()}
+  if(sp==='tide')tideHalo(t,1);
   ctx.restore()}
+/* v2.10.0 新皮肤的花纹，只画在身体里面 */
+const STARDOT=[[-14,-12,3.2,0],[-4,-16,2,1.3],[4,12,2.4,2.1],[-18,6,2,3.3],[-8,2,3.6,4.2],[18,-16,1.8,5],[-22,-4,1.6,.7],[10,4,1.8,2.7],[-12,16,1.8,3.9]];
+function skinPattern(sp,t){ctx.save();ctx.beginPath();ctx.ellipse(0,0,28,23,0,0,TAU);ctx.clip();
+  if(sp==='panda'){ctx.fillStyle='#1e2026';ctx.beginPath();ctx.ellipse(-27,-2,8,12,0,0,TAU);ctx.fill()}
+  else if(sp==='clown'){for(const [bx,bw] of [[5,4.5],[-9,4.5],[-23,3]]){ctx.fillStyle='#fff';ctx.strokeStyle='#1b2a41';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(bx,0,bw,30,0,0,TAU);ctx.fill();ctx.stroke()}}
+  else if(sp==='koi'){ctx.fillStyle='#ff4f3a';circ(9,-19,11);ctx.beginPath();ctx.ellipse(-10,-9,13,9,.3,0,TAU);ctx.fill();ctx.beginPath();ctx.ellipse(-21,9,6,5,0,0,TAU);ctx.fill()}
+  else if(sp==='octo'){ctx.fillStyle='rgba(255,255,255,.28)';circ(-12,-10,4);circ(-3,-15,3);circ(-16,2,2.6);circ(4,-12,2)}
+  else if(sp==='star'){const n=ctx.createRadialGradient(-8,6,1,-8,6,18);n.addColorStop(0,'rgba(255,120,220,.35)');n.addColorStop(1,'rgba(255,120,220,0)');ctx.fillStyle=n;circ(-8,6,18);
+    for(const [sx,sy,r,ph] of STARDOT){const a=.35+.65*Math.abs(Math.sin(t*2.2+ph));ctx.globalAlpha=a;ctx.fillStyle='#fff8d0';sparkle(sx,sy,r*(.7+.3*a))}ctx.globalAlpha=1}
+  else if(sp==='tide'){const pu=.5+.5*Math.sin(t*3);ctx.globalCompositeOperation='lighter';const c=ctx.createRadialGradient(-6,2,1,-6,2,15);c.addColorStop(0,`rgba(220,255,245,${.75+pu*.25})`);c.addColorStop(1,'rgba(120,240,210,0)');ctx.fillStyle=c;circ(-6,2,15);ctx.globalCompositeOperation='source-over';
+    ctx.strokeStyle=`rgba(255,255,255,${.35+pu*.3})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(-6,2,6+pu*3,0,TAU);ctx.stroke()}
+  ctx.restore()}
+function sparkle(x,y,r){ctx.beginPath();ctx.moveTo(x,y-r*2);ctx.quadraticCurveTo(x,y,x+r*2,y);ctx.quadraticCurveTo(x,y,x,y+r*2);ctx.quadraticCurveTo(x,y,x-r*2,y);ctx.quadraticCurveTo(x,y,x,y-r*2);ctx.fill()}
+/* 小墨墨：尾巴换成四条小触手 */
+function octoLegs(t,c){ctx.lineCap='round';for(let i=0;i<4;i++){const y0=-9+i*6,w=Math.sin(t*8+i*1.3),ex=-48+Math.abs(i-1.5)*4,ey=y0*1.6+w*7;
+  ctx.strokeStyle=c;ctx.lineWidth=7-i%2;ctx.beginPath();ctx.moveTo(-14,y0);ctx.quadraticCurveTo(-32,y0+w*-6,ex,ey);ctx.stroke();
+  ctx.fillStyle='#e6d4ff';circ(-30,y0+w*-3+1.5,1.6);circ(ex+6,ey-1,1.3)}}
+/* 潮心小鱼的光环：front=0 画后半圈，1 画前半圈 */
+function tideHalo(t,front){ctx.save();ctx.rotate(-.25);ctx.strokeStyle='rgba(190,255,235,.55)';ctx.lineWidth=2;ctx.beginPath();front?ctx.ellipse(0,0,44,13,0,0,Math.PI):ctx.ellipse(0,0,44,13,0,Math.PI,TAU);ctx.stroke();
+  ctx.shadowColor='#bfffee';ctx.shadowBlur=10;ctx.fillStyle='#effffa';for(let i=0;i<3;i++){const a=t*1.6+i*TAU/3,sy=Math.sin(a);if(front?sy<0:sy>=0)continue;circ(Math.cos(a)*44,sy*13,2.4+sy*.8)}ctx.restore()}
 /* 海天使皮肤：半透明发光的身体、扇动的小翅膀、橙红色的心 */
 function drawAngel(t,o){
   const fl=Math.sin(t*9),pu=.5+.5*Math.sin(t*3);
@@ -1452,6 +1491,18 @@ function drawAngel(t,o){
   else{ctx.fillStyle='#fff';circ(15,-5,o.scared?9:7.5);ctx.fillStyle='#1b2a41';circ(16.5,-5,o.scared?3.4:4.4);ctx.fillStyle='#fff';circ(18,-7,1.6)}
   ctx.fillStyle='rgba(255,120,150,.5)';circ(11,7,3.5);
   ctx.strokeStyle='#c0465a';ctx.lineWidth=2;ctx.lineCap='round';ctx.beginPath();if(o.scared||o.dead)ctx.arc(24,6,2.6,0,TAU);else ctx.arc(21,4,4.5,.25,1.5);ctx.stroke()}
+/* 星空小鱼的星尘、潮心小鱼的波纹 */
+function skinTrail(g,t,sp){if(sp==='angel')return angelTrail(g,t);
+  const a=g.str||(g.str=[]),dur=sp==='tide'?1.3:1.1;if(state==='play'&&a.lt!==t&&(sp!=='tide'||t-(a.lb||0)>.16)){a.lt=t;a.lb=t;a.push({x:g.scroll+fishSX-(sp==='tide'?20:30),y:g.fish.y+(sp==='tide'?0:(Math.random()-.5)*16),b:t,r:1.4+Math.random()*2.2,c:Math.random()<.35?'255,226,140':'220,228,255'})}
+  while(a.length&&(t-a[0].b>dur||a.length>90))a.shift();
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  for(const p of a){const k=(t-p.b)/dur,sx=p.x-g.scroll;
+    if(sp==='tide'){ctx.strokeStyle=`rgba(150,250,225,${(1-k)*.6})`;ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(sx,p.y,8+k*26,4+k*12,0,0,TAU);ctx.stroke()}
+    else{ctx.fillStyle=`rgba(${p.c},${(1-k)*.9})`;sparkle(sx-k*14,p.y+Math.sin(p.b*7+k*4)*4,p.r*(1-k*.4))}}
+  ctx.restore()}
+const TRAIL={angel:1,star:1,tide:1};
+/* 吃到珍珠时皮肤的小花样 */
+function skinPick(x,y){const sp=(SKINS[SAVE.skin]||{}).sp;if(sp==='koi')burst(x,y,'#ffd23f',5,1);else if(sp==='panda'&&Math.random()<.3)ftext('🍃',x,y-20,'#7fd36a')}
 /* 海天使游过留下的荧光拖尾 */
 function angelTrail(g,t){
   const a=g.atr||(g.atr=[]);if(state==='play'&&a.lt!==t){a.lt=t;a.push({x:g.scroll+fishSX-30,y:g.fish.y+(Math.random()-.5)*14,b:t,r:2+Math.random()*3,c:Math.random()<.25?'255,170,140':'160,245,255'})}
@@ -1580,7 +1631,7 @@ function drawWorld(){
     if(B.ph==='idle'){drawShark(bx,by,t);const mx=bx-112,my=by+10,op=bossOpen(B),on=B.carry>0&&op;if(!op){ctx.fillStyle='#5f7fa3';ctx.beginPath();ctx.moveTo(bx-124,by-8);ctx.quadraticCurveTo(bx-84,by+30,bx-54,by+24);ctx.lineTo(bx-56,by+2);ctx.closePath();ctx.fill()}ctx.save();ctx.strokeStyle=on?'#4fe0b5':'rgba(255,255,255,.75)';ctx.globalAlpha=op?1:.25;ctx.lineWidth=on?5:3;ctx.setLineDash([10,8]);ctx.lineDashOffset=-t*40;ctx.beginPath();ctx.arc(mx,my,44+Math.sin(t*6)*3,0,TAU);ctx.stroke();ctx.restore();
       ctx.fillStyle='#fff';ctx.font=`${20*Math.max(1,U*.85)}px ${FONT}`;ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='rgba(6,40,70,.6)';const tx=on?'点我喂！':op?'咕——':'……';ctx.strokeText(tx,bx-30,by-78);ctx.fillText(tx,bx-30,by-78)}
     for(let i=0;i<B.carry;i++)drawFish(fishSX-50-i*28,F.y+22+Math.sin(t*6+i)*3,0,t+i,{s:.45,c0:'#bff0ff',c1:'#56b8f0',c2:'#2f8fd0'})}
-  const dead=state==='dying';if(SKINS[SAVE.skin]&&SKINS[SAVE.skin].sp==='angel'&&!dead)angelTrail(g,t);
+  const dead=state==='dying',ksp=(SKINS[SAVE.skin]||{}).sp;if(TRAIL[ksp]&&!dead)skinTrail(g,t,ksp);
   if(!(g.inv>0&&!g.trap&&Math.sin(t*30)>0)||dead){
     drawFish(fishSX,F.y,dead?Math.PI:clamp(F.vy/520,-.5,.5)+(g.trap?Math.sin(t*30)*.2:0),dead?0:t,{dead,scared:g.sharks.length>0||!!g.trap,...skin()})}
   if(g.orb){const o=g.orb;if(!(o.inv>0&&Math.sin(t*30)>0)){ctx.save();ctx.translate(fishSX-78,o.y);ctx.shadowColor='#9ff0ff';ctx.shadowBlur=26+Math.sin(t*4)*8;ctx.fillStyle='#dffaff';circ(0,0,15);ctx.shadowBlur=0;ctx.fillStyle='#9ff0ff';circ(0,0,9);ctx.fillStyle='#fff';for(let i=0;i<o.hp;i++)circ((i-(o.hp-1)/2)*11,-26,3.5);ctx.restore()}}
@@ -1637,8 +1688,14 @@ function shopItems(){
       act:lock?`<button class="btn off" disabled>🔒 通关第 ${ITEM_CH[it.id]} 关</button>`:`<button class="btn sun" data-buy="${it.id}" ${SAVE.wallet<it.p?'disabled':''}>⚪ ${it.p}</button>`+(n?`<button class="btn ${on?'off':'mint'}" data-tog="${it.id}">${on?'取下':'带上'}</button>`:'')}})}
   if(shopTab==='tool')return TOOLS.filter(t=>chN()>=(t.ch||5)).map(t=>{const own=SAVE.tools[t.id];return{id:t.id,ic:t.ic,n:t.n,d:t.d,note:'买一次，永久使用',tag:own?'已拥有':'⚪ '+t.p,own,
     act:own?'<button class="btn off" disabled>已拥有</button>':`<button class="btn sun" data-tool="${t.id}" ${SAVE.wallet<t.p?'disabled':''}>⚪ ${t.p}</button>`}});
-  return SKINS.map((k,i)=>{const own=SAVE.skins.includes(i),cur=SAVE.skin===i;return{id:'s'+i,ic:`<i style="background:radial-gradient(circle at 35% 30%,${k.c[0]},${k.c[1]})${k.sp?';box-shadow:0 0 10px 3px #9ff8ff,inset 0 0 0 4px rgba(255,106,77,.55)':''}"></i>`,n:k.n,d:cur?'正在使用':own?'已拥有':k.d||'换个颜色去冒险',note:'永久拥有',tag:cur?'使用中':own?'已拥有':'⚪ '+k.p,own,
-    act:own?`<button class="btn ${cur?'off':'mint'}" data-skin="${i}" ${cur?'disabled':''}>${cur?'使用中':'换上'}</button>`:`<button class="btn sun" data-skin="${i}" ${SAVE.wallet<k.p?'disabled':''}>⚪ ${k.p}</button>`}})}
+  return SKINS.map((k,i)=>{const own=SAVE.skins.includes(i),cur=SAVE.skin===i,lock=!own&&k.both&&!(hardOpen()&&hard2Open());return{id:'s'+i,ic:`<img class="skI" src="${skinIcon(i)}" alt="">`,n:k.n,d:cur?'正在使用':own?'已拥有':k.d||'换个颜色去冒险',note:lock?'第一卷和第二卷都通关后才能买':'永久拥有',tag:cur?'使用中':own?'已拥有':(lock?'🔒 ':'⚪ ')+k.p,own,lock,p:k.p,
+    act:own?`<button class="btn ${cur?'off':'mint'}" data-skin="${i}" ${cur?'disabled':''}>${cur?'使用中':'换上'}</button>`:lock?'<button class="btn off" disabled>🔒 两卷都通关后才能买</button>':`<button class="btn sun" data-skin="${i}" ${SAVE.wallet<k.p?'disabled':''}>⚪ ${k.p}</button>`}}).sort((a,b)=>a.p-b.p)}
+/* 杂货铺里的皮肤图标：用游戏里同一套画法画一条小鱼，画一次存起来 */
+const SKIC={};
+function skinIcon(i){if(SKIC[i])return SKIC[i];const k=SKINS[i],W=120,H=96;let url='';
+  ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,W,H);
+  try{drawFish(66,48,0,.32,{s:.86,c0:k.c[0],c1:k.c[1],c2:k.c[2],sp:k.sp});const c=document.createElement('canvas');c.width=W;c.height=H;c.getContext('2d').drawImage(cv,0,0,W,H,0,0,W,H);url=c.toDataURL()}catch(e){}
+  ctx.restore();return SKIC[i]=url}
 function showShop(){
   $('wallet').textContent=SAVE.wallet;const items=shopItems();if(!items.some(x=>x.id===shopSel))shopSel=items[0]?items[0].id:'';const cur=items.find(x=>x.id===shopSel);
   $('shopList').innerHTML=`<div class="tabs">${STABS.map(t=>`<button class="tab ${t[0]===shopTab?'on':''}" data-stab="${t[0]}">${t[1]} ${t[2]}</button>`).join('')}</div>`
@@ -1650,7 +1707,7 @@ $('shopList').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)r
   if(d.tool){const t=TOOLS.find(x=>x.id===d.tool);if(SAVE.wallet<t.p)return;SAVE.wallet-=t.p;SAVE.tools[t.id]=1;SFX.win()}
   else if(d.buy){const it=ITEMS.find(x=>x.id===d.buy);if(SAVE.wallet<it.p)return;SAVE.wallet-=it.p;SAVE.inv[it.id]=(SAVE.inv[it.id]||0)+1;SFX.shield()}
   else if(d.tog){SAVE.use[d.tog]=SAVE.use[d.tog]===0?1:0;SFX.tap()}
-  else if(d.skin){const i=+d.skin;if(!SAVE.skins.includes(i)){if(SAVE.wallet<SKINS[i].p)return;SAVE.wallet-=SKINS[i].p;SAVE.skins.push(i);SFX.win()}SAVE.skin=i}
+  else if(d.skin){const i=+d.skin;if(!SAVE.skins.includes(i)){const k=SKINS[i];if(SAVE.wallet<k.p||k.both&&!(hardOpen()&&hard2Open()))return;SAVE.wallet-=k.p;SAVE.skins.push(i);SFX.win();if(k.sp==='octo')toast('墨墨：亏了！亏大了！',2.4)}SAVE.skin=i}
   persist();refreshMenu();showShop()};
 const dot=k=>`<i style="background:radial-gradient(circle at 35% 30%,${FISH[k].c[0]},${FISH[k].c[1]})"></i>`;
 function showKitchen(){
@@ -3116,6 +3173,16 @@ for(const k in TLC)delete TLC[k];
 for(const d of DISH){if(+d.id.slice(1)<66)continue;const m=methodOf(d.id),z=`用${Object.entries(d.need).map(([k,n])=>FISH[k].n+(n>1?'×'+n:'')).join('、')}做成，在${STN[m][1]}上完成。小馆里一份卖 ${d.p} 珍珠，已经上过 0 次。`,
  v=`Made with ${Object.entries(d.need).map(([k,n])=>tl0(FISH[k].n,'en')+(n>1?' ×'+n:'')).join(', ')}, finished at the ${tl0(STN[m][1],'en').toLowerCase()}. Sells for ${d.p} pearls a plate at the diner. Times served: 0.`;DICT[z]=[v,v,v,v]}
 for(const k in TLC)delete TLC[k];
+/* v2.10.0：六款新皮肤 */
+{const EN11={"熊猫小鱼":"Panda fish","黑眼圈、小圆耳朵。吃到珍珠时偶尔冒出一片竹叶":"Black eye patches and little round ears. Sometimes a bamboo leaf pops out when it eats a pearl",
+ "小丑鱼":"Clownfish","橙底三条白环，南方环礁的珊瑚礁里最常见的鱼":"Orange with three white bands. The most common fish on the reefs of the Southern Atoll",
+ "锦鲤":"Koi","红白花斑的锦鲤，每吃到一颗珍珠都闪一下金光":"A red-and-white koi. Every pearl it eats sparkles gold",
+ "小墨墨":"Little Inky","墨墨同款的小触手。被撞到时会喷一团墨":"Little tentacles just like Inky's. Squirts ink when it gets hit",
+ "星空小鱼":"Starry fish","身上的小星星会眨眼，游过的地方留下一串星尘":"Little stars twinkle on its body, and it leaves a trail of stardust",
+ "潮心小鱼":"Tide Heart fish","像潮心一样透亮，身边绕着一圈光环，游过的地方留下波纹":"Clear and bright like the Tide Heart, with a ring of light around it. Leaves ripples wherever it swims",
+ "第一卷和第二卷都通关后才能买":"Unlocks after clearing Volume 1 and Volume 2","🔒 两卷都通关后才能买":"🔒 Clear both volumes first","墨墨：亏了！亏大了！":"Inky: I'm losing money! Losing big!"};
+ for(const k in EN11)if(!DICT[k]){const v=EN11[k];DICT[k]=[v,v,v,v]}}
+for(const k in TLC)delete TLC[k];
 /* ---------- music (synthesised) ---------- */
 const TRK={
  menu:{bpm:96,root:60,mo:12,kick:1,ch:[[0,4,7],[7,11,14],[9,12,16],[5,9,12]],
@@ -4012,7 +4079,7 @@ function frame(ts){
   const dt=Math.min(.034,(ts-last)/1000||0);last=ts;musTick();
   if(G){if(state==='play'||state==='dying')update(dt);if(G){drawWorld();if(state==='play'||state==='dying')updateHUD()}}
   if(!G&&!FS){menuT+=dt;drawBG(0,menuT*45,menuT);const y=VT*.8+Math.sin(menuT*1.4)*18;
-    drawFish(VW*.5,y,Math.sin(menuT*1.4+1.5)*.15,menuT,{s:1.5,...skin()});drawFish(VW*.5-110,y+34,Math.sin(menuT*1.4+1)*.15,menuT+1,{s:.7,c0:'#bff0ff',c1:'#56b8f0',c2:'#2f8fd0'})}
+    const sk=skin(),rl=sk.sp==='panda'&&menuT%7<.9?menuT%7/.9*TAU:0;drawFish(VW*.5,y,Math.sin(menuT*1.4+1.5)*.15+rl,menuT,{s:1.5,...sk});drawFish(VW*.5-110,y+34,Math.sin(menuT*1.4+1)*.15,menuT+1,{s:.7,c0:'#bff0ff',c1:'#56b8f0',c2:'#2f8fd0'})}
   if(!stQ&&$('sShop').classList.contains('on'))drawShopScene(dt);
   if(FS&&!stQ)fishFrame(dt);
   if(stQ)drawCut(dt);else if(!FS)ambOff();if(SV&&!SV.over)svTick(dt*(SAVE.spd||1));

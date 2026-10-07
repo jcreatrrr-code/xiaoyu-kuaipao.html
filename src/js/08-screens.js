@@ -10,8 +10,14 @@ function shopItems(){
       act:lock?`<button class="btn off" disabled>🔒 通关第 ${ITEM_CH[it.id]} 关</button>`:`<button class="btn sun" data-buy="${it.id}" ${SAVE.wallet<it.p?'disabled':''}>⚪ ${it.p}</button>`+(n?`<button class="btn ${on?'off':'mint'}" data-tog="${it.id}">${on?'取下':'带上'}</button>`:'')}})}
   if(shopTab==='tool')return TOOLS.filter(t=>chN()>=(t.ch||5)).map(t=>{const own=SAVE.tools[t.id];return{id:t.id,ic:t.ic,n:t.n,d:t.d,note:'买一次，永久使用',tag:own?'已拥有':'⚪ '+t.p,own,
     act:own?'<button class="btn off" disabled>已拥有</button>':`<button class="btn sun" data-tool="${t.id}" ${SAVE.wallet<t.p?'disabled':''}>⚪ ${t.p}</button>`}});
-  return SKINS.map((k,i)=>{const own=SAVE.skins.includes(i),cur=SAVE.skin===i;return{id:'s'+i,ic:`<i style="background:radial-gradient(circle at 35% 30%,${k.c[0]},${k.c[1]})${k.sp?';box-shadow:0 0 10px 3px #9ff8ff,inset 0 0 0 4px rgba(255,106,77,.55)':''}"></i>`,n:k.n,d:cur?'正在使用':own?'已拥有':k.d||'换个颜色去冒险',note:'永久拥有',tag:cur?'使用中':own?'已拥有':'⚪ '+k.p,own,
-    act:own?`<button class="btn ${cur?'off':'mint'}" data-skin="${i}" ${cur?'disabled':''}>${cur?'使用中':'换上'}</button>`:`<button class="btn sun" data-skin="${i}" ${SAVE.wallet<k.p?'disabled':''}>⚪ ${k.p}</button>`}})}
+  return SKINS.map((k,i)=>{const own=SAVE.skins.includes(i),cur=SAVE.skin===i,lock=!own&&k.both&&!(hardOpen()&&hard2Open());return{id:'s'+i,ic:`<img class="skI" src="${skinIcon(i)}" alt="">`,n:k.n,d:cur?'正在使用':own?'已拥有':k.d||'换个颜色去冒险',note:lock?'第一卷和第二卷都通关后才能买':'永久拥有',tag:cur?'使用中':own?'已拥有':(lock?'🔒 ':'⚪ ')+k.p,own,lock,p:k.p,
+    act:own?`<button class="btn ${cur?'off':'mint'}" data-skin="${i}" ${cur?'disabled':''}>${cur?'使用中':'换上'}</button>`:lock?'<button class="btn off" disabled>🔒 两卷都通关后才能买</button>':`<button class="btn sun" data-skin="${i}" ${SAVE.wallet<k.p?'disabled':''}>⚪ ${k.p}</button>`}}).sort((a,b)=>a.p-b.p)}
+/* 杂货铺里的皮肤图标：用游戏里同一套画法画一条小鱼，画一次存起来 */
+const SKIC={};
+function skinIcon(i){if(SKIC[i])return SKIC[i];const k=SKINS[i],W=120,H=96;let url='';
+  ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,W,H);
+  try{drawFish(66,48,0,.32,{s:.86,c0:k.c[0],c1:k.c[1],c2:k.c[2],sp:k.sp});const c=document.createElement('canvas');c.width=W;c.height=H;c.getContext('2d').drawImage(cv,0,0,W,H,0,0,W,H);url=c.toDataURL()}catch(e){}
+  ctx.restore();return SKIC[i]=url}
 function showShop(){
   $('wallet').textContent=SAVE.wallet;const items=shopItems();if(!items.some(x=>x.id===shopSel))shopSel=items[0]?items[0].id:'';const cur=items.find(x=>x.id===shopSel);
   $('shopList').innerHTML=`<div class="tabs">${STABS.map(t=>`<button class="tab ${t[0]===shopTab?'on':''}" data-stab="${t[0]}">${t[1]} ${t[2]}</button>`).join('')}</div>`
@@ -23,7 +29,7 @@ $('shopList').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)r
   if(d.tool){const t=TOOLS.find(x=>x.id===d.tool);if(SAVE.wallet<t.p)return;SAVE.wallet-=t.p;SAVE.tools[t.id]=1;SFX.win()}
   else if(d.buy){const it=ITEMS.find(x=>x.id===d.buy);if(SAVE.wallet<it.p)return;SAVE.wallet-=it.p;SAVE.inv[it.id]=(SAVE.inv[it.id]||0)+1;SFX.shield()}
   else if(d.tog){SAVE.use[d.tog]=SAVE.use[d.tog]===0?1:0;SFX.tap()}
-  else if(d.skin){const i=+d.skin;if(!SAVE.skins.includes(i)){if(SAVE.wallet<SKINS[i].p)return;SAVE.wallet-=SKINS[i].p;SAVE.skins.push(i);SFX.win()}SAVE.skin=i}
+  else if(d.skin){const i=+d.skin;if(!SAVE.skins.includes(i)){const k=SKINS[i];if(SAVE.wallet<k.p||k.both&&!(hardOpen()&&hard2Open()))return;SAVE.wallet-=k.p;SAVE.skins.push(i);SFX.win();if(k.sp==='octo')toast('墨墨：亏了！亏大了！',2.4)}SAVE.skin=i}
   persist();refreshMenu();showShop()};
 const dot=k=>`<i style="background:radial-gradient(circle at 35% 30%,${FISH[k].c[0]},${FISH[k].c[1]})"></i>`;
 function showKitchen(){
