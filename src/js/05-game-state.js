@@ -29,7 +29,7 @@ function useShield(){const g=G;g.shield=false;g.shieldUsed++;g.inv=1;SFX.pop();b
 function useWhale(shark){const g=G;g.whale=false;g.shieldUsed++;g.inv=shark?1.6:1;SFX.pop();SFX.free();burst(fishSX,g.fish.y,'#7fd8ff',20);burst(fishSX,g.fish.y,'#fff',10,1);ftext(shark?'鲸鱼结界挡住了鲨鱼！':'鲸鱼结界挡住了！',fishSX,g.fish.y-60,'#bff0ff')}
 const absorb=()=>G.shield?useShield():useWhale();
 function hurt(n){const g=G;if(SAVE.god&&SAVE.dev)return 0;if(g.inv>0)return 0;if(g.shield||g.whale){absorb();return 0}
-  if(g.boss&&g.boss.k==='chase'&&!g.boss.done)g.boss.gap-=22;g.life=Math.max(0,g.life-n);g.noDmg=false;g.combo=0;g.inv=1.4;g.shake=.3;SFX.hit();burst(fishSX,g.fish.y,'#ff6b6b',10);
+  if(g.boss&&g.boss.k==='chase'&&!g.boss.done)g.boss.gap-=22;g.life=Math.max(0,g.life-n);g.noDmg=false;g.combo=0;g.inv=1.4;g.shake=.3;SFX.hit();burst(fishSX,g.fish.y,'#ff6b6b',10);if((SKINS[SAVE.skin]||{}).sp==='octo')burst(fishSX-24,g.fish.y,'#3a2a55',18);
   ftext(n>=1?'-1 星':'-半星',fishSX,g.fish.y-50,'#ffb3b3');if(g.life<=0)die('hp');return 1}
 function die(c){const g=G;if(state!=='play')return;if(SAVE.god&&SAVE.dev){g.life=g.maxLife;g.inv=1;return}
   if(g.boss&&!g.boss.done){g.noDmg=false;g.boss.tries=(g.boss.tries||0)+1;bossRetry();return}

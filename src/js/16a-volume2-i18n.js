@@ -139,3 +139,13 @@ for(const k in TLC)delete TLC[k];
 for(const d of DISH){if(+d.id.slice(1)<66)continue;const m=methodOf(d.id),z=`用${Object.entries(d.need).map(([k,n])=>FISH[k].n+(n>1?'×'+n:'')).join('、')}做成，在${STN[m][1]}上完成。小馆里一份卖 ${d.p} 珍珠，已经上过 0 次。`,
  v=`Made with ${Object.entries(d.need).map(([k,n])=>tl0(FISH[k].n,'en')+(n>1?' ×'+n:'')).join(', ')}, finished at the ${tl0(STN[m][1],'en').toLowerCase()}. Sells for ${d.p} pearls a plate at the diner. Times served: 0.`;DICT[z]=[v,v,v,v]}
 for(const k in TLC)delete TLC[k];
+/* v2.10.0：六款新皮肤 */
+{const EN11={"熊猫小鱼":"Panda fish","黑眼圈、小圆耳朵。吃到珍珠时偶尔冒出一片竹叶":"Black eye patches and little round ears. Sometimes a bamboo leaf pops out when it eats a pearl",
+ "小丑鱼":"Clownfish","橙底三条白环，南方环礁的珊瑚礁里最常见的鱼":"Orange with three white bands. The most common fish on the reefs of the Southern Atoll",
+ "锦鲤":"Koi","红白花斑的锦鲤，每吃到一颗珍珠都闪一下金光":"A red-and-white koi. Every pearl it eats sparkles gold",
+ "小墨墨":"Little Inky","墨墨同款的小触手。被撞到时会喷一团墨":"Little tentacles just like Inky's. Squirts ink when it gets hit",
+ "星空小鱼":"Starry fish","身上的小星星会眨眼，游过的地方留下一串星尘":"Little stars twinkle on its body, and it leaves a trail of stardust",
+ "潮心小鱼":"Tide Heart fish","像潮心一样透亮，身边绕着一圈光环，游过的地方留下波纹":"Clear and bright like the Tide Heart, with a ring of light around it. Leaves ripples wherever it swims",
+ "第一卷和第二卷都通关后才能买":"Unlocks after clearing Volume 1 and Volume 2","🔒 两卷都通关后才能买":"🔒 Clear both volumes first","墨墨：亏了！亏大了！":"Inky: I'm losing money! Losing big!"};
+ for(const k in EN11)if(!DICT[k]){const v=EN11[k];DICT[k]=[v,v,v,v]}}
+for(const k in TLC)delete TLC[k];

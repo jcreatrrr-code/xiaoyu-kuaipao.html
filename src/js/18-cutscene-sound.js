@@ -41,7 +41,7 @@ function frame(ts){
   const dt=Math.min(.034,(ts-last)/1000||0);last=ts;musTick();
   if(G){if(state==='play'||state==='dying')update(dt);if(G){drawWorld();if(state==='play'||state==='dying')updateHUD()}}
   if(!G&&!FS){menuT+=dt;drawBG(0,menuT*45,menuT);const y=VT*.8+Math.sin(menuT*1.4)*18;
-    drawFish(VW*.5,y,Math.sin(menuT*1.4+1.5)*.15,menuT,{s:1.5,...skin()});drawFish(VW*.5-110,y+34,Math.sin(menuT*1.4+1)*.15,menuT+1,{s:.7,c0:'#bff0ff',c1:'#56b8f0',c2:'#2f8fd0'})}
+    const sk=skin(),rl=sk.sp==='panda'&&menuT%7<.9?menuT%7/.9*TAU:0;drawFish(VW*.5,y,Math.sin(menuT*1.4+1.5)*.15+rl,menuT,{s:1.5,...sk});drawFish(VW*.5-110,y+34,Math.sin(menuT*1.4+1)*.15,menuT+1,{s:.7,c0:'#bff0ff',c1:'#56b8f0',c2:'#2f8fd0'})}
   if(!stQ&&$('sShop').classList.contains('on'))drawShopScene(dt);
   if(FS&&!stQ)fishFrame(dt);
   if(stQ)drawCut(dt);else if(!FS)ambOff();if(SV&&!SV.over)svTick(dt*(SAVE.spd||1));
