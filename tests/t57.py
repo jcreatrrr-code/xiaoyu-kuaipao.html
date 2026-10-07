@@ -36,7 +36,7 @@ async def main():
         hid=await pg.evaluate("()=>document.getElementById('bFish').hidden");print('menu button hidden after ch2:',hid)
         if hid:ok=False;print('  !! fishing button should show')
         if SHOTS:await pg.screenshot(path=SHOTS+'/主菜单.png')
-        await pg.click('#bFish');await pg.wait_for_timeout(1200)
+        await pg.click('#bFish');await pg.wait_for_timeout(1200);await pg.evaluate("()=>{window.__F.FS.noJunk=1}")
         if SHOTS:await pg.screenshot(path=SHOTS+'/船尾-黄昏.png')
         caught=[];kinds=set()
         for n in range(8):
@@ -110,7 +110,7 @@ async def main():
         await pg.evaluate("()=>window.__F.fsUp()")
         await pg.set_viewport_size({'width':844,'height':390});await pg.wait_for_timeout(500)
         if SHOTS:await pg.screenshot(path=SHOTS+'/横屏.png')
-        await pg.click('#fhQuit');await pg.wait_for_timeout(300)
+        await pg.click('#fhQuit');await pg.wait_for_timeout(200);await pg.click('#fhPanel [data-fq]');await pg.wait_for_timeout(300)
         menu=await pg.evaluate("()=>document.getElementById('sMenu').classList.contains('on')&&document.getElementById('fishHud').hidden");print('back to menu',menu)
         if not menu:ok=False
         print('errors',errs)

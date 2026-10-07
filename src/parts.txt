@@ -29,5 +29,6 @@ src/js/16-i18n.js
 src/js/16a-volume2-i18n.js
 src/js/17-music.js
 src/js/17a-fishing.js
+src/js/17b-fishing2.js
 src/js/18-cutscene-sound.js
 src/tail.html
