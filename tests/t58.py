@@ -81,6 +81,7 @@ async def main():
         await pg.evaluate("()=>{const K=window.__K,F=window.__F;F.fsGo('reef');const f=F.FS,S=K.SAVE.fsh;S.baits.squid=3;S.gear.bait='squid';Object.assign(S.gear,{rod:'bamboo',line:'braid'});S.own.bamboo=1;S.own.braid=1;f.rainNight=1;f.tod=.85;f.lph=3;f.rain=0;f.wxT=99}")
         w=await pg.evaluate("()=>{const f=window.__F.FS;for(let i=0;i<20;i++){f.legT=0;window.__F.update(1/60)}return f.sh.filter(s=>s.leg).map(s=>s.s.id)}");print('gt shadow',w)
         if w!=['gt']:ok=False;print('  !! 礁王 should show after a rainy night')
+        await pg.evaluate("()=>{const a=window.__K.SAVE.fsh.ach=window.__K.SAVE.fsh.ach||{};for(const k of ['first','star3','n50','n200','dex','spots','gt','moon','air10','rel50','junk5','boom','pets50','card','gold'])a[k]=1}")
         t0=await pg.evaluate("()=>window.__K.SAVE.fsh.tide")
         r=await pg.evaluate(CATCH,{'id':'gt','fr':1,'st':3});print('gt',r['ph'],r['secs'],r['txt'][:50])
         if not r['card']:ok=False;print('  !! a good player with the best gear should land 礁王')

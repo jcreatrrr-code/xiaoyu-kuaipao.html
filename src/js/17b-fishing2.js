@@ -128,6 +128,7 @@ function fsPet(){const f=FS,w=fsIw();f.iwaPet=1.2;const tap=(a,n,s)=>{for(let i=
 /* 收竿：换钓点或回主菜单 */
 function fsSpots(){const cur=fsSpot().id;
   $('fhPanel').innerHTML=`<h3>换个地方钓</h3>${SPOTS.map(s=>{const ok=cleared(s.li),on=s.id===cur;return `<div class="fdk"><span class="ic">${s.ic}</span><div><b>${s.n}</b><span>${s.d}</span></div>${on?'<button class="btn sm off" disabled>在这儿</button>':ok?`<button class="btn sm mint" data-fs="${s.id}">去这儿</button>`:`<span class="note">${s.li===VOL1+2?'第三章以后':'第四章以后'}</span>`}</div>`}).join('')}
+   <div class="fdk"><span class="ic">🎏</span><div><b>环礁钓鱼节</b><span>${fsFestD().card?'有通行卡，每天能比一场':fsFestD().pass?'有准入证，去找老舵考核':'要准入证和老舵的考核'}</span></div>${cleared(VOL1+3)?`<button class="btn sm sun" data-ff="1">${FS.ev?'进行中':'看看'}</button>`:'<span class="note">第四章以后</span>'}</div>
    <div class="rowb"><button class="btn sm" data-fp="x">接着钓</button><button class="btn sm sun" data-fq="1">回主菜单</button></div>`;$('fhPanel').hidden=false}
 function fsGo(id){const f=FS;SAVE.fsh.spot=id;persist();f.sh=[];f.bob=null;f.ph='idle';f.bite=null;f.F=null;f.chumAt=null;f.iw=null;for(let i=0;i<4;i++)fsSpawn(true);$('fhPanel').hidden=true;toast(`${fsSpot().ic} ${fsSpot().n}`,1.6);fhTop()}
 

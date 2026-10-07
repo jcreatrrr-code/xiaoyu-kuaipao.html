@@ -230,3 +230,9 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
 #fhChum{position:absolute;right:12px;bottom:calc(74px + env(safe-area-inset-bottom));pointer-events:auto;min-height:40px}
 #fhCard .fcCam{position:absolute;left:-12px;top:-10px;width:38px;height:38px;border-radius:50%;border:0;background:#fff;box-shadow:0 2px 0 rgba(0,0,0,.15);font-size:18px;cursor:pointer}
 #fhCard .fbadge.leg{background:#c08a1a}#fhCard .fcBtns.one{grid-template-columns:1fr}
+#fhEv{position:absolute;left:50%;top:calc(116px + env(safe-area-inset-top));transform:translateX(-50%);background:rgba(10,14,36,.55);color:#fff8e6;padding:5px 14px;border-radius:14px;text-align:center;pointer-events:none;width:max-content;max-width:90%}
+#fhEv b{display:block;font-size:16px}#fhEv span{display:block;font-size:13px;opacity:.9}
+.fpass{position:relative;margin:8px 0 10px;padding:12px 14px;border-radius:12px;background:linear-gradient(135deg,#ffcf6a,#ff9f6a 60%,#e86a8a);color:#3a1a10;box-shadow:0 3px 0 rgba(0,0,0,.15)}
+.fpass b{display:block;font-size:16px;margin-bottom:4px}.fpass span{display:block;font-size:13px}.fpass i{position:absolute;right:12px;top:10px;font-style:normal;font-size:28px;opacity:.8}
+.frank{margin:6px 0 10px}.frank div{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:8px}.frank div.me{background:rgba(255,207,106,.35);font-weight:bold}.frank b{flex:1;text-align:left}.frank em{font-style:normal;opacity:.85}
+#fhPanel .fdk.no{opacity:.55}
