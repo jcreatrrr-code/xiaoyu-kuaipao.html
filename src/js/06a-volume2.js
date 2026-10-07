@@ -28,12 +28,14 @@ function v2Build(L,g){a2Build(L,g);a3Build(L,g);if(L.tide)for(const e of g.E)if(
   if(!L.leap)return;const m=v=>SURF+(1-SURF)*v;g.E=g.E.filter(e=>!(e.t==='rock'&&e.top&&!e.root));
   for(const e of g.E){if(e.f!=null&&!e.air)e.f=m(e.f);if(e.amp!=null&&e.t!=='net')e.amp*=1-SURF;
     if(e.t==='fnet')e.h=m(e.h);else if(e.t==='rock')e.h=e.top?m(e.h):e.h*(1-SURF)}}
+/* 会上下动的根缝石头 */
+function v2Mv(g,leap){for(const e of g.E)if(e.mv&&e.x>g.scroll-200&&e.x<g.scroll+VW+300){const o=e.mv.amp*(leap?1-SURF:1)*Math.sin(g.t*1.2+e.mv.ph);if(e.h0==null)e.h0=e.t==='pearl'?e.f:e.h;
+    if(e.t==='pearl')e.f=e.h0+o;else e.h=e.top?e.h0+o:e.h0-o}}
 /* 每帧：潮位、跃出水面 */
 function v2Move(g,dt,k){const F=g.fish,L=g.L,t=g.t;a3Tick(g,dt);
   if(L.tide){if(!g.tips.tide&&t>3){g.tips.tide=1;toast(TIPS.tide,3)}const fl=yMax-tideH(t)*(yMax-yMin);
     if(F.y>fl-18){F.y=fl-18;if(g.inv<=0&&!g.trap){hurt(1);F.vy=-300*k}else if(F.vy>0)F.vy=0}}
-  for(const e of g.E)if(e.mv&&e.x>g.scroll-200&&e.x<g.scroll+VW+300){const o=e.mv.amp*(L.leap?1-SURF:1)*Math.sin(t*1.2+e.mv.ph);if(e.h0==null)e.h0=e.t==='pearl'?e.f:e.h;
-    if(e.t==='pearl')e.f=e.h0+o;else e.h=e.top?e.h0+o:e.h0-o}
+  v2Mv(g,L.leap);
   if(!L.leap||g.trap)return;const sy=surfY();
   if(g.leap){const lp=g.leap;lp.t+=dt;const q=Math.min(1,lp.t/lp.T);F.y=fy(LEAP.fs-Math.sin(Math.PI*q)*(LEAP.fs-LEAP.fp));F.vy=0;
     if(q>=1){g.leap=null;F.y=sy+24;F.vy=120*k;burst(fishSX,sy+8,'#fff',10,1)}return}

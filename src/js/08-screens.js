@@ -61,7 +61,7 @@ function showLevels(mode){
   {const tot=starTotal(),nx=STARGIFT[SAVE.sg||0],t='⭐ 已集 '+tot+' 颗星'+(nx?(tot>=nx[0]?' · 下次通关领取礼物':' · 再集 '+(nx[0]-tot)+' 颗有礼物'):'');$('starInfo').textContent=t;$('starInfo').dataset.raw=t}
   lastMode=mode;document.querySelectorAll('#modeTabs .tab').forEach(t=>t.classList.toggle('on',t.dataset.mode===mode));const em=mode==='endless';$('lvGrid').hidden=em;$('lvInfo').hidden=em;$('endPanel').hidden=!em;$('sLevels').classList.toggle('map',!em);if(em){WM=null;$('volTabs').hidden=true;show('sLevels');return}
   const hi=mode==='hard'?1:0,sv=SAVE[mode];$('lvTitle').textContent=(hi?'困难模式':'普通模式')+' · 选择关卡';
-  const vtab=!hi&&v2Open(),vol=vtab?(SAVE.vol||2):1,base=vol===2?VOL1:0;$('volTabs').hidden=!vtab;document.querySelectorAll('#volTabs .tab').forEach(t=>t.classList.toggle('on',+t.dataset.vol===vol));
+  const vtab=v2Open(),vol=vtab&&!(hi&&!hard2Open())?(SAVE.vol||2):1,base=vol===2?VOL1:0;$('volTabs').hidden=!vtab;document.querySelectorAll('#volTabs .tab').forEach(t=>t.classList.toggle('on',+t.dataset.vol===vol));
   $('lvGrid').dataset.mode=mode;show('sLevels');renderMap(mode,vol,hi,sv,base)}
 const STARGIFT=[[4,'gold',2,'金鱼结界 ×2'],[9,'life',1,'生命星 ×1'],[14,'pearl',150,'150 颗珍珠'],[20,'whale',2,'鲸鱼结界 ×2'],[27,'revive',1,'复活海星 ×1'],[34,'pearl',400,'400 颗珍珠'],[42,'double',3,'双倍珍珠袋 ×3'],[52,'pearl',800,'800 颗珍珠'],[66,'revive',3,'复活海星 ×3'],[80,'pearl',1500,'1500 颗珍珠'],[96,'pearl',3000,'3000 颗珍珠']];
 const starTotal=()=>['simple','hard'].reduce((a,m)=>a+SAVE[m].st.reduce((x,y)=>x+y,0)+SAVE[m].s4.reduce((x,y)=>x+(y?1:0),0),0);
@@ -78,7 +78,7 @@ function showEnd(win,stars,prev){
     {const tot=starTotal(),nw=tot-(SAVE.starPaid||0);if(nw>0){SAVE.starPaid=tot;SAVE.wallet+=nw*15;html+=stat('新得到 '+nw+' 颗星','+'+nw*15+' ⚪')}
       const got=[];while((SAVE.sg||0)<STARGIFT.length&&tot>=STARGIFT[SAVE.sg||0][0]){const m=STARGIFT[SAVE.sg||0];if(m[1]==='pearl')SAVE.wallet+=m[2];else SAVE.inv[m[1]]=(SAVE.inv[m[1]]||0)+m[2];got.push(m[3]);SAVE.sg=(SAVE.sg||0)+1}
       if(got.length)html+=stat('集星礼物（共 '+tot+' 颗星）',got.join('、'));const nx=STARGIFT[SAVE.sg||0];if(nx)html+=`<div class="cond"><span>再集 ${nx[0]-tot} 颗星，还有一份礼物</span></div>`;persist()}
-    btns=(g.li<LV.length-1?'<button class="btn mint" data-act="next">下一关</button>':'')+'<button class="btn sm" data-act="retry">再次挑战</button><button class="btn sm" data-act="menu">主菜单</button>';
+    btns=(g.li<LV.length-1&&!(hi&&g.li===VOL1-1&&!hard2Open())?'<button class="btn mint" data-act="next">下一关</button>':'')+'<button class="btn sm" data-act="retry">再次挑战</button><button class="btn sm" data-act="menu">主菜单</button>';
   }else{
     title={shark:'小鱼被鲨鱼吃掉了！',net:'小鱼没能逃出渔网…',hp:'星星用完了！',goal:'到终点了，但目标还没完成',orb:'潮心被撞灭了…'}[g.cause]||'游戏结束';
     if(endless){const sc=score(),b=SAVE.end,rec=sc>b.score;b.score=Math.max(b.score,sc);b.dist=Math.max(b.dist,m);b.combo=Math.max(b.combo,g.maxCombo);persist();
@@ -101,7 +101,7 @@ document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>show(b.dataset.g
 $('bHelp').onclick=()=>show('sHelp');
 $('bMusic').onclick=()=>{SAVE.music=SAVE.music===0?1:0;persist();refreshMenu();SFX.tap()};
 $('bMute').onclick=()=>{SAVE.mute=SAVE.mute?0:1;persist();refreshMenu();SFX.tap()};
-$('volTabs').onclick=e=>{const b=e.target.closest('[data-vol]');if(b){SFX.tap();SAVE.vol=+b.dataset.vol;persist();showLevels(lastMode)}};
+$('volTabs').onclick=e=>{const b=e.target.closest('[data-vol]');if(b){SFX.tap();if(lastMode==='hard'&&+b.dataset.vol===2&&!hard2Open()){toast('先通关第二卷普通模式的全部关卡，才能挑战第二卷的困难模式',2.8);return}SAVE.vol=+b.dataset.vol;persist();showLevels(lastMode)}};
 $('bPause').onclick=pause;
 $('bResume').onclick=()=>{show('');state='play'};
 $('bRestart').onclick=()=>startGame(...lastArgs);

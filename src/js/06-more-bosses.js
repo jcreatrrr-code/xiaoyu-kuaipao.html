@@ -114,7 +114,7 @@ function update(dt){
     const up=(g.slowT>0?180:330)*k*(g.boss&&!g.boss.done?1-.13*(g.boss.carry||0):1),dn=(g.mode==='simple'?165:215)*k,tv=hold?-up:g.started?dn:0;
     F.vy+=(tv-F.vy)*Math.min(1,dt*7);F.y+=F.vy*dt;
     if(F.y<yMin+22){F.y=yMin+22;F.vy=0}if(g.orb){const o=g.orb;if(!o.y)o.y=F.y;o.y+=(F.y-o.y)*Math.min(1,dt*2.4);o.inv=Math.max(0,o.inv-dt)}if(F.y>yMax-18){F.y=yMax-18;if(g.inv<=0){hurt(1);F.vy=-300*k;if(!g.tips.floor){g.tips.floor=1;toast('碰到海底也会掉星！',2.2,1)}}else if(F.vy>0)F.vy=0}
-    if(g.L&&g.L.vol===2)v2Move(g,dt,k);
+    if(g.L&&g.L.vol===2)v2Move(g,dt,k);else if(endless)v2Mv(g,0);
     g.bubT-=dt;if(g.bubT<=0){g.bubT=.22;g.parts.push({x:fishSX-34,y:F.y,vx:-40,vy:-20,l:.9,c:'#fff',r:2+Math.random()*3,k:1})}
   }
   const fx=fishSX;

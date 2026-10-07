@@ -57,14 +57,17 @@ function genSlot(g){
     if(g.mode==='simple'&&g.r()<.22)name='pearls'}
   PAT[name](g,x,d);g.last=name;
   const gap=g.gap(d);
+  if(g.mode==='endless'&&EV2K.has(name)){g.i++;g.x+=gap*g.r(.95,1.1)+(name==='vent'||name==='roots'||name==='lava'?60:220);return}
   if(g.mode!=='simple'&&g.i>=4&&name!=='shark'&&name!=='pearls'&&name!=='jelly'&&name!=='ice'&&g.r()<.2+.25*d)
     g.E.push({t:'jelly',x:x+gap*.5,f:g.r(.35,.65),amp:.14,ph:g.r(0,6),sp:1.1});
   if(g.i>=2&&g.r()<.5){const ks=g.fish(x),k=ks[(g.wi=(g.wi||0)+1+0*g.r())%ks.length];const w={t:'wild',k,x:x+gap*.55,f:g.r(.15,.85),ph:g.r(0,6),hp:FISH[k].hp,shiny:Math.random()<.04};g.E.push(w);if(g.bait)g.E.push({...w,x:w.x+150,f:clamp(1.05-w.f,.15,.85),ph:w.ph+2})}
   g.i++;g.x+=gap*g.r(.95,1.1)}
 function buildLevel(li,mode){
   const L=LV[li],hard=mode==='hard',len=L.len*60,pool={...L.pool};if(!hard&&pool.shield)pool.shield*=2;
-  if(hard){if(li>=1)pool.net=(pool.net||0)+li*.5;if(li>=3)pool.wall=(pool.wall||0)+(li-2)*.5}
-  const g={mode,r:rng(1000+li*77+(hard?13:0)),x:700,i:0,E:[],last:'',pool:()=>pool,fish:()=>L.fish,gap:()=>hard?350-li*8:450,diff:x=>x/len};
+  const v2=L.vol===2,lj=v2?li-VOL1:li;
+  if(hard&&!v2){if(li>=1)pool.net=(pool.net||0)+li*.5;if(li>=3)pool.wall=(pool.wall||0)+(li-2)*.5}
+  if(hard&&v2)for(const k in pool)if(k!=='pearls'&&k!=='shield')pool[k]*=1.25;
+  const g={mode,r:rng(1000+li*77+(hard?13:0)),x:700,i:0,E:[],last:'',pool:()=>pool,fish:()=>L.fish,gap:()=>hard?(v2?400-lj*5:350-li*8):450,diff:x=>x/len};
   while(g.x<len-450)genSlot(g);
   for(let x=2400;x<len-900;x+=2400){let cx=x;for(let pass=0;pass<4;pass++){let moved=false;
     for(const e of g.E){if(e.t==='btn'&&cx>e.x-470&&cx<e.d.x+90){cx=e.x-500;moved=true}}
@@ -77,10 +80,12 @@ function buildLevel(li,mode){
   if(L.boss){const bx=len-1500;g.E=g.E.filter(e=>e.x<bx-150);g.E.push({t:'boss',x:bx})}
   if(L.helpers)[['鲸婆婆','whale',.14],['墨墨','gold',.36],['大白','clear',.58],['石蟹','doors',.8]].forEach(h=>g.E.push({t:'help',x:len*h[2],who:h[0],k:h[1]}));
   if(L.vol===2)v2Build(L,g);g.E.push({t:'fin',x:len});return g}
+/* 无尽模式：第二卷里学会的机关，通关对应那一章以后，也会在无尽模式里出现（[机关, 学会它的关卡, 从第几段难度开始]） */
+const EV2=[['roots',14,1],['vent',17,1],['fork',16,2],['lamp',18,2],['pumice',21,2],['lava',20,3],['sline',22,3]],EV2K=new Set(EV2.map(q=>q[0]));
 function buildEndless(){
   const lv=x=>Math.floor(x/60/200);
   return{mode:'endless',r:rng((Math.random()*1e9)|0),x:700,i:0,E:[],last:'',
-    pool:x=>{const l=lv(x),p={pearls:3,rockB:2,rockT:2,octo:2,shield:1};if(l>=1)Object.assign(p,{gate:2,jelly:2,net:2});if(l>=2)Object.assign(p,{shark:2,vortex:1});if(l>=3)Object.assign(p,{wall:2,ice:2});return p},
+    pool:x=>{const l=lv(x),p={pearls:3,rockB:2,rockT:2,octo:2,shield:1};if(l>=1)Object.assign(p,{gate:2,jelly:2,net:2});if(l>=2)Object.assign(p,{shark:2,vortex:1});if(l>=3)Object.assign(p,{wall:2,ice:2});for(const[k,li,t]of EV2)if(l>=t&&cleared(li))p[k]=1;return p},
     fish:x=>{const l=lv(x);return l<1?['sard','bream','yellow']:l<2?['sard','bream','yellow','salmon','mack','saury']:l<3?['salmon','mack','eel','cod','puffer','tuna']:Object.keys(FISH).filter(k=>!FISH[k].x)},
     gap:d=>430-130*d,diff:x=>clamp(lv(x)/6,0,1)}}
 
