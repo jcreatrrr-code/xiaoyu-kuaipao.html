@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>小鱼快跑</title>
-<meta name="version" content="2.8.2">
+<meta name="version" content="2.8.3">
 <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=Yusei+Magic&family=Comfortaa:wght@600;700&family=Baloo+Bhaijaan+2:wght@500;700&family=Jua&family=Itim&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -249,7 +249,7 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
 #fhPanel>.rowb:last-child{position:sticky;bottom:-18px;margin:12px -20px -18px;padding:10px 20px calc(12px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid rgba(27,42,65,.12);z-index:2}
 /* 关卡地图：海图铺满整个界面，标签和关卡卡片浮在上面 */
 #lvHead{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;flex-shrink:0}
-#sLevels.map{display:block;overflow:hidden;padding:0}
+#sLevels.map{overflow:hidden;padding:0}#sLevels.map.on{display:block}
 #sLevels.map>.float{display:none}
 #sLevels.map #lvGrid{position:absolute;inset:0;display:block;width:auto;overflow:auto;scrollbar-width:none;overscroll-behavior:contain;background:#0a3463}
 #sLevels.map #lvGrid::-webkit-scrollbar{display:none}
@@ -379,7 +379,7 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
       <button class="btn" id="bHelp">玩法说明</button>
       <button class="btn" id="bSet">设置</button>
     </div>
-    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v2.8.2</p>
+    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v2.8.3</p>
     <button class="btn sm float" data-go="sMenu">返回主菜单</button>
   </section>
 
