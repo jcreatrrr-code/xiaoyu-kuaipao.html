@@ -3,12 +3,15 @@ const WM_DECO=[['🪸','🐚'],['⚓','🛟'],['🦈','🫧'],['🧊','❄️'],
  ['🥥','🏝️'],['🐟','💨'],['🌳','🦀'],['⛈️','🛶'],['⭐','🐚'],['🌋','🦞'],['💡','🎣'],['🐟','💡'],['🌋','🔥'],['🪨','🐙'],['🌟','🌙'],['🏮','🍲']];
 const wmSel={},wmCross=t=>Math.sin(t*1.05+.5)*.62+Math.sin(t*.37+1.2)*.38;
 let WM=null,wmRaf=0;
-function wmFishSvg(){const sk=SKINS[SAVE.skin]||SKINS[0],[c0,c1,c2]=sk.c;
-  return`<div class="wmOff"><div class="wmFi"><svg viewBox="-56 -40 96 80" width="60" height="50" aria-hidden="true"${sk.sp==='angel'?' class="glow"':''}><defs><radialGradient id="wmFg" cx="42%" cy="32%" r="62%"><stop offset="0" stop-color="${c0}"/><stop offset="1" stop-color="${c1}"/></radialGradient></defs>`
-   +`<path d="M-23 0Q-39 -6 -50 -21Q-42 0 -50 21Q-39 6 -23 0Z" fill="${c2}"><animateTransform attributeName="transform" type="rotate" values="-16 -23 0;16 -23 0;-16 -23 0" dur=".7s" repeatCount="indefinite"/></path>`
-   +`<path d="M-12 -19Q-3 -37 11 -20Z" fill="${c2}"/><ellipse rx="28" ry="23" fill="url(#wmFg)"/><ellipse cx="2" cy="10" rx="17" ry="9" fill="rgba(255,255,255,.38)"/><ellipse cx="-5" cy="8" rx="8" ry="5" transform="rotate(34 -5 8)" fill="${c2}"/>`
-   +`<circle cx="13" cy="-5" r="9.5" fill="#fff"/><circle cx="15" cy="-5" r="5.4" fill="#1b2a41"/><circle cx="16.8" cy="-7.2" r="2" fill="#fff"/><circle cx="7" cy="8" r="4.5" fill="rgba(255,90,120,.45)"/>`
-   +`<path d="M25.3 5.4A5.5 5.5 0 0 1 20.4 9.5" fill="none" stroke="#8a3b00" stroke-width="2.2" stroke-linecap="round"/></svg></div></div>`}
+/* 地图上的小鱼用游戏里同一套画法画，换了皮肤（包括海天使）地图上也跟着换 */
+const WMF={w:110,h:96};let wmFr=0;
+function wmFishSvg(){const d=Math.min(3,devicePixelRatio||1);return`<div class="wmOff"><div class="wmFi"><canvas class="wmFc" width="${WMF.w*d}" height="${WMF.h*d}" aria-hidden="true"></canvas></div></div>`}
+function wmFishTick(){cancelAnimationFrame(wmFr);const fc=$('lvGrid').querySelector('.wmFc');if(!fc||!$('sLevels').classList.contains('on'))return;
+  const d=fc.width/WMF.w,t=performance.now()/1000,pw=fc.width,ph=fc.height;
+  ctx.save();ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,pw,ph);ctx.setTransform(d,0,0,d,0,0);
+  try{drawFish(WMF.w/2,WMF.h/2,0,t,{s:.62,...skin()})}catch(e){}
+  ctx.restore();const g=fc.getContext('2d');g.clearRect(0,0,pw,ph);g.drawImage(cv,0,0,pw,ph,0,0,pw,ph);
+  wmFr=requestAnimationFrame(wmFishTick)}
 function renderMap(mode,vol,hi,sv,base,still){
   cancelAnimationFrame(wmRaf);
   const box=$('lvGrid'),land=matchMedia('(orientation:landscape)').matches,key=mode+vol;
@@ -73,8 +76,8 @@ function renderMap(mode,vol,hi,sv,base,still){
     nodes+=`<button class="wmN ${dn?'done':o?'open':'lock'}${L.boss?' boss':''}${fz?' fresh':''}" data-k="${k}" style="left:${f1(x)}px;top:${f1(y)}px${fz?';animation-delay:'+(.25+(k-walk-1)*.2)+'s':''}">`
       +(o?`<b>${i-base+1}</b>`:'🔒')+(L.boss&&o?'<span class="wmCr">👑</span>':'')+(o?`<em>${L.name}${st?`<span class="wmSt">${st}</span>`:''}</em>`:'')+'</button>'}
   box.innerHTML=`<div class="wm" style="width:${W}px;height:${H}px">${svg}${nodes}<div class="wmFish">${wmFishSvg()}</div></div>`;
-  WM={mode,vol,hi,sv,base,ids,n,key,land,poly,cum,nodeAt,Q,sel,front,open,moving:0,hh,ih,iw};
-  wmPlace(Q[sel+1],1);wmRest();wmMark();wmInfo();
+  WM={mode,vol,hi,sv,base,ids,n,key,land,poly,cum,nodeAt,Q,sel,front,open,moving:0,hh,ih,iw,bw,bh};
+  wmPlace(Q[sel+1],1);wmRest();wmMark();wmInfo();wmFishTick();
   if(walk>=0)setTimeout(()=>{if(WM&&WM.key===key)wmMove(front,()=>{const p=box.querySelector('.wmDone');if(p)p.setAttribute('d',dpath(0,nodeAt[front+1]))})},650+(front-walk)*200)}
 /* 停下来时小鱼待在关卡点旁边（竖屏在侧面，横屏在上方），不挡住名字牌和下一关 */
 function wmRest(on=1){const w=WM,f=$('lvGrid').querySelector('.wmFish');if(!f)return;f.classList.remove('restL','restR','restU');if(!on)return;
@@ -83,12 +86,14 @@ function wmPlace(p,snap){const f=$('lvGrid').querySelector('.wmFish');if(!f)retu
   const box=$('lvGrid'),w=WM;if(w.land){const v=p[0]-(box.clientWidth-w.iw)/2;box.scrollLeft=snap?v:box.scrollLeft+(v-box.scrollLeft)*.2}else{const v=p[1]-(w.hh+(box.clientHeight-w.hh-w.ih)/2);box.scrollTop=snap?v:box.scrollTop+(v-box.scrollTop)*.2}}
 function wmMark(){$('lvGrid').querySelectorAll('.wmN').forEach(b=>b.classList.toggle('sel',+b.dataset.k===WM.sel))}
 function wmInfo(){const {hi,sv,ids,base,sel}=WM;wmInfo0(ids,base,hi,sv,sel)}
-function wmInfo0(ids,base,hi,sv,sel){const go=(t)=>`<div class="liB"><button class="btn sm" data-wm="back">返回主菜单</button><button class="btn sun" data-wm="go">${t}</button></div>`;
-  let h=`<p class="wmStar">${$('starInfo').dataset.raw||''}</p>`;
-  if(sel===ids.length)h+=`<div class="liT"><b>🔥 特别关 石焖宴</b></div><em>${SAVE.feast2?'已办成 · 可以再开一次':'全岛的人都在等着开席'}</em><em>十二位客人，至少上九道</em>`+go('开席');
+function wmInfo0(ids,base,hi,sv,sel){let h;
+  if(sel===ids.length)h=`<div class="liT"><b>🔥 特别关 石焖宴</b></div><em>${SAVE.feast2?'已办成 · 可以再开一次':'全岛的人都在等着开席'}</em><em>十二位客人，至少上九道</em>`;
   else{const i=ids[sel],L=LV[i];let st='';for(let k=0;k<3;k++)st+=`<i class="st ${sv.st[i]>k?'f':''}"></i>`;if(sv.s4[i])st+='<i class="st f"></i>';
-    h+=`<div class="liT"><b>第${i-base+1}关 ${L.name}</b><span class="mini">${st}</span></div><em>${goalText(L,hi)}</em><em>${L.tool?TOOLN[L.tool][0]+(SAVE.tools[L.tool]?' 带着':' 需要')+TOOLN[L.tool][1]:cleared(i)?'🌊 海域已恢复':'海域褪色中'}</em>`+go('出发')}
-  $('lvInfo').innerHTML=h}
+    h=`<div class="liT"><b>第${i-base+1}关 ${L.name}</b><span class="mini">${st}</span></div><em>${goalText(L,hi)}</em><em>${L.tool?TOOLN[L.tool][0]+(SAVE.tools[L.tool]?' 带着':' 需要')+TOOLN[L.tool][1]:cleared(i)?'🌊 海域已恢复':'海域褪色中'}</em>`}
+  /* 只换文字，两个按钮一直是同一个，手指按下去时按钮不会被换掉 */
+  const k=sel+'|'+h;if($('lvTxt').dataset.k!==k){$('lvTxt').dataset.k=k;$('lvTxt').innerHTML=h}
+  const g=sel===ids.length?'开席':'出发';if($('lvGoTxt').dataset.k!==g){$('lvGoTxt').dataset.k=g;$('lvGoTxt').textContent=g}
+  const r=$('starInfo').dataset.raw||'';if($('lvStar').dataset.k!==r){$('lvStar').dataset.k=r;$('lvStar').textContent=r}}
 /* 小鱼沿着海路游过去，经过的关卡都要走一遍 */
 function wmMove(k,then){const w=WM;if(!w||w.moving)return;const a=w.nodeAt[w.sel+1],b=w.nodeAt[k+1];w.sel=k;wmSel[w.key]=k;wmMark();wmInfo();
   if(a===b){wmRest();then&&then();return}
@@ -103,7 +108,10 @@ function wmGo(){const w=WM;if(!w||w.moving)return;SFX.tap();if(w.sel===w.ids.len
 $('lvGrid').onclick=e=>{const b=e.target.closest('.wmN');if(!b||!WM||WM.moving)return;const k=+b.dataset.k;
   if(!WM.open(k)){SFX.tap();b.classList.remove('nope');void b.offsetWidth;b.classList.add('nope');toast('通关上一关后揭晓',2);return}
   if(k===WM.sel){wmGo();return}SFX.tap();wmMove(k)};
-$('lvInfo').onclick=e=>{const b=e.target.closest('[data-wm]');if(!b)return;if(b.dataset.wm==='go')wmGo();else{SFX.tap();WM=null;show('sMenu')}};
+$('lvBack').onclick=()=>{WM=null;cancelAnimationFrame(wmRaf);cancelAnimationFrame(wmFr);toMenu();try{SFX.tap()}catch(e){}};
+$('lvGo').onclick=()=>wmGo();
 $('lvGrid').addEventListener('wheel',e=>{if(WM&&WM.land&&Math.abs(e.deltaY)>Math.abs(e.deltaX)){$('lvGrid').scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
-{let rt=0;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{const w=WM;if(w&&$('sLevels').classList.contains('on')&&$('sLevels').classList.contains('map')&&!w.moving){wmSel[w.key]=w.sel;renderMap(w.mode,w.vol,w.hi,w.sv,w.base,1)}},180)})}
+/* 手机浏览器的地址栏收起、弹出也会触发尺寸变化，只有转屏或宽度变了才重画 */
+{let rt=0;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{const w=WM,b=$('lvGrid');if(!w||!$('sLevels').classList.contains('on')||!$('sLevels').classList.contains('map')||w.moving)return;
+  const land=matchMedia('(orientation:landscape)').matches;if(land===w.land&&Math.abs(b.clientWidth-w.bw)<2&&Math.abs(b.clientHeight-w.bh)<160)return;wmSel[w.key]=w.sel;renderMap(w.mode,w.vol,w.hi,w.sv,w.base,1)},180)})}
 {const EN7={"开席":"Start the feast"};for(const k in EN7)if(!DICT[k]){const v=EN7[k];DICT[k]=[v,v,v,v]}for(const k in TLC)delete TLC[k]}
