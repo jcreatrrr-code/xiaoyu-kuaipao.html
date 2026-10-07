@@ -273,9 +273,9 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
 .wmFish.restL .wmOff{transform:translate(-62px,-4px)}
 .wmFish.restR .wmOff{transform:translate(62px,-4px) scaleX(-1)}
 .wmFish.restU .wmOff{transform:translate(0,-60px)}
-.wmFi{position:absolute;left:-30px;top:-25px;animation:wmBob 1.4s ease-in-out infinite;filter:drop-shadow(0 4px 0 rgba(6,40,70,.35))}
-.wmFi.left svg{transform:scaleX(-1)}
-.wmFi svg.glow{filter:drop-shadow(0 0 8px #9ff8ff)}
+.wmFi{position:absolute;left:-55px;top:-48px;animation:wmBob 1.4s ease-in-out infinite;filter:drop-shadow(0 3px 0 rgba(6,40,70,.3))}
+.wmFc{display:block;width:110px;height:96px}
+.wmFi.left .wmFc{transform:scaleX(-1)}
 @keyframes wmBob{50%{transform:translateY(-6px)}}
 @keyframes wmPulse{0%{transform:scale(.9);opacity:.9}100%{transform:scale(1.35);opacity:0}}
 @keyframes wmPop{0%{transform:scale(0)}100%{transform:scale(1)}}
@@ -287,7 +287,7 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
 #lvInfo em{display:block;font-style:normal;font-size:15px;color:var(--muted)}
 #lvInfo .mini{display:flex;gap:2px}#lvInfo .mini .st{width:18px;height:18px;background:#e3dcc6}#lvInfo .mini .st.f{background:var(--sun)}
 #lvInfo .liB{display:flex;gap:10px;width:100%;margin-top:8px}
-#lvInfo .liB .btn{flex:1;min-width:0}#lvInfo .liB .btn.sun{flex:1.5}
+#lvInfo .liB .btn{flex:1;min-width:0;touch-action:manipulation}#lvInfo .liB .btn.sun{flex:1.5}
 #lvInfo .wmStar{display:none;margin:0 0 4px;font-size:14px;color:var(--muted)}
 @media (orientation:landscape){
  #sLevels.map #lvHead{flex-direction:row;justify-content:center;gap:10px;padding:calc(8px + env(safe-area-inset-top,0px)) 12px 10px;border-radius:0 0 18px 18px}
