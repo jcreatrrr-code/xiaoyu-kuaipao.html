@@ -218,3 +218,12 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
 .fdk{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center;text-align:start;background:#fff;border-radius:16px;padding:8px 10px;margin-top:8px}.fdk .ic{font-size:28px}.fdk span{display:block;font-size:14px}.fdk .btn{font-size:15px;min-height:40px;padding:6px 12px}
 #fhPanel h4{margin:12px 0 0;text-align:start}#fhPanel h4 .note{font-weight:400}.fbtn{display:flex;flex-direction:column;gap:4px}#fhPanel .fbig{font-size:22px}
 #fishHud .fhTop .rnd{width:42px;height:42px;font-size:20px}#fishHud .fhTop .chip{font-size:14px;padding:4px 10px}
+#fishHud.fight .fhTop .chip,#fishHud.fight .fhTop .rnd{visibility:hidden}
+#fhCard{width:min(86%,340px);padding:18px 18px 16px}
+#fhCard .fcPic{position:relative;width:192px;margin:0 auto 6px}#fhCard .fcPic canvas{margin:0}
+#fhCard .fbadge{position:absolute;top:-8px;right:-14px;background:#e0503f;color:#fff;font-size:13px;padding:3px 9px;border-radius:12px;transform:rotate(6deg)}
+#fhCard h3{margin:2px 0 0;font-size:24px}#fhCard .fst{margin:0;font-size:18px}
+#fhCard .fbig{margin:6px 0 2px;font-size:22px}#fhCard .fbig small{font-size:14px;color:var(--muted)}#fhCard .fbig i{display:inline-block;width:1px;height:16px;background:#ccc;margin:0 12px;vertical-align:-1px}
+#fhCard .fsay{margin:6px 0 14px;font-size:15px;color:var(--muted)}
+#fhCard .fcBtns{display:grid;grid-template-columns:1fr 1fr;gap:10px}#fhCard .fcBtns .btn{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:18px;padding:10px 6px;min-height:60px}#fhCard .fcBtns small{font-size:13px;opacity:.8}
+#fhCard .note{margin:10px 0 0}
