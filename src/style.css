@@ -216,3 +216,5 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
 .fbook{display:grid;gap:8px;text-align:start;margin-top:8px}.fbk{display:grid;grid-template-columns:80px 1fr;column-gap:10px;align-items:center;background:#fff;border-radius:16px;padding:8px 10px}
 .fbk canvas{position:static;inset:auto;grid-row:span 4;width:80px;height:44px;image-rendering:pixelated;background:#dff4ff;border-radius:10px}.fbk span,.fbk em{font-size:14px;color:var(--muted);font-style:normal}.fbk.no b{color:var(--muted)}
 .fdk{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center;text-align:start;background:#fff;border-radius:16px;padding:8px 10px;margin-top:8px}.fdk .ic{font-size:28px}.fdk span{display:block;font-size:14px}.fdk .btn{font-size:15px;min-height:40px;padding:6px 12px}
+#fhPanel h4{margin:12px 0 0;text-align:start}#fhPanel h4 .note{font-weight:400}.fbtn{display:flex;flex-direction:column;gap:4px}#fhPanel .fbig{font-size:22px}
+#fishHud .fhTop .rnd{width:42px;height:42px;font-size:20px}#fishHud .fhTop .chip{font-size:14px;padding:4px 10px}

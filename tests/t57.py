@@ -1,21 +1,21 @@
 import os
 GAME=os.environ.get('XK_GAME') or 'file://'+os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','index.html'))
-# v2.3.0：船尾钓鱼。第二卷第二章通关后接解锁剧情；抛竿、试探、真咬钩、遛鱼、渔获卡、留下或放回、手帐、饮品
+# v2.3.0：船尾钓鱼。v2.4.0：绿区会动、放回得潮印、钓具箱、托竿。第二卷第二章通关后接解锁剧情；抛竿、试探、真咬钩、遛鱼、渔获卡、留下或放回、手帐、饮品
 import asyncio, sys
 from playwright.async_api import async_playwright
 SHOTS=os.environ.get('XK_SHOTS')
 SETUP="""()=>{const K=window.__K,S=K.SAVE;for(let i=0;i<14;i++)S.simple.st[i]=Math.max(S.simple.st[i],1);Object.assign(S.story,{pro:1,pro2:1,post0:1,pre12:1,post12:1,pre13:1,post13:1});S.wallet=500;S.dev=1}"""
 # 机器人：浮漂真沉下去才点；遛鱼时线太紧就松手
-BOT="""async (o)=>{const F=window.__F,f=F.FS,log=[];let i=0,peak=0;for(;i<200&&f.ph!=='idle';i++)F.update(1/60);
+BOT="""async (o)=>{const F=window.__F,f=F.FS,log=[];let i=0,peak=0,inz=0;for(;i<200&&f.ph!=='idle';i++)F.update(1/60);
   F.fsDown(o.aim);for(;i<200&&f.pow<o.pow;i++)F.update(1/60);F.fsUp();
   for(i=0;i<60*60&&f.ph!=='fight'&&f.ph!=='idle';i++){F.update(1/60);const b=f.bite;if(b&&!log.includes(b.k))log.push(b.k);
     if(b&&b.k===(o.early?'dip':'sink')){F.fsDown(.5);if(o.early){log.push('spook');o.early=0}}}
   if(f.ph!=='fight')return {log,ph:f.ph,secs:Math.round(i/60)};
   const k=f.F.sh.s.k;let t=0;
-  for(i=0;i<60*90&&f.ph==='fight';i++){const F2=f.F;if(F2.jump>0&&!F2.ok)F.fsDown(.5);
-    const want=o.greedy?true:F2.T<.62&&!F2.burst;if(want&&!f.hold)F.fsDown(.5);if(!want&&f.hold)F.fsUp();peak=Math.max(peak,F2.T);F.update(1/60);t++}
-  F.fsUp();for(i=0;i<120&&f.ph==='land';i++)F.update(1/60);
-  return {log,k,ph:f.ph,fight:Math.round(t/60),peak:+peak.toFixed(2),card:!document.getElementById('fhCard').hidden}}"""
+  for(i=0;i<(o.stop||60*90)&&f.ph==='fight';i++){const F2=f.F;if(F2.jump>0&&!F2.ok)F.fsDown(.5);
+    const want=o.greedy?true:F2.T+F2.v*.35<F2.c;if(want&&!f.hold)F.fsDown(.5);if(!want&&f.hold)F.fsUp();peak=Math.max(peak,F2.T);if(Math.abs(F2.T-F2.c)<=F2.zw/2)inz++;F.update(1/60);t++}
+  if(o.stop)return {stopped:f.ph==='fight'};F.fsUp();for(i=0;i<120&&f.ph==='land';i++)F.update(1/60);
+  return {log,k,ph:f.ph,fight:Math.round(t/60),peak:+peak.toFixed(2),inz:+(inz/Math.max(1,t)).toFixed(2),card:!document.getElementById('fhCard').hidden}}"""
 async def main():
     async with async_playwright() as p:
         b=await p.chromium.launch();ok=True;errs=[]
@@ -53,6 +53,45 @@ async def main():
         # 一直按住不松手：线绷太紧，鱼会跑掉（不会断线）
         r=await pg.evaluate(BOT,{'aim':.5,'pow':.5,'early':False,'greedy':True});print('greedy',r)
         if r.get('ph')=='fight' or r.get('card'):ok=False;print('  !! holding forever should lose the fish')
+        tide=await pg.evaluate("()=>window.__K.SAVE.fsh.tide");print('tide after releases',tide)
+        if tide<1:ok=False;print('  !! releasing should give 潮印')
+        # 钓具箱：潮印换尼龙线，珍珠买虾仁，托竿第三章前锁着
+        await pg.evaluate("()=>{window.__K.SAVE.fsh.tide=200}");await pg.click('#fhGear');await pg.wait_for_timeout(200)
+        if SHOTS:await pg.screenshot(path=SHOTS+'/钓具箱.png',full_page=True)
+        lock=await pg.evaluate("()=>!document.querySelector('#fhPanel [data-gr]')");print('rack locked before ch3',lock)
+        if not lock:ok=False
+        await pg.click('#fhPanel [data-gb="line:nylon"]');await pg.click('#fhPanel [data-bb=shrimp]')
+        g=await pg.evaluate("()=>{const f=window.__K.SAVE.fsh;return {line:f.gear.line,bait:f.gear.bait,n:f.baits.shrimp,tide:f.tide,w:window.__K.SAVE.wallet}}");print('gear',g)
+        if g['line']!='nylon' or g['bait']!='shrimp' or g['n']!=10 or g['tide']!=180:ok=False;print('  !! gear purchase')
+        await pg.click('#fhPanel [data-fp]')
+        r=await pg.evaluate(BOT,{'aim':.5,'pow':.5,'early':False,'greedy':False});print('shrimp cast',r)
+        n=await pg.evaluate("()=>window.__K.SAVE.fsh.baits.shrimp");print('shrimp left',n)
+        if r.get('card'):
+            if n!=9:ok=False;print('  !! a bite should use one bait')
+            await pg.click('#fhCard [data-fk=rel]')
+        if SHOTS:
+            r=await pg.evaluate(BOT,{'aim':.45,'pow':.4,'early':False,'greedy':False,'stop':150})
+            if r.get('stopped'):await pg.wait_for_timeout(250);await pg.screenshot(path=SHOTS+'/遛鱼.png')
+            await pg.evaluate("()=>{const F=window.__F,f=F.FS;for(let i=0;i<60*90&&f.ph==='fight';i++){F.fsUp();F.update(1/60)}for(let i=0;i<200&&f.ph!=='card'&&f.ph!=='idle';i++)F.update(1/60)}")
+            if await pg.evaluate("()=>!document.getElementById('fhCard').hidden"):await pg.click('#fhCard [data-fk=rel]')
+        # 第三章通关后：换托竿架 → 老舵剧情 → 回到船尾；离开一阵回来有托竿的收获
+        await pg.evaluate("()=>{const S=window.__K.SAVE;S.simple.st[14]=1}");await pg.click('#fhGear');await pg.click('#fhPanel [data-gr]');await pg.wait_for_timeout(600)
+        st=await pg.evaluate("()=>({on:document.getElementById('sStory').classList.contains('on'),who:document.getElementById('stWho').textContent})");print('rack story',st)
+        if not(st['on'] and st['who']=='老舵'):ok=False;print('  !! 老舵 story should play')
+        if SHOTS:await pg.screenshot(path=SHOTS+'/老舵的托竿架.png')
+        for _ in range(40):
+            if not await pg.evaluate("()=>document.getElementById('sStory').classList.contains('on')"):break
+            await pg.click('#stText');await pg.wait_for_timeout(120)
+        back=await pg.evaluate("()=>!document.getElementById('fishHud').hidden&&window.__K.SAVE.fsh.auto.own&&window.__K.SAVE.fsh.auto.on");print('back on deck with rack',back)
+        if not back:ok=False
+        t0=await pg.evaluate("()=>{const f=window.__F.FS,S=window.__K.SAVE.fsh;f.at=0;const t=S.tide;for(let i=0;i<60*3;i++)window.__F.update(1/60);return S.tide-t}");print('auto catch tide',t0)
+        if t0<1:ok=False;print('  !! auto rod should catch and release')
+        await pg.wait_for_timeout(300)
+        if SHOTS:await pg.screenshot(path=SHOTS+'/托竿.png')
+        a=await pg.evaluate("()=>{const S=window.__K.SAVE.fsh;S.auto.ts=Date.now()-11*60000;const t=S.tide;window.__F.fsAway();return {d:S.tide-t,txt:document.getElementById('fhPanel').textContent}}");print('away',a['d'],a['txt'][:40])
+        if a['d']<4 or '4 条' not in a['txt']:ok=False;print('  !! away catches')
+        if SHOTS:await pg.screenshot(path=SHOTS+'/离开以后.png')
+        await pg.click('#fhPanel [data-fp]')
         # 手帐和饮品
         await pg.click('#fhBook');await pg.wait_for_timeout(200)
         if SHOTS:await pg.screenshot(path=SHOTS+'/钓鱼手帐.png')
