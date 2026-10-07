@@ -240,7 +240,7 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
 #fhPanel>.rowb:last-child{position:sticky;bottom:-18px;margin:12px -20px -18px;padding:10px 20px calc(12px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid rgba(27,42,65,.12);z-index:2}
 /* 关卡地图：海图铺满整个界面，标签和关卡卡片浮在上面 */
 #lvHead{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;flex-shrink:0}
-#sLevels.map{display:block;overflow:hidden;padding:0}
+#sLevels.map{overflow:hidden;padding:0}#sLevels.map.on{display:block}
 #sLevels.map>.float{display:none}
 #sLevels.map #lvGrid{position:absolute;inset:0;display:block;width:auto;overflow:auto;scrollbar-width:none;overscroll-behavior:contain;background:#0a3463}
 #sLevels.map #lvGrid::-webkit-scrollbar{display:none}
