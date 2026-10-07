@@ -71,18 +71,65 @@ function fsChumBtn(){const e=$('fhChum'),c=SAVE.fsh.chum||0,ph=FS&&FS.ph;e.hidde
 $('fhChum').onclick=()=>{SFX.tap();fsChum()};
 
 /* 伊瓦：停在栏杆上，点它会嗒嗒嗒；偶尔叼走放回去的小鱼 */
-function drawIwa(x,y,t,o){x=Math.round(x);y=Math.round(y);const fly=o&&o.fly,pet=o&&o.pet>0;
-  if(fly){const u=o.fly,fx=x+u*40,fy=y-Math.sin(u*Math.PI)*16-u*10,w=Math.sin(t*14)>0?-2:2;R(fx-1,fy,4,2,'#1c1c28');R(fx-6,fy+w,5,1,'#1c1c28');R(fx+3,fy-w,5,1,'#1c1c28');R(fx+3,fy,2,1,'#9aa0b0');return}
-  const bob=Math.round(Math.sin(t*1.3)*.5);R(x,y-6+bob,4,5,'#1c1c28');R(x-2,y-4+bob,3,2,'#1c1c28');R(x-3,y-3+bob,2,1,'#1c1c28');R(x+3,y-8+bob,3,3,'#1c1c28');R(x+5,y-7+bob,2,1,'#9aa0b0');R(x+6,y-6+bob,1,1,'#9aa0b0');
-  R(x+3,y-5+bob,2,2,pet||Math.sin(t*.7)>.6?'#e0303a':'#a02030');R(x+4,y-8+bob,1,1,'#ffffff');R(x+1,y-1,1,2,'#3a3a44');R(x+3,y-1,1,2,'#3a3a44');
-  if(pet){const k=o.pet;for(let i=0;i<2;i++)R(x+2+i*4-Math.round((1-k)*2),y-11-Math.round((1-k)*8)-i*2,1,1,'#ff7aa8')}}
-function fsPet(){const f=FS;f.iwaPet=1.2;for(let i=0;i<3;i++)setTimeout(()=>snd(1200+i*80,.03,'square',.05),i*90);SAVE.fsh.pets=(SAVE.fsh.pets||0)+1;if(SAVE.fsh.pets%10===1)toast('伊瓦：嗒嗒嗒。',1.4)}
+/* 伊瓦：几个落脚点之间飞来飞去，摸它会有不同反应 */
+function fsPerch(sp,gy){const c=p=>Math.round(CW*p);
+  if(sp==='stern')return[{x:c(.2),y:gy-10},{x:c(.6),y:gy-10},{x:c(.86)-4,y:gy-24},{x:c(.12),y:gy+5}];
+  if(sp==='lagoon')return[{x:c(.2),y:gy-7,stake:1},{x:c(.62),y:gy-1},{x:c(.42)-12,y:gy-6},{x:c(.9)-12,y:gy-29}];
+  if(sp==='mangrove')return[{x:c(.2),y:gy-7,stake:1},{x:c(1/6)+2,y:gy-16},{x:c(4/6)-5,y:gy-10}];
+  return[{x:c(.2),y:gy-7,stake:1},{x:c(.65),y:gy},{x:c(.88),y:gy}]}
+function fsIw(){const f=FS;if(!f.iw)f.iw={i:0,m:'sit',k:0,d:0,dir:1,nx:6+Math.random()*8,pets:[],sulk:0,gcd:40,shell:0,last:''};return f.iw}
+/* 换个动作：m 动作名，d 时长，b 落到第几个落脚点 */
+function fsIwSet(m,d,b){const w=fsIw();if(w.b!=null){w.i=w.b;w.b=null}w.m=m;w.k=0;w.d=d;if(b!=null){w.a=w.i;w.b=b<0?w.i:b}}
+function fsIwaUpd(dt){const f=FS,w=fsIw();if(!SAVE.story.fish2)return;w.sulk=Math.max(0,w.sulk-dt);w.gcd-=dt;if(w.shell>0)w.shell-=dt;
+  if(w.m!=='sit'){w.k+=dt/w.d;if(w.k>=1){const m=w.m;if(w.b!=null){w.i=w.b;w.b=null}
+    if(m==='gift'){w.shell=3.5;SAVE.fsh.tide+=1;SAVE.fsh.tideAll=(SAVE.fsh.tideAll||0)+1;persist();fhTop();toast('伊瓦叼来一枚小贝壳，放在你脚边 · 🌊 +1 潮印',2.2);snd(1500,.06,'triangle',.06)}
+    if(m==='nap'&&Math.random()<.5){fsIwSet('nap',6+Math.random()*8);return}
+    w.m='sit';w.k=0;w.nx=6+Math.random()*9}return}
+  if((w.nx-=dt)>0)return;const n=fsPerch(fsSpot().id,FL.gy||100).length,other=()=>{let j=w.i;while(n>1&&j===w.i)j=Math.floor(Math.random()*n);return j},r=Math.random();
+  if((f.nightV||0)>.6&&f.ph!=='fight'&&r<.45)fsIwSet('nap',8+Math.random()*10);
+  else if(r<.5)fsIwSet('fly',1.6,other());else if(r<.75)fsIwSet('preen',2.2);else{fsIwSet('hop',.6);w.dir=-w.dir}}
+/* 叼走放回的小鱼：俯冲到海里再飞回来 */
+function fsIwaSnatch(){const w=fsIw();fsIwSet('snatch',2.2,-1)}
+function fsIwaPos(sp,gy,t){const w=fsIw(),P=fsPerch(sp,gy);if(w.i>=P.length)w.i=0;if(w.b!=null&&w.b>=P.length)w.b=0;const A=P[w.a!=null&&w.b!=null?w.a:w.i],u=w.k,m=w.m;
+  if(m==='fly'){const B=P[w.b];return{x:lerp(A.x,B.x,u),y:lerp(A.y,B.y,u)-Math.sin(u*Math.PI)*14,air:1,dir:B.x>=A.x?1:-1}}
+  if(m==='lap'){const s=A.x<CW/2?1:-1;return{x:A.x+Math.sin(u*Math.PI*2)*18*s,y:A.y-4-Math.sin(u*Math.PI)*16,air:1,dir:Math.cos(u*Math.PI*2)*s>=0?1:-1}}
+  if(m==='snatch'||m==='gift'){const B=P[w.b],S={x:CW*(m==='gift'?.3:.55),y:(FL.hy||40)+8};const v=u<.5?u*2:(u-.5)*2,a=u<.5?A:S,b=u<.5?S:B;
+    return{x:lerp(a.x,b.x,v),y:lerp(a.y,b.y,v)-Math.sin(v*Math.PI)*(u<.5?6:12),air:1,dir:b.x>=a.x?1:-1,fish:m==='snatch'&&u>=.5,shell:m==='gift'&&u>=.5}}
+  return{x:A.x,y:A.y,dir:w.dir}}
+function drawIwa(x,y,t,o){x=Math.round(x);y=Math.round(y);o=o||{};const dir=o.dir||1,m=o.m||'sit',k=o.k||0,K='#1c1c28',G='#9aa0b0',P=(dx,dy,w,h,c)=>R(dir>0?x+dx:x+4-dx-w,y+dy,w,h,c);
+  if(o.air){const fl=Math.sin(t*14)>0?-2:2;P(-1,0,5,2,K);P(-6,fl,5,1,K);P(-8,fl*1.5,2,1,K);P(4,-fl,5,1,K);P(8,-fl*1.5,2,1,K);P(4,0,2,1,G);P(-3,1,2,1,K);
+    if(o.fish){P(4,2,1,2,'#c8d8e8');P(4,4,2,1,'#c8d8e8')}if(o.shell){P(4,2,2,2,'#ffd2c0')}return}
+  let bob=Math.round(Math.sin(t*1.3)*.5);if(m==='hop'||m==='startle')bob=-Math.round(Math.sin(k*Math.PI)*(m==='hop'?4:6));if(m==='nap')bob=0;
+    if(m==='wings'){const s=Math.sin(Math.min(1,k*4)*Math.PI/2)*(k>.8?(1-k)*5:1),wl=Math.round(2+s*7);P(-wl,-7+bob,wl,2,K);P(-wl-1,-8+bob-Math.round(s*2),2,1,K);P(4,-7+bob,wl,2,K);P(3+wl,-8+bob-Math.round(s*2),2,1,K)}
+  const ruf=m==='grumpy';P(ruf?-1:0,(ruf?-7:-6)+bob,ruf?6:4,ruf?6:5,K);P(-2,-4+bob,3,2,K);P(-3,-3+bob,2,1,K);if(ruf){P(-1,-8+bob,1,1,K);P(2,-8+bob,1,1,K);P(4,-7+bob,1,1,K)}
+  if(m==='preen'){const h=Math.sin(k*Math.PI*3)>0?1:0;P(0,-8+bob+h,3,3,K);P(-1,-6+bob+h,2,1,G);P(1,-8+bob+h,1,1,'#ffffff')}
+  else if(m==='nap'){P(2,-7,3,2,K);P(3,-6,2,1,'#a02030');const z=(t*.8)%1;P(6,-10-Math.round(z*4),2,1,`rgba(255,255,255,${1-z})`);P(7,-11-Math.round(z*4),1,1,`rgba(255,255,255,${1-z})`)}
+  else if(m==='nuzzle'){const l=Math.round(Math.sin(Math.min(1,k*2)*Math.PI/2)*2);P(3+l,-7+bob+l,3,3,K);P(5+l,-6+bob+l,2,1,G);P(6+l,-5+bob+l,1,1,G);P(4+l,-7+bob+l,1,1,'#ffffff');P(3,-5+bob,2,2,'#e0303a')}
+  else{P(3,-8+bob,3,3,K);P(5,-7+bob,2,1,G);P(6,-6+bob,1,1,G);P(4,-8+bob,1,1,ruf?'#ff6a5a':'#ffffff');P(3,-5+bob,2,2,o.pet||Math.sin(t*.7)>.6?'#e0303a':'#a02030')}
+  if(m==='puff'){const s=Math.sin(Math.min(1,k*3)*Math.PI/2)*(k>.85?(1-k)*6.6:1),r=Math.round(s*2);P(3,-5+bob,2+r,2+r,'#e0303a');if(r>1)P(4,-4+bob,1,1,'#ff8a8a')}
+  P(1,-1,1,2,'#3a3a44');P(3,-1,1,2,'#3a3a44');
+  if(m==='nuzzle'||m==='puff'&&k>.3){for(let i=0;i<2;i++)R(x+2+i*4-Math.round(k*2),y-11-Math.round(k*8)-i*2,1,1,'#ff7aa8')}
+  if(ruf||m==='startle'){R(x+2,y-15+bob,1,3,'#ff6a5a');R(x+2,y-11+bob,1,1,'#ff6a5a')}}
+function fsIwaDraw(sp,gy,t){const f=FS,w=fsIw(),P=fsPerch(sp,gy);for(const p of P)if(p.stake){R(p.x,p.y,2,gy-p.y+3,'#7a5a3a');R(p.x-1,p.y,4,1,'#8a6a4a')}
+  const q=fsIwaPos(sp,gy,t);drawIwa(q.x,q.y,t,{dir:q.dir,m:w.m,k:w.k,air:q.air,fish:q.fish,shell:q.shell,pet:w.m!=='sit'});f.iwaPos=q.air?null:{x:Math.round(q.x),y:Math.round(q.y)};
+  if(w.shell>0){const kx=Math.round(CW*.42)-8,ky=(sp==='reef'?gy-6:gy)-1;R(kx,ky,3,2,'#ffd2c0');R(kx+1,ky-1,1,1,'#ffe8dc')}}
+function fsPet(){const f=FS,w=fsIw();f.iwaPet=1.2;const tap=(a,n,s)=>{for(let i=0;i<n;i++)setTimeout(()=>snd(a+i*s,.03,'square',.05),i*90)};
+  if(w.m==='nap'){fsIwSet('startle',.8);toast('伊瓦被你吵醒了，迷迷糊糊地看着你',1.8);tap(900,2,60);return}
+  if(w.sulk>0){toast('伊瓦扭过头去，不理你',1.4);w.dir=-w.dir;return}
+  if(w.m!=='sit'&&w.m!=='hop'&&w.m!=='preen')return;
+  SAVE.fsh.pets=(SAVE.fsh.pets||0)+1;w.pets=w.pets.filter(x=>f.t-x<12);w.pets.push(f.t);
+  if(w.pets.length>=5){w.pets=[];w.sulk=10;const P=fsPerch(fsSpot().id,FL.gy||100);let far=w.i,fd=-1;for(let j=0;j<P.length;j++){const d=Math.abs(P[j].x-P[w.i].x);if(d>fd){fd=d;far=j}}
+    fsIwSet('grumpy',.9);setTimeout(()=>{if(FS&&w.m==='grumpy'||FS&&w.m==='sit')fsIwSet('fly',1.4,far)},900);toast('嘎！伊瓦嫌你摸太多了，飞到一边去了',1.8);snd(420,.12,'sawtooth',.06);return}
+  const opts=[['nuzzle',3,1.2,'伊瓦用脑袋蹭了蹭你的手'],['puff',2,1.8,'伊瓦鼓起红红的喉囊，嗒嗒嗒！'],['wings',2,1.6,'伊瓦张开翅膀，比你还宽'],['hop',1.2,.6,'伊瓦蹦了一下，转过身去'],['lap',1.2,2.4,'伊瓦绕着你飞了一圈']];
+  if(w.gcd<=0&&SAVE.fsh.pets>=4)opts.push(['gift',1.2,3.2,'']);let tot=0;const ok=opts.filter(o=>o[0]!==w.last);for(const o of ok)tot+=o[1];let r=Math.random()*tot,pick=ok[0];for(const o of ok){if((r-=o[1])<=0){pick=o;break}}
+  const [m,,d,msg]=pick;w.last=m;if(m==='gift'){w.gcd=150;fsIwSet('gift',d,-1)}else if(m==='lap')fsIwSet('lap',d,-1);else{fsIwSet(m,d);if(m==='hop')w.dir=-w.dir}
+  if(msg)toast(msg,1.5);if(m==='puff'){snd(300,.25,'sine',.07);setTimeout(()=>tap(1200,3,80),250)}else if(m==='wings')snd(600,.15,'triangle',.05);else tap(1200,3,80)}
 
 /* 收竿：换钓点或回主菜单 */
 function fsSpots(){const cur=fsSpot().id;
   $('fhPanel').innerHTML=`<h3>换个地方钓</h3>${SPOTS.map(s=>{const ok=cleared(s.li),on=s.id===cur;return `<div class="fdk"><span class="ic">${s.ic}</span><div><b>${s.n}</b><span>${s.d}</span></div>${on?'<button class="btn sm off" disabled>在这儿</button>':ok?`<button class="btn sm mint" data-fs="${s.id}">去这儿</button>`:`<span class="note">${s.li===VOL1+2?'第三章以后':'第四章以后'}</span>`}</div>`}).join('')}
    <div class="rowb"><button class="btn sm" data-fp="x">接着钓</button><button class="btn sm sun" data-fq="1">回主菜单</button></div>`;$('fhPanel').hidden=false}
-function fsGo(id){const f=FS;SAVE.fsh.spot=id;persist();f.sh=[];f.bob=null;f.ph='idle';f.bite=null;f.F=null;f.chumAt=null;for(let i=0;i<4;i++)fsSpawn(true);$('fhPanel').hidden=true;toast(`${fsSpot().ic} ${fsSpot().n}`,1.6);fhTop()}
+function fsGo(id){const f=FS;SAVE.fsh.spot=id;persist();f.sh=[];f.bob=null;f.ph='idle';f.bite=null;f.F=null;f.chumAt=null;f.iw=null;for(let i=0;i<4;i++)fsSpawn(true);$('fhPanel').hidden=true;toast(`${fsSpot().ic} ${fsSpot().n}`,1.6);fhTop()}
 
 /* 拍照：小鱼和鱼的合影，存到手机相册 */
 function fsPhoto(sh){const c=document.createElement('canvas'),S=4,w=90,h=120;c.width=w*S;c.height=h*S;const g=c.getContext('2d'),[k0,k1,s0,s1]=todCol(FS.tod);
