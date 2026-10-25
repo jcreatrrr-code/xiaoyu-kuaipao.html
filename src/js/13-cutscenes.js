@@ -53,6 +53,7 @@ const SCN={dQiang:{bg:'diner',cast:[['kid',.26,'g'],['aqiang',.56,'g',1]]},dCrew
  shEnd:{bg:'shore',dusk:1,cast:[['kid',.16,'g'],['achao',.36,'g'],['haisheng',.56,'g',1],['xiaoman',.8,'g',1]]},s4ok:{bg:'sea',i:4,cast:[['shark',.3,.22],['turtle',.7,.34,1],['whale',.6,.12,1]]}};
 function bgShore(t,gy,hy,o){
   if(o.deck){deckScene(t,gy,hy,o);return}
+  if(o.mist){mistShore(t,gy,hy,o);return}
   const sky=o.dusk?['#ff9f6b','#ffe0a0']:o.ice?['#b8d8ec','#eef8ff']:['#7fcbff','#dff4ff'];for(let i=0;i<6;i++)R(0,Math.floor(hy*i/6),CW,Math.ceil(hy/6)+1,mixc(sky[0],sky[1],i/5));
   El(CW*(o.dusk?.78:.2),hy*(o.dusk?.8:.4),5,5,o.dusk?'#ff6b4a':'#fff27a');
   for(let i=0;i<3;i++){const cx=((i*47+t*2.5)%(CW+30))-15,cy=hy*(.2+i*.22);El(cx,cy,6,2,'#ffffff');El(cx+4,cy-1,4,2,'#ffffff')}
@@ -105,6 +106,7 @@ function drawCut(dt){
   if(sc.night){px.fillStyle='rgba(8,14,44,.62)';px.fillRect(0,0,CW,CH2);const hxp=Math.round(CW*.74);if(sc.atoll)lhLamps(t,hy,sc);if(sc.stars)for(let i=0;i<22;i++){const sx=(i*37+11)%CW,sy=(i*19+5)%Math.max(4,hy-2);R(sx,sy,1,1,Math.sin(t*2+i)>.6?'#ffffff':'#bcd0ff')}else if(!sc.atoll){R(hxp+5,gy-11,5,4,'#ffe27a');R(hxp-10,gy-11,5,4,'#ffe27a')}if(!sc.stars)for(let i=0;i<26;i++){const rx=((i*37+t*90)%(CW+20))-10,ry=((i*53+t*160)%CH2);R(rx,ry,1,3,'rgba(200,220,255,.5)')}
     if(sc.glow){const gx=Math.round(CW*.3),gy2=Math.round((hy+gy)/2),p=Math.round(Math.sin(t*3)*1);El(gx,gy2,9+p,3+p,'rgba(159,240,255,.35)');El(gx,gy2,5,2,'#9ff0ff');El(gx,gy2,2,1,'#ffffff')}
     if(!sc.stars&&Math.sin(t*1.7)>.985){R(0,0,CW,CH2,'rgba(255,255,255,.5)');if(!q.th){q.th=1;CSND.thunder()}}else q.th=0}
+  if(sc.fog)mistVeil(t,gy,sc.fog);
   if(spk&&fxo.em&&q.lt>.05){const bob=q.lt<.3?Math.round((.3-q.lt)*10):0,ex=spk[1]+7,ey=spk[2]-6-bob;R(ex-4,ey-5,9,9,'#ffffff');R(ex-5,ey-4,11,7,'#ffffff');R(ex-2,ey+4,2,2,'#ffffff');
     const c=fxo.em;if(c==='!'){R(ex,ey-3,1,4,'#e0503f');R(ex,ey+2,1,1,'#e0503f')}else if(c==='?'){R(ex-1,ey-3,3,1,'#3f8fd0');R(ex+1,ey-2,1,2,'#3f8fd0');R(ex,ey,1,1,'#3f8fd0');R(ex,ey+2,1,1,'#3f8fd0')}else{R(ex-3,ey,1,1,'#5f7080');R(ex,ey,1,1,'#5f7080');R(ex+3,ey,1,1,'#5f7080')}}
   if(spk&&fxo.cut){const k=spk[0],e=Math.min(1,q.lt/.22),bh=Math.round(gy*.42),by=Math.round(CH2*.07),ox=Math.round((1-e)*-CW);R(ox,by,CW,bh,'#1b2a41');R(ox,by,CW,1,'#ffd23f');R(ox,by+bh-1,CW,1,'#ffd23f');for(let i=0;i<7;i++)R(ox+((i*29+t*140)%CW),by+3+i*Math.floor((bh-6)/7),10,1,'rgba(255,255,255,.25)');

@@ -1,5 +1,5 @@
 /* ---------- 第二卷 南方环礁：海域、关卡、新情况 ---------- */
-const VOL1=12,volOf=li=>li<VOL1?1:2,v2Open=()=>cleared(VOL1-1);
+const VOL1=12,volOf=li=>li<VOL1?1:li<VOL2?2:3,v2Open=()=>cleared(VOL1-1);
 TH.push(
  {n:'碧色潟湖',top:'#7fe6e0',bot:'#1a8fb0',far:'#5fcfd8',mid:'#3fb0c8',sand:'#f8ecc8',rock:'#ece4d6',rock2:'#cfc3ae',weed:'#6fe0b0'},
  {n:'飞鱼水道',top:'#6fd8f0',bot:'#1570b0',far:'#4fb8e0',mid:'#2f98c8',sand:'#f5e2b0',rock:'#d9a070',rock2:'#a8703f',weed:'#4fd0a0'},
@@ -24,7 +24,7 @@ const TIPS2={node:'发光的是要带回小馆的食材，用手指点它！',ro
 const LEAPSAFE={rock:1,octo:1,jelly:1,net:1,fnet:1,ice:1,mimic:1};
 const SURF=.3,surfY=()=>fy(SURF),LEAP={T:1.5,fs:SURF+.04,fp:.03};
 const tideH=t=>.2*(.5-.5*Math.cos(t*TAU/11));
-function v2Build(L,g){a2Build(L,g);a3Build(L,g);if(L.tide)for(const e of g.E)if(e.t==='pearl'||e.t==='wild')e.f=Math.min(e.f,.74);
+function v2Build(L,g){a2Build(L,g);a3Build(L,g);v3Build(L,g);if(L.tide)for(const e of g.E)if(e.t==='pearl'||e.t==='wild')e.f=Math.min(e.f,.74);
   if(!L.leap)return;const m=v=>SURF+(1-SURF)*v;g.E=g.E.filter(e=>!(e.t==='rock'&&e.top&&!e.root));
   for(const e of g.E){if(e.f!=null&&!e.air)e.f=m(e.f);if(e.amp!=null&&e.t!=='net')e.amp*=1-SURF;
     if(e.t==='fnet')e.h=m(e.h);else if(e.t==='rock')e.h=e.top?m(e.h):e.h*(1-SURF)}}
@@ -32,7 +32,7 @@ function v2Build(L,g){a2Build(L,g);a3Build(L,g);if(L.tide)for(const e of g.E)if(
 function v2Mv(g,leap){for(const e of g.E)if(e.mv&&e.x>g.scroll-200&&e.x<g.scroll+VW+300){const o=e.mv.amp*(leap?1-SURF:1)*Math.sin(g.t*1.2+e.mv.ph);if(e.h0==null)e.h0=e.t==='pearl'?e.f:e.h;
     if(e.t==='pearl')e.f=e.h0+o;else e.h=e.top?e.h0+o:e.h0-o}}
 /* 每帧：潮位、跃出水面 */
-function v2Move(g,dt,k){const F=g.fish,L=g.L,t=g.t;a3Tick(g,dt);
+function v2Move(g,dt,k){const F=g.fish,L=g.L,t=g.t;a3Tick(g,dt);v3Tick(g,dt);
   if(L.tide){if(!g.tips.tide&&t>3){g.tips.tide=1;toast(TIPS.tide,3)}const fl=yMax-tideH(t)*(yMax-yMin);
     if(F.y>fl-18){F.y=fl-18;if(g.inv<=0&&!g.trap){hurt(1);F.vy=-300*k}else if(F.vy>0)F.vy=0}}
   v2Mv(g,L.leap);
@@ -55,7 +55,7 @@ function v2BG(th,sc,t){
   if(th===13){ctx.fillStyle='rgba(30,70,120,.25)';for(let i=0;i<3;i++){const x=VW-((t*90+i*260+sc*.1)%(VW+200))+100,y=yMin+30+i*22;ctx.beginPath();ctx.ellipse(x,y,22,6,0,0,TAU);ctx.fill();ctx.beginPath();ctx.moveTo(x-4,y);ctx.lineTo(x+10,y-16);ctx.lineTo(x+14,y);ctx.fill()}}
   if(th===14){ctx.strokeStyle='rgba(60,40,25,.55)';ctx.lineCap='round';const o=sc*.3;for(let n=Math.floor(o/140)-1;n*140-o<VW+60;n++){const x=n*140-o,h=120+hash(n+2)*160;ctx.lineWidth=10;
     for(const s of[-1,1]){ctx.beginPath();ctx.moveTo(x,0);ctx.quadraticCurveTo(x+s*30,h*.6,x+s*44,h);ctx.stroke()}}}
-  a2BG(th,sc,t);a3BG(th,sc,t);
+  a2BG(th,sc,t);a3BG(th,sc,t);v3BG(th,sc,t);
   if(th===15){ctx.strokeStyle='rgba(200,220,255,.18)';ctx.lineWidth=1.5;for(let i=0;i<40;i++){const x=((i*97+t*60)%(VW+80))-40,y=((i*53+t*700)%(PH+60))-30;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-6,y+18);ctx.stroke()}}}
 function v2Sky(g,t){if(!g||!g.L||!g.L.leap)return;const y=surfY(),st=g.theme===15;ctx.save();const gr=ctx.createLinearGradient(0,0,0,y);
   gr.addColorStop(0,st?'#141c2c':'#bfe9ff');gr.addColorStop(1,st?'#3a4a62':'#eaf8ff');ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(VW,0);

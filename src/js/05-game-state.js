@@ -11,7 +11,7 @@ function startGame(mode,li){
   G={mode,li,L,gen,E:gen.E,t:0,scroll:0,speed:0,life,maxLife:life,pearls:0,rescued:0,combo:0,comboT:0,maxCombo:0,bonus:0,
      shield:false,shieldUsed:0,inv:0,slowT:0,trap:null,sharks:[],cp:0,noDmg:true,fish:{y:0,vy:0},parts:[],texts:[],shake:0,flash:0,
      theme:endless?0:L.theme,lvl:0,whale:false,magnet:false,caught:{},nCaught:0,buff:{},tips:{},dead:0,cause:'',bubT:0,pruneT:0,hudKey:''};
-  G.faded=!endless&&!L.dark&&(li<5||L.vol===2)&&!(SAVE.simple.st[li]>0||SAVE.hard.st[li]>0);G.orb=!endless&&L.escort?{y:0,hp:3,inv:0}:null;
+  G.faded=!endless&&!L.dark&&(li<5||L.vol>=2)&&!(SAVE.simple.st[li]>0||SAVE.hard.st[li]>0);G.orb=!endless&&L.escort?{y:0,hp:3,inv:0}:null;
   const used=[];for(const it of ITEMS)if(SAVE.inv[it.id]>0&&SAVE.use[it.id]!==0){SAVE.inv[it.id]--;used.push(it.n);
     if(it.id==='gold')G.shield=true;else if(it.id==='whale')G.whale=true;else if(it.id==='magnet')G.magnet=true;else if(it.id==='life'){G.life++;G.maxLife++}else G.buff[it.id]=true}
   if(G.buff.bait){gen.bait=true;for(const e of G.E.slice())if(e.t==='wild')G.E.push({...e,x:e.x+150,f:clamp(1.05-e.f,.15,.85),ph:e.ph+2})}

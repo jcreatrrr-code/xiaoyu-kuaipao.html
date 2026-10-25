@@ -64,7 +64,7 @@ function genSlot(g){
   g.i++;g.x+=gap*g.r(.95,1.1)}
 function buildLevel(li,mode){
   const L=LV[li],hard=mode==='hard',len=L.len*60,pool={...L.pool};if(!hard&&pool.shield)pool.shield*=2;
-  const v2=L.vol===2,lj=v2?li-VOL1:li;
+  const v2=L.vol>=2,lj=v2?li-volStart(L.vol):li;
   if(hard&&!v2){if(li>=1)pool.net=(pool.net||0)+li*.5;if(li>=3)pool.wall=(pool.wall||0)+(li-2)*.5}
   if(hard&&v2)for(const k in pool)if(k!=='pearls'&&k!=='shield')pool[k]*=1.25;
   const g={mode,r:rng(1000+li*77+(hard?13:0)),x:700,i:0,E:[],last:'',pool:()=>pool,fish:()=>L.fish,gap:()=>hard?(v2?400-lj*5:350-li*8):450,diff:x=>x/len};
@@ -79,7 +79,7 @@ function buildLevel(li,mode){
   if(L.nodes){const n=(L.goal.n?L.goal.n[hard?1:0]:2)+2,m=L.nodes.length;for(let k=0;k<n;k++)L.nodes.forEach((nk,q)=>g.E.push({t:'node',k:nk,x:800+((L.boss?len-1700:len)-1600)*(k+(q+.4)/m)/n,f:NODE[nk].f!=null?NODE[nk].f:(k+q)%2?(nk==='grape'?.14:.9):(nk==='grape'?.86:.1),hp:NODE[nk].hp}))}
   if(L.boss){const bx=len-1500;g.E=g.E.filter(e=>e.x<bx-150);g.E.push({t:'boss',x:bx})}
   if(L.helpers)[['鲸婆婆','whale',.14],['墨墨','gold',.36],['大白','clear',.58],['石蟹','doors',.8]].forEach(h=>g.E.push({t:'help',x:len*h[2],who:h[0],k:h[1]}));
-  if(L.vol===2)v2Build(L,g);g.E.push({t:'fin',x:len});return g}
+  if(L.vol>=2)v2Build(L,g);g.E.push({t:'fin',x:len});return g}
 /* 无尽模式：第二卷里学会的机关，通关对应那一章以后，也会在无尽模式里出现（[机关, 学会它的关卡, 从第几段难度开始]） */
 const EV2=[['roots',14,1],['vent',17,1],['fork',16,2],['lamp',18,2],['pumice',21,2],['lava',20,3],['sline',22,3]],EV2K=new Set(EV2.map(q=>q[0]));
 function buildEndless(){
