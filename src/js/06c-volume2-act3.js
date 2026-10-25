@@ -71,7 +71,7 @@ function a3Node(e,t){
     circ(0,-4,13);ctx.fillStyle='#fff';circ(-5,-4,4);circ(5,-4,4);ctx.fillStyle='#1b2a41';circ(-5,-3,2);circ(5,-3,2);return 1}
   if(e.k==='parrot'){ctx.rotate(Math.sin(t*1.6+e.x)*.1);ctx.fillStyle='#3fc8a8';ctx.beginPath();ctx.ellipse(0,0,22,11,0,0,TAU);ctx.fill();ctx.fillStyle='#2a7aa0';ctx.beginPath();ctx.moveTo(-20,0);ctx.lineTo(-32,-9);ctx.lineTo(-32,9);ctx.fill();for(let i=0;i<3;i++){ctx.fillStyle=['#ffd23f','#ff8fc0','#7fd8ff'][i];circ(-8+i*7,-2+(i%2)*4,3)}
     ctx.fillStyle='#e8fff8';ctx.beginPath();ctx.moveTo(19,-3);ctx.lineTo(27,0);ctx.lineTo(19,4);ctx.fill();ctx.fillStyle='#1b2a41';circ(13,-3,2.2);return 1}
-  return 0}
+  return v3Node(e,t)}
 function a3Build(L,g){
   const pm=g.E.filter(e=>e.t==='pumice');if(pm.length){g.E=g.E.filter(e=>!((e.t==='jelly'||e.t==='octo'||e.t==='rock'&&e.top)&&pm.some(p=>Math.abs(e.x-p.x)<p.w/2+80)));
     let j=0;for(const e of g.E)if(e.t==='node'&&e.k==='tako'){const p=pm.slice().sort((a,b)=>Math.abs(a.x-e.x)-Math.abs(b.x-e.x)).find(q=>!q.node);if(p){p.node=e;e.x=p.x+(j++%2?-1:1)*p.w*.18;e.f=p.h1+.07}}}

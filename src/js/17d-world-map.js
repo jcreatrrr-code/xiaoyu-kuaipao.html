@@ -38,7 +38,7 @@ function renderMap(mode,vol,hi,sv,base,still){
   const mixW=(h,a)=>'#'+[1,3,5].map(i=>Math.round(parseInt(h.slice(i,i+2),16)*(1-a)+255*a).toString(16).padStart(2,'0')).join(''),R=D*1.02,f1=v=>v.toFixed(1),FT={top:'#ffb070',mid:'#c8603a',far:'#e0824a',sand:'#f5d8a0',rock:'#8a5a40',rock2:'#5a3a2a',weed:'#ffcf6a'};
   /* 小物件不压在关卡点、名字牌和海路上 */
   const busy=(x,y,r)=>Q.some((q,j)=>j>0&&Math.abs(q[0]-x)<r+38&&y>q[1]-r-38&&y<q[1]+r+(land?62:58))||poly.some((p,j)=>j%4===0&&Math.hypot(p[0]-x,p[1]-y)<r+14)||Q.some((q,j)=>{if(!j)return 0;const [fx,fy]=land?[q[0],q[1]-60]:[q[0]+(q[0]>bw*.32?-62:62),q[1]-4];return Math.hypot(fx-x,fy-y)<r+38})||x<r||x>W-r||y<r||y>H-r;
-  const sea1=vol===2?'#2fb3cc':'#2a9fd0',sea2=vol===2?'#123766':'#0a3463';
+  const sea1=vol===3?'#8a98a6':vol===2?'#2fb3cc':'#2a9fd0',sea2=vol===3?'#26303e':vol===2?'#123766':'#0a3463';
   let defs=`<linearGradient id="wmSea" x1="0" y1="${land?0:1}" x2="${land?1:0}" y2="0"><stop offset="0" stop-color="${sea1}"/><stop offset="1" stop-color="${sea2}"/></linearGradient>`
     +'<filter id="wmF1" color-interpolation-filters="sRGB"><feColorMatrix type="saturate" values=".4"/></filter><filter id="wmF0" color-interpolation-filters="sRGB"><feColorMatrix type="saturate" values=".15"/><feComponentTransfer><feFuncR type="linear" slope=".62" intercept=".2"/><feFuncG type="linear" slope=".62" intercept=".24"/><feFuncB type="linear" slope=".62" intercept=".3"/></feComponentTransfer></filter>'
     +'<filter id="wmBl" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14"/></filter>';
