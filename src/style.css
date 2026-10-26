@@ -301,3 +301,5 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
  #lvInfo .liT b{font-size:20px}
  #lvInfo .liB{flex-direction:column-reverse;gap:12px}
 }
+
+.jRow{display:flex;flex-wrap:wrap;gap:8px}.jS{display:inline-block;padding:8px 12px;border:2px dashed #d8c89a;border-radius:12px;font-size:15px;color:#8a7a5a}

@@ -69,12 +69,17 @@ d84:['干海带（昆布）、清水',['海带用湿布擦掉表面灰尘，不�
 d85:['泡发的海带、蒜、醋、鱼露、香油',['海带切细丝，开水焯一分钟，过冷水。','蒜末、醋、鱼露、香油调成汁。','和海带丝拌匀，冷藏半小时更入味。']]});
 CTIP.push('雾太大的时候，跟着雾里发光的珍珠游。听到“咕咕”声的地方就是大黄鱼。','退潮的时候，头顶的水面会往下压，别被挤在泥滩和水面之间。','看不见礁石就点右下角的钟，回声会照出前面的礁石。','钟响一声走上面，响两声走下面。雾里看不见潮，只能信钟声。');
 /* 雾海的岸：灰天灰海、黑礁石、晒鱼的竹架；退潮时露出泥滩 */
-function mistShore(t,gy,hy,o){const sky=['#9aa4ac','#d4d8da'];for(let i=0;i<6;i++)R(0,Math.floor(hy*i/6),CW,Math.ceil(hy/6)+1,mixc(sky[0],sky[1],i/5));
+function mistShore(t,gy,hy,o){const sky=o.sun?['#8ec4dc','#e8e2c8']:['#9aa4ac','#d4d8da'];for(let i=0;i<6;i++)R(0,Math.floor(hy*i/6),CW,Math.ceil(hy/6)+1,mixc(sky[0],sky[1],i/5));
   for(const[f,w,h]of[[.08,14,9],[.36,22,13],[.7,18,8],[.92,12,6]]){const x=Math.round(CW*f);for(let j=0;j<h;j++)R(x-Math.round(w*(1-j/h)/2),hy-j,Math.max(1,Math.round(w*(1-j/h))),1,mixc('#5a6068','#b8bec2',.15+.08*(f*4%1)))}
   R(0,hy,CW,gy-hy,'#7a868e');R(0,hy+Math.floor((gy-hy)/2),CW,gy-hy,'#66727a');for(let i=0;i<7;i++){const y=hy+1+(i*5)%Math.max(1,gy-hy-1),x=((i*23+t*(3+i%3))%(CW+8))-4;R(x,y,4,1,'#a8b4ba')}
+  if(o.sun){El(Math.round(CW*.2),Math.round(hy*.35),7,7,'#f4e4a0');El(Math.round(CW*.2),Math.round(hy*.35),5,5,'#fff4c8')}
   if(o.ship){const sx=Math.round(CW*.78);R(sx-12,hy-2,24,3,'#2a2a2e');R(sx-1,hy-14,2,12,'#2a2a2e');for(let j=0;j<10;j++)R(sx+1,hy-13+j,Math.round(8*(1-j/12)),1,'#1a1a1e');R(sx-10,hy-4,4,2,'#d8b04a')}
   if(o.flat){R(0,gy-4,CW,CH2-gy+4,'#5a5044');for(let i=0;i<10;i++){const x=(i*31)%CW,y=gy+2+(i*13)%Math.max(4,CH2-gy-6);El(x,y,5+i%3*2,1,'#8a9298')}R(0,gy-4,CW,1,'#7a6e60');return}
   R(0,gy,CW,CH2-gy,'#4a4640');R(0,gy,CW,1,'#6a6660');for(let i=0;i<14;i++)R((i*37)%CW,gy+3+(i*11)%30,2,1,'#5e5a54');
-  for(const f of[.06,.86]){const x=Math.round(CW*f);for(let k=0;k<3;k++){R(x+k*6,gy-16,1,16,'#8a7a4a')}R(x-2,gy-16,17,1,'#a89a6a');R(x-2,gy-11,17,1,'#a89a6a')}}
+  for(const f of[.06,.86]){const x=Math.round(CW*f);for(let k=0;k<3;k++){R(x+k*6,gy-16,1,16,'#8a7a4a')}R(x-2,gy-16,17,1,'#a89a6a');R(x-2,gy-11,17,1,'#a89a6a')}
+  if(o.sun)for(let i=0;i<6;i++)R((i*47+9)%CW,gy+2+(i*7)%10,4,1,'#8a5a9a');
+  if(o.mill){const mx=Math.round(CW*.5);R(mx-22,gy-26,44,26,'#3a3a40');for(let j=0;j<10;j++)R(mx-24+j,gy-36+j,48-j*2,1,'#2a2a30');R(mx+10,gy-44,6,14,'#2e2e34');for(let k=0;k<3;k++){const ph=(t*.6+k/3)%1;El(mx+13+ph*10,gy-46-ph*22,3+ph*5,2+ph*3,`rgba(230,232,235,${.6*(1-ph)})`)}R(mx-6,gy-14,12,14,'#1c1c20');for(const dx of[-16,12])R(mx+dx,gy-20,5,4,'#d8b04a')}
+  if(o.soup){const cx=Math.round(CW*.5);El(cx,gy-6,16,6,'#2a2624');R(cx-16,gy-12,32,7,'#2a2624');El(cx,gy-12,15,3,'#c89a5a');for(let k=0;k<3;k++){const ph=(t*.8+k/3)%1;El(cx-6+k*6,gy-16-ph*14,2+ph*3,2,`rgba(240,240,240,${.5*(1-ph)})`)}
+    for(const f of[.22,.78]){const x=Math.round(CW*f);R(x-10,gy-22,1,22,'#6a5a3a');R(x+10,gy-22,1,22,'#6a5a3a');R(x-11,gy-22,23,1,'#8a7a4a');for(let k=0;k<4;k++){R(x-8+k*5,gy-21,1,3,'#8a7a4a');R(x-9+k*5,gy-18,3,6,'#b0a090')}}}}
 function mistVeil(t,gy,n){for(let i=0;i<(n>1?9:5);i++){const w=40+i%3*20,x=((i*53+t*(4+i%3))%(CW+w*2))-w,y=Math.round(gy*(.15+.12*(i%7)));El(x,y,w/2,3+i%2,`rgba(225,230,233,${n>1?.5:.32})`)}
   if(n>1){px.fillStyle='rgba(220,226,230,.35)';px.fillRect(0,0,CW,CH2)}}

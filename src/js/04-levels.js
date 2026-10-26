@@ -81,7 +81,7 @@ function buildLevel(li,mode){
   if(L.helpers)[['鲸婆婆','whale',.14],['墨墨','gold',.36],['大白','clear',.58],['石蟹','doors',.8]].forEach(h=>g.E.push({t:'help',x:len*h[2],who:h[0],k:h[1]}));
   if(L.vol>=2)v2Build(L,g);g.E.push({t:'fin',x:len});return g}
 /* 无尽模式：第二卷里学会的机关，通关对应那一章以后，也会在无尽模式里出现（[机关, 学会它的关卡, 从第几段难度开始]） */
-const EV2=[['roots',14,1],['vent',17,1],['fork',16,2],['lamp',18,2],['pumice',21,2],['lava',20,3],['sline',22,3]],EV2K=new Set(EV2.map(q=>q[0]));
+const EV2=[['roots',14,1],['vent',17,1],['fork',16,2],['lamp',18,2],['pumice',21,2],['lava',20,3],['sline',22,3],['whirl',28,2],['sbell',29,2],['chain',33,3]],EV2K=new Set(EV2.map(q=>q[0]));
 function buildEndless(){
   const lv=x=>Math.floor(x/60/200);
   return{mode:'endless',r:rng((Math.random()*1e9)|0),x:700,i:0,E:[],last:'',
