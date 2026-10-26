@@ -12,6 +12,7 @@ src/js/06a-volume2.js
 src/js/06b-volume2-act2.js
 src/js/06c-volume2-act3.js
 src/js/06d-volume3.js
+src/js/06e-volume3-act23.js
 src/js/07-drawing.js
 src/js/08-screens.js
 src/js/09-story-restaurant.js
@@ -23,14 +24,17 @@ src/js/13a-volume2-story.js
 src/js/13b-volume2-act2-story.js
 src/js/13c-volume2-act3-story.js
 src/js/13d-volume3-story.js
+src/js/13e-volume3-act23-story.js
 src/js/14-book.js
 src/js/14a-volume2-book.js
 src/js/14b-volume2-act3-book.js
 src/js/14c-volume3-book.js
+src/js/14d-volume3-act23-book.js
 src/js/15-devmode.js
 src/js/16-i18n.js
 src/js/16a-volume2-i18n.js
 src/js/16b-volume3-i18n.js
+src/js/16c-volume3-act23-i18n.js
 src/js/17-music.js
 src/js/17a-fishing.js
 src/js/17b-fishing2.js

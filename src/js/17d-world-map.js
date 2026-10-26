@@ -15,8 +15,8 @@ function wmFishTick(){cancelAnimationFrame(wmFr);const fc=$('lvGrid').querySelec
 function renderMap(mode,vol,hi,sv,base,still){
   cancelAnimationFrame(wmRaf);
   const box=$('lvGrid'),land=matchMedia('(orientation:landscape)').matches,key=mode+vol;
-  const ids=LV.map((L,i)=>i).filter(i=>volOf(i)===vol),feast=vol===2&&!hi&&cleared(VOL1+11),n=ids.length+(feast?1:0);
-  const open=k=>k>=ids.length||ids[k]===0||hi&&ids[k]===VOL1||sv.st[ids[k]-1]>0,done=k=>k<ids.length?sv.st[ids[k]]>0:!!SAVE.feast2,lit=k=>k<ids.length?cleared(ids[k]):done(k);
+  const ids=LV.map((L,i)=>i).filter(i=>volOf(i)===vol),feast=!hi&&(vol===2&&cleared(VOL1+11)||vol===3&&cleared(VOL2+11)),n=ids.length+(feast?1:0);
+  const open=k=>k>=ids.length||ids[k]===0||hi&&(ids[k]===VOL1||ids[k]===VOL2)||sv.st[ids[k]-1]>0,done=k=>k<ids.length?sv.st[ids[k]]>0:!!(vol===3?SAVE.feast3:SAVE.feast2),lit=k=>k<ids.length?cleared(ids[k]):done(k);
   let front=0;for(let k=0;k<ids.length;k++)if(open(k))front=k;
   SAVE.mapAt=SAVE.mapAt||{};const was=SAVE.mapAt[key],walk=!still&&was!==undefined&&was<front?was:-1;
   if(was!==front){SAVE.mapAt[key]=front;persist()}
@@ -71,7 +71,7 @@ function renderMap(mode,vol,hi,sv,base,still){
     +`<text x="${f1(Q[0][0])}" y="${f1(Q[0][1])}" font-size="32" text-anchor="middle" dominant-baseline="central">${vol===2?'⛵':'🏠'}</text></svg>`;
   let nodes='';
   for(let k=0;k<n;k++){const [x,y]=Q[k+1],o=open(k),dn=done(k),fz=k<ids.length&&walk>=0&&k>walk&&k<=front;
-    if(k===ids.length){nodes+=`<button class="wmN feast${dn?' done':' open'}" data-k="${k}" style="left:${f1(x)}px;top:${f1(y)}px">🔥<em>石焖宴</em></button>`;continue}
+    if(k===ids.length){nodes+=`<button class="wmN feast${dn?' done':' open'}" data-k="${k}" style="left:${f1(x)}px;top:${f1(y)}px">${vol===3?'🍲<em>百日汤宴</em>':'🔥<em>石焖宴</em>'}</button>`;continue}
     const i=ids[k],L=LV[i];let st='';if(dn){for(let j=0;j<3;j++)st+=`<i class="st ${sv.st[i]>j?'f':''}"></i>`;if(sv.s4[i])st+='<i class="st f"></i>'}
     nodes+=`<button class="wmN ${dn?'done':o?'open':'lock'}${L.boss?' boss':''}${fz?' fresh':''}" data-k="${k}" style="left:${f1(x)}px;top:${f1(y)}px${fz?';animation-delay:'+(.25+(k-walk-1)*.2)+'s':''}">`
       +(o?`<b>${i-base+1}</b>`:'🔒')+(L.boss&&o?'<span class="wmCr">👑</span>':'')+(o?`<em>${L.name}${st?`<span class="wmSt">${st}</span>`:''}</em>`:'')+'</button>'}
@@ -87,7 +87,7 @@ function wmPlace(p,snap){const f=$('lvGrid').querySelector('.wmFish');if(!f)retu
 function wmMark(){$('lvGrid').querySelectorAll('.wmN').forEach(b=>b.classList.toggle('sel',+b.dataset.k===WM.sel))}
 function wmInfo(){const {hi,sv,ids,base,sel}=WM;wmInfo0(ids,base,hi,sv,sel)}
 function wmInfo0(ids,base,hi,sv,sel){let h;
-  if(sel===ids.length)h=`<div class="liT"><b>🔥 特别关 石焖宴</b></div><em>${SAVE.feast2?'已办成 · 可以再开一次':'全岛的人都在等着开席'}</em><em>十二位客人，至少上九道</em>`;
+  if(sel===ids.length)h=volOf(ids[0])===3?`<div class="liT"><b>🍲 特别关 百日汤宴</b></div><em>${SAVE.feast3?'已办成 · 可以再开一次':'雾散了，群岛的人都在等着开席'}</em><em>十二位客人，至少上九道</em>`:`<div class="liT"><b>🔥 特别关 石焖宴</b></div><em>${SAVE.feast2?'已办成 · 可以再开一次':'全岛的人都在等着开席'}</em><em>十二位客人，至少上九道</em>`;
   else{const i=ids[sel],L=LV[i];let st='';for(let k=0;k<3;k++)st+=`<i class="st ${sv.st[i]>k?'f':''}"></i>`;if(sv.s4[i])st+='<i class="st f"></i>';
     h=`<div class="liT"><b>第${i-base+1}关 ${L.name}</b><span class="mini">${st}</span></div><em>${goalText(L,hi)}</em><em>${L.tool?TOOLN[L.tool][0]+(SAVE.tools[L.tool]?' 带着':' 需要')+TOOLN[L.tool][1]:cleared(i)?'🌊 海域已恢复':'海域褪色中'}</em>`}
   /* 只换文字，两个按钮一直是同一个，手指按下去时按钮不会被换掉 */
@@ -104,7 +104,7 @@ function wmMove(k,then){const w=WM;if(!w||w.moving)return;const a=w.nodeAt[w.sel
     if(fi&&Math.abs(dx)>.6)fi.classList.toggle('left',dx<0);wmPlace(p,0);
     if(u<1)wmRaf=requestAnimationFrame(step);else{w.moving=0;fi&&fi.classList.remove('left');wmRest();then&&then()}};
   wmRaf=requestAnimationFrame(step)}
-function wmGo(){const w=WM;if(!w||w.moving)return;SFX.tap();if(w.sel===w.ids.length){startFeast2();return}launch(w.mode,w.ids[w.sel])}
+function wmGo(){const w=WM;if(!w||w.moving)return;SFX.tap();if(w.sel===w.ids.length){w.vol===3?startFeast3():startFeast2();return}launch(w.mode,w.ids[w.sel])}
 $('lvGrid').onclick=e=>{const b=e.target.closest('.wmN');if(!b||!WM||WM.moving)return;const k=+b.dataset.k;
   if(!WM.open(k)){SFX.tap();b.classList.remove('nope');void b.offsetWidth;b.classList.add('nope');toast('通关上一关后揭晓',2);return}
   if(k===WM.sel){wmGo();return}SFX.tap();wmMove(k)};

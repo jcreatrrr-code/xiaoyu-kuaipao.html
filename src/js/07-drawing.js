@@ -160,6 +160,7 @@ function drawEntity(e,sx,y,g,T){const t=g.t;switch(e.t){
   case'fnet':drawFnet(e,sx,g,t);break;
   case'fork':case'vent':case'lamp':a2Draw(e,sx,g,t,T);break;
   case'lava':case'pumice':case'sline':a3Draw(e,sx,g,t,T);break;
+  case'whirl':case'sbell':case'chain':v3bDraw(e,sx,g,t,T);break;
   case'octo':drawOcto(sx,y,octoR(e,t),octoWarn(e,t),t,e);break;
   case'jelly':drawJelly(sx,y,t,e);break;
   case'net':if(!e.hold)drawNet(sx,y,t);break;
@@ -237,7 +238,7 @@ function drawWorld(){
     ctx.translate(-8,-70+Math.sin(t*3)*3);ctx.fillStyle='#4a90d9';ctx.beginPath();ctx.ellipse(0,0,20,12,0,0,TAU);ctx.fill();ctx.beginPath();ctx.moveTo(-17,0);ctx.lineTo(-30,-10);ctx.lineTo(-27,0);ctx.lineTo(-30,9);ctx.fill();
     ctx.fillStyle='#d9efff';ctx.beginPath();ctx.ellipse(3,6,13,5,0,0,TAU);ctx.fill();ctx.fillStyle='#1b2a41';circ(11,-2,2.2);ctx.strokeStyle='#d9efff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(2,-12);ctx.lineTo(-2,-20);ctx.moveTo(2,-12);ctx.lineTo(6,-20);ctx.stroke();ctx.restore()}
   if(g.magnet&&!dead){ctx.strokeStyle=`rgba(255,255,255,${.18+.1*Math.sin(t*5)})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(fishSX,F.y,115,0,TAU);ctx.stroke()}
-  if(g.trap){if(g.trap.e.lamp){ctx.save();ctx.strokeStyle='rgba(255,240,170,.85)';ctx.lineWidth=4;for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(fishSX,F.y,40+i*12+Math.sin(t*8+i)*4,0,TAU);ctx.stroke()}ctx.restore()}else drawNet(fishSX,F.y,t*6)}
+  if(g.trap){if(g.trap.e.t==='whirl'){ctx.save();ctx.translate(fishSX,F.y);for(let i=0;i<4;i++){ctx.strokeStyle=`rgba(220,236,244,${.35+i*.12})`;ctx.lineWidth=3+i;ctx.beginPath();ctx.arc(0,0,44+i*14,t*(4+i)+i,t*(4+i)+i+4.2);ctx.stroke()}ctx.restore()}else if(g.trap.e.lamp){ctx.save();ctx.strokeStyle='rgba(255,240,170,.85)';ctx.lineWidth=4;for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(fishSX,F.y,40+i*12+Math.sin(t*8+i)*4,0,TAU);ctx.stroke()}ctx.restore()}else drawNet(fishSX,F.y,t*6)}
   if(g.lcap)a2CapDraw(g,t);
   for(const s of g.sharks)if(s.ph===1)drawShark(s.sx,s.y,t);
   for(const p of g.parts){ctx.globalAlpha=clamp(p.l*2,0,1);if(p.k){ctx.strokeStyle=p.c;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,TAU);ctx.stroke()}else{ctx.fillStyle=p.c;circ(p.x,p.y,p.r)}}

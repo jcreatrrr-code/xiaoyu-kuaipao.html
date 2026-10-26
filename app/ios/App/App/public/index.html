@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>小鱼快跑</title>
-<meta name="version" content="3.0.0">
+<meta name="version" content="3.1.0">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
 :root{
@@ -310,6 +310,8 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
  #lvInfo .liT b{font-size:20px}
  #lvInfo .liB{flex-direction:column-reverse;gap:12px}
 }
+
+.jRow{display:flex;flex-wrap:wrap;gap:8px}.jS{display:inline-block;padding:8px 12px;border:2px dashed #d8c89a;border-radius:12px;font-size:15px;color:#8a7a5a}
 </style>
 </head>
 <body>
@@ -381,7 +383,7 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
       <button class="btn" id="bHelp">玩法说明</button>
       <button class="btn" id="bSet">设置</button>
     </div>
-    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v3.0.0</p>
+    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v3.1.0</p>
     <button class="btn sm float" data-go="sMenu">返回主菜单</button>
   </section>
 
@@ -411,6 +413,7 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
     <div class="tabs" id="kitTabs"><button class="tab on" data-kt="open">🍽️ 营业</button><button class="tab" data-kt="menu">📖 菜谱</button><button class="tab" data-kt="team">👥 店员</button><button class="tab" data-kt="bask">🧺 鱼篓</button></div>
     <div class="pane" data-pane="open">
       <div class="card" id="restCard" style="padding:12px 18px"></div>
+      <div class="card" id="jarCard" hidden style="padding:12px 18px"></div>
       <button class="btn sun xl" id="bServe" style="width:min(100%,440px)">开始营业<small>约 90 秒 · 客人点菜，你来做菜上菜</small></button>
       <p class="sub">今日订单（营业时到店，上菜多得五成珍珠）</p>
       <div class="grid10" id="ordList"></div>
@@ -675,7 +678,7 @@ function buildLevel(li,mode){
   if(L.helpers)[['鲸婆婆','whale',.14],['墨墨','gold',.36],['大白','clear',.58],['石蟹','doors',.8]].forEach(h=>g.E.push({t:'help',x:len*h[2],who:h[0],k:h[1]}));
   if(L.vol>=2)v2Build(L,g);g.E.push({t:'fin',x:len});return g}
 /* 无尽模式：第二卷里学会的机关，通关对应那一章以后，也会在无尽模式里出现（[机关, 学会它的关卡, 从第几段难度开始]） */
-const EV2=[['roots',14,1],['vent',17,1],['fork',16,2],['lamp',18,2],['pumice',21,2],['lava',20,3],['sline',22,3]],EV2K=new Set(EV2.map(q=>q[0]));
+const EV2=[['roots',14,1],['vent',17,1],['fork',16,2],['lamp',18,2],['pumice',21,2],['lava',20,3],['sline',22,3],['whirl',28,2],['sbell',29,2],['chain',33,3]],EV2K=new Set(EV2.map(q=>q[0]));
 function buildEndless(){
   const lv=x=>Math.floor(x/60/200);
   return{mode:'endless',r:rng((Math.random()*1e9)|0),x:700,i:0,E:[],last:'',
@@ -742,7 +745,7 @@ function tryCatch(ev){const g=G;if(state!=='play'||g.trap||g.tcap)return false;c
   return true}
 /* ---------- more bosses: chase / pipe / team ---------- */
 function mkBoss(g){const k=g.L.boss===1?'feed':g.L.boss,hd=g.mode==='hard',fin=g.E.find(q=>q.t==='fin'),mid=(yMin+yMax)/2;
-  if(k==='guide')return guideMk(g,hd,fin);if(k==='herd')return herdMk(g,hd,fin);if(k==='light')return lightMk(g,hd,fin);if(k==='bore')return boreMk(g,hd,fin);
+  if(k==='guide')return guideMk(g,hd,fin);if(k==='herd')return herdMk(g,hd,fin);if(k==='light')return lightMk(g,hd,fin);if(k==='bore')return boreMk(g,hd,fin);if(k==='whistle')return whistleMk(g,hd,fin);if(k==='fogbell')return fogbellMk(g,hd,fin);
   if(k==='feed')return{k,hun:0,need:hd?11:8,js:3,carry:0,ph:'idle',t:-2.5,by:mid,sp:1,done:0,fin};
   if(k==='chase')return{k,gap:60,dur:hd?46:38,t:-1.5,nx:0,sy:mid,done:0,fin,reset(){this.gap=60;this.t=-1.5;this.nx=0}};
   if(k==='pipe')return{k,n:0,need:4,chg:0,t:0,js:4,by:mid,hh:60,done:0,fin,reset(){this.n=0;this.chg=0;this.t=0}};
@@ -762,7 +765,7 @@ const BOSSMSG={feed:'大白来了，它饿坏了！点游过的鱼抓住它，�
 const HELPERS=[['🦈','wall','大白'],['🐙','net','墨墨'],['🦀','door','石蟹'],['🐋','fog','鲸婆婆']];
 const teamBtn=i=>[VW*(.14+.24*i),Math.min(VT-48*U,yMax+56),Math.max(36,32*U)];
 function bossWin(B,msg){const g=G;B.done=1;g.sharks=[];g.inv=3;g.flash=.6;g.shake=.5;g.bonus+=300;CSND.crash();SFX.win();for(const e of g.E)if(e.x>g.scroll-100&&(e.t==='wild'||e.t==='jelly'||e.t==='rock'||e.t==='torb'))e.gone=1;if(B.fin)B.fin.x=g.scroll+VW+500;toast(msg,3.4)}
-function bossUpd(B,dt){if(B.k==='guide')return guideUpd(B,dt);if(B.k==='herd')return herdUpd(B,dt);if(B.k==='light')return lightUpd(B,dt);if(B.k==='bore')return boreUpd(B,dt);const g=G,F=g.fish,hd=g.mode==='hard',k=clamp((yMax-yMin)/544,.85,1.45);B.t+=dt;
+function bossUpd(B,dt){if(B.k==='guide')return guideUpd(B,dt);if(B.k==='herd')return herdUpd(B,dt);if(B.k==='light')return lightUpd(B,dt);if(B.k==='bore')return boreUpd(B,dt);if(B.k==='whistle')return whistleUpd(B,dt);if(B.k==='fogbell')return fogbellUpd(B,dt);const g=G,F=g.fish,hd=g.mode==='hard',k=clamp((yMax-yMin)/544,.85,1.45);B.t+=dt;
   if(B.k==='chase'){B.sy+=(F.y-B.sy)*Math.min(1,dt*3);if(B.t<0)return;
     if(!B.nx||B.nx<g.scroll+VW)B.nx=g.scroll+VW+260;while(B.nx<g.scroll+VW+900){const nm=['pearls','pearls','rockB','rockT','gate','jelly'];PAT[nm[Math.floor(Math.random()*nm.length)]](g.gen,B.nx,.6);B.nx+=hd?330:390}
     B.gap-=(hd?3.7:2.9)*dt;if(B.gap<=0){die('shark');return}
@@ -777,13 +780,13 @@ function bossUpd(B,dt){if(B.k==='guide')return guideUpd(B,dt);if(B.k==='herd')re
     while(B.obs.length&&B.obs[0].x<TLINE()){B.obs.shift();B.i++;ftext('没叫对帮手！',fishSX+20,F.y-56,'#ffb3b3');g.inv=0;hurt(1);if(state!=='play'||B!==g.boss||B.i===0)return}
     B.ot=(B.ot===undefined?2.5:B.ot)-dt;if(B.ot<=0&&B.orbs<5&&!g.E.some(e=>e.t==='torb'&&!e.gone&&e.x>g.scroll)){B.ot=3.2;g.E.push({t:'torb',x:g.scroll+VW+60,f:.2+Math.random()*.6})}
     if(B.i>=B.total&&!B.obs.length){if(B.orbs>=5)bossWin(B,'五颗潮心都接住了！大家一起把它们送了回去');else if(!B.msg){B.msg=1;toast('难关都过了！把剩下的潮心接住',2.6)}}}}
-function bossTap2(B,ux,uy){if(B.k==='guide')return guideTap(B,ux,uy);if(B.k==='bore')return false;if(B.k==='herd'||B.k==='light'){return true}if(B.k!=='team'||B.t<0)return false;const g=G;
+function bossTap2(B,ux,uy){if(B.k==='guide')return guideTap(B,ux,uy);if(B.k==='bore')return false;if(B.k==='herd'||B.k==='light'||B.k==='whistle'||B.k==='fogbell'){return true}if(B.k!=='team'||B.t<0)return false;const g=G;
   for(let i=0;i<4;i++){const[bx,by,r]=teamBtn(i);if(Math.hypot(ux-bx,uy-by)>r*1.25)continue;const h=HELPERS[i],o=B.obs[0];if(B.cd[h[1]]>0)return true;
     if(o&&o.ty===h[1]){const fr=B.bt/(30/B.bpm),beat=(B.half%2===1?fr<.3:fr>.7);burst(o.x,(yMin+yMax)/2,'#ffd23f',26);ftext(h[2]+(beat?'：合拍！+30':'：交给我！'),Math.min(o.x,VW-170),yMin+74,beat?'#bff6e6':'#ffe27a');if(beat)g.bonus+=30;SFX.save();if(h[1]==='wall')CSND.crash();g.shake=.2;B.obs.shift();B.i++}
     else{B.cd[h[1]]=1.8;SFX.hit();ftext(o?'不是'+h[2]+'的活儿！':'还没到时候',bx-40,by-60,'#ffb3b3')}
     return true}
   return false}
-function bossDraw2(B,t){if(B.k==='guide')return guideDraw(B,t);if(B.k==='herd')return herdDraw(B,t);if(B.k==='light')return lightDraw(B,t);if(B.k==='bore')return boreDraw(B,t);const g=G,F=g.fish;
+function bossDraw2(B,t){if(B.k==='guide')return guideDraw(B,t);if(B.k==='herd')return herdDraw(B,t);if(B.k==='light')return lightDraw(B,t);if(B.k==='bore')return boreDraw(B,t);if(B.k==='whistle'||B.k==='fogbell')return;const g=G,F=g.fish;
   if(B.k==='chase'){const sx=fishSX-70-Math.max(0,B.gap)*2.4;ctx.save();ctx.translate(sx,B.sy+Math.sin(t*9)*4);ctx.scale(-1,1);drawShark(0,0,t*1.6);ctx.restore()}
   else if(B.k==='pipe'){ctx.save();ctx.fillStyle=B.inb?'rgba(255,236,140,.3)':'rgba(255,236,140,.15)';ctx.fillRect(0,B.by-B.hh,VW,B.hh*2);ctx.strokeStyle='rgba(255,240,170,.9)';ctx.lineWidth=3;ctx.setLineDash([18,12]);ctx.lineDashOffset=-t*90;
     ctx.beginPath();ctx.moveTo(0,B.by-B.hh);ctx.lineTo(VW,B.by-B.hh);ctx.moveTo(0,B.by+B.hh);ctx.lineTo(VW,B.by+B.hh);ctx.stroke();ctx.setLineDash([]);
@@ -798,7 +801,7 @@ function bossDraw2(B,t){if(B.k==='guide')return guideDraw(B,t);if(B.k==='herd')r
       else{ctx.fillStyle='rgba(20,14,50,.92)';for(let yy=y0;yy<y1+40;yy+=70)circ(x+Math.sin(t*2+yy)*10,yy,64);ctx.fillStyle='#ff5a5a';for(let i=0;i<3;i++){const ey=y0+120+i*(y1-y0-200)/2;circ(x-14,ey,5);circ(x+14,ey,5)}}
       ctx.restore()}
     ctx.restore()}}
-function bossHud2(B,t){if(B.k==='guide')return guideHud(B,t);if(B.k==='herd')return herdHud(B,t);if(B.k==='light')return lightHud(B,t);if(B.k==='bore')return boreHud(B,t);const g=G,hd=g.mode==='hard',w=Math.min(VW-40*U,300*U),x0=(VW-w)/2,y0=yMin+8*U,h=20*U;ctx.save();ctx.textAlign='center';ctx.font=`${14*U}px ${FONT}`;
+function bossHud2(B,t){if(B.k==='guide')return guideHud(B,t);if(B.k==='herd')return herdHud(B,t);if(B.k==='light')return lightHud(B,t);if(B.k==='bore')return boreHud(B,t);if(B.k==='whistle')return whistleHud(B,t);if(B.k==='fogbell')return fogbellHud(B,t);const g=G,hd=g.mode==='hard',w=Math.min(VW-40*U,300*U),x0=(VW-w)/2,y0=yMin+8*U,h=20*U;ctx.save();ctx.textAlign='center';ctx.font=`${14*U}px ${FONT}`;
   const bar=(f,col,lab,yy)=>{ctx.fillStyle='rgba(6,40,70,.55)';ctx.fillRect(x0-4*U,yy-4*U,w+8*U,h+8*U);ctx.fillStyle=col;ctx.fillRect(x0,yy,w*clamp(f,0,1),h);ctx.fillStyle='#fff';ctx.fillText(lab,VW/2,yy+h-5*U)};
   if(B.k==='chase'){bar(B.gap/100,B.gap<25?'#ff7a6b':'#4fe0b5','和大白的距离',y0);bar(Math.max(0,B.t)/B.dur,'#ffd23f','再坚持 '+Math.max(0,Math.ceil(B.dur-B.t))+' 秒',y0+h+12*U);
     if(B.gap<25){const a=.25+.2*Math.sin(t*12),gr=ctx.createLinearGradient(0,0,VW*.5,0);gr.addColorStop(0,`rgba(255,40,40,${a})`);gr.addColorStop(1,'rgba(255,0,0,0)');ctx.fillStyle=gr;ctx.fillRect(0,0,VW*.5,VT)}}
@@ -850,7 +853,7 @@ function update(dt){
   if(g.buff.slow)g.speed*=.85;if(g.boost>0){g.speed*=1.45;g.boost-=dt}if(g.boss&&!g.boss.done&&g.boss.k==='chase'&&g.boss.t>0)g.speed*=1.35;
   if(g.tcap)a3PotUpd(g,dt);else if(g.lcap)a2CapUpd(g,dt);else if(g.trap){const tr=g.trap;tr.t-=dt;if(g.mode!=='simple')tr.p=Math.max(0,tr.p-1.5*dt);F.vy=0;
     if(tr.t<=0){if(g.mode==='simple'){tr.e.gone=1;g.trap=null;g.life=Math.max(0,g.life-1);g.noDmg=false;g.combo=0;g.inv=1.8;SFX.hit();
-        if(g.life<=0)die('net');else toast('渔网松开了，下次点快一点！',2)}else die('net')}
+        if(g.life<=0)die('net');else toast(tr.e.t==='whirl'?'漩涡把你甩了出来，下次点快一点！':'渔网松开了，下次点快一点！',2)}else die('net')}
   }else{
     g.scroll+=g.speed*dt;
     const up=(g.slowT>0?180:330)*k*(g.boss&&!g.boss.done?1-.13*(g.boss.carry||0):1),dn=(g.mode==='simple'?165:215)*k,tv=hold?-up:g.started?dn:0;
@@ -874,6 +877,7 @@ function update(dt){
     case'fnet':v2Hit(g,e,sx,y,dx,dt);break;
     case'fork':case'vent':case'lamp':a2Hit(g,e,sx,y,dx,dist,dt,k);break;
     case'lava':case'pumice':case'sline':a3Hit(g,e,sx,y,dx,dt);break;
+    case'whirl':case'sbell':case'chain':v3bHit(g,e,sx,y,dx,dist,dt,k);break;
     case'pearl':if(sx>fx)e.miss=0;else if(sx<fx-(g.magnet?120:50)&&!e.miss&&!e.air){e.miss=1;if(g.combo>=3)ftext('连击断了',fx+30,F.y-56,'#b8c7d9');g.combo=0}
       if(g.magnet&&dist<190&&dist>=38&&!g.trap){const k=Math.min(1,dt*(dist<115?9:5));e.dx=(e.dx||0)-dx*k;e.py=(e.py||0)-dy*k}
       if(dist<38&&!g.trap){e.gone=1;if(g.boss&&g.boss.k==='chase'&&!g.boss.done)g.boss.gap=Math.min(100,g.boss.gap+1.05);g.pearls+=e.air?2:1;if(e.air)burst(sx,y,'#ffe27a',6,1);skinPick(sx,y);g.combo++;g.comboT=3.5;g.maxCombo=Math.max(g.maxCombo,g.combo);SFX.pearl(g.combo);burst(sx,y,'#fff',4,1);
@@ -931,7 +935,7 @@ function finish(){
   if(!ok){g.cause='goal';showEnd(false);return}
   const prev=SAVE[g.mode].st[g.li]>0,s2=g.pearls>=L.extra[hi],s3=g.life>=(hi?1:2),s4=prev&&g.noDmg&&s2;
   if(g.noDmg)SAVE.stat.nodmg=1;const sv=SAVE[g.mode];sv.st[g.li]=Math.max(sv.st[g.li],1+s2+s3);if(s4)sv.s4[g.li]=1;persist();SFX.win();
-  const end0=()=>showEnd(true,[1,s2,s3,s4],prev),k='post'+g.li,end=()=>{if(g.li===VOL1+11&&!SAVE.feast2&&!SAVE.story.feast2){state='over';hud.hidden=true;startFeast2()}else if(g.li===VOL1+1&&!SAVE.story.fish0){state='over';hud.hidden=true;playStory(STORY.fish0,()=>{SAVE.story.fish0=1;persist();end0()})}else if(g.li===VOL1+2&&SAVE.story.fish0&&!SAVE.story.fish2){state='over';hud.hidden=true;playStory(STORY.fish2,()=>{SAVE.story.fish2=1;persist();end0()})}else end0()};
+  const end0=()=>showEnd(true,[1,s2,s3,s4],prev),k='post'+g.li,end=()=>{if(g.li===VOL1+11&&!SAVE.feast2&&!SAVE.story.feast2){state='over';hud.hidden=true;startFeast2()}else if(g.li===VOL2+11&&!SAVE.feast3&&!SAVE.story.feast3){state='over';hud.hidden=true;startFeast3()}else if(g.li===VOL1+1&&!SAVE.story.fish0){state='over';hud.hidden=true;playStory(STORY.fish0,()=>{SAVE.story.fish0=1;persist();end0()})}else if(g.li===VOL1+2&&SAVE.story.fish0&&!SAVE.story.fish2){state='over';hud.hidden=true;playStory(STORY.fish2,()=>{SAVE.story.fish2=1;persist();end0()})}else end0()};
   if(!SAVE.story[k]||SAVE.always){state='over';hud.hidden=true;$('toast').className='';playStory(SAVE.story[k]?seenLines(k):STORY[k],()=>{SAVE.story[k]=1;if(g.li===10)SAVE.conch=1;persist();end()})}else end()}
 
 /* ---------- 第二卷 南方环礁：海域、关卡、新情况 ---------- */
@@ -1420,13 +1424,14 @@ const V3TIP={fog:'雾太大了！只看得见身边一圈。跟着雾里发光�
  ebb:'退潮了！头顶的水面会一点点往下压，跟着潮沟游，别被挤在泥滩和水面之间',
  bell:'看不见礁石！点右下角的钟，回声会把前面的礁石照出来一会儿'};
 const ebbH=(t,hd)=>(hd?.36:.3)*(.5-.5*Math.cos(t*TAU/12)),ebbY=g=>yMin+ebbH(g.t,g.mode!=='simple')*(yMax-yMin);
-function v3Build(L,g){const hd=g.mode!=='simple';
-  if(L.ebb){const lo=hd?.4:.36;g.E=g.E.filter(e=>!(e.t==='rock'&&e.top));
+function v3Build(L,g){const hd=g.mode!=='simple';v3bBuild(L,g);
+  if(L.ebb===1){const lo=hd?.4:.36;g.E=g.E.filter(e=>!(e.t==='rock'&&e.top));
     for(const e of g.E){if(e.t==='rock')e.h=Math.min(e.h,hd?.36:.32);else if(e.f!=null&&e.t!=='node'){e.f=Math.max(e.f,lo);if(e.amp)e.amp=Math.min(e.amp,(1-lo)*.2)}}}}
 /* 每帧：退潮的水面、敲钟的回声 */
 function v3Tick(g,dt){const L=g.L,F=g.fish;if(!L||L.vol!==3)return;
-  {const k=L.ebb?'ebb':L.bell?'bell':L.fog&&!L.boss?'fog':'';if(k&&!g.tips['v3'+k]&&g.t>2.5&&g.mode==='simple'){g.tips['v3'+k]=1;toast(V3TIP[k],3.4)}}
-  if(L.ebb&&!g.trap){const c=ebbY(g);if(F.y<c+22){F.y=c+22;if(F.vy<0)F.vy=0}}
+  {const k=L.ebb===1?'ebb':L.bell?'bell':L.theme===24?'fog':'';if(k&&!g.tips['v3'+k]&&g.t>2.5&&g.mode==='simple'){g.tips['v3'+k]=1;toast(V3TIP[k],3.4)}}
+  v3bTick(g,dt);
+  if(L.ebb===1&&!g.trap){const c=ebbY(g);if(F.y<c+22){F.y=c+22;if(F.vy<0)F.vy=0}}
   if(L.bell){g.bellCd=Math.max(0,(g.bellCd||0)-dt);const p=g.ping;if(p){p.r+=900*dt;const hd=g.mode!=='simple';
       for(const e of g.E){if(e.gone||e.lp===p.id||!(e.t==='rock'||e.t==='octo'||e.t==='jelly'))continue;const sx=e.x+(e.dx||0)-g.scroll;if(sx>fishSX-120&&sx-fishSX<p.r){e.lp=p.id;e.lit=g.t+(hd?2.2:3.2)}}
       if(p.r>VW)g.ping=null}}}
@@ -1436,18 +1441,18 @@ function v3Ring(g){if(g.bellCd>0){SFX.tap();return}g.bellCd=g.mode==='simple'?2.
 function v3Tap(ev){const g=G;if(state!=='play'||!g||!g.L||!g.L.bell||g.trap)return false;const r=cv.getBoundingClientRect(),ux=(ev.clientX-r.left)/S,uy=(ev.clientY-r.top)/S,[bx,by,br]=V3B();
   if(Math.hypot(ux-bx,uy-by)>br+14*U)return false;v3Ring(g);return true}
 /* 雾、退潮的泥滩、回声：画在所有东西上面，节点前面 */
-function v3Over(g,t){const L=g.L;if(!L||L.vol!==3)return;const F=g.fish,hd=g.mode!=='simple';
-  if(L.ebb){const c=ebbY(g);ctx.save();const gr=ctx.createLinearGradient(0,0,0,c);gr.addColorStop(0,'#b8bec2');gr.addColorStop(1,'#d8dcd8');ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(VW,0);
+function v3Over(g,t){const L=g.L;if(!L||L.vol!==3)return;const F=g.fish,hd=g.mode!=='simple';v3bOver(g,t);
+  if(L.ebb===1){const c=ebbY(g);ctx.save();const gr=ctx.createLinearGradient(0,0,0,c);gr.addColorStop(0,'#b8bec2');gr.addColorStop(1,'#d8dcd8');ctx.fillStyle=gr;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(VW,0);
     for(let x=VW;x>=-20;x-=20)ctx.lineTo(x,c+Math.sin(x*.05+t*2+g.scroll*.02)*3);ctx.fill();
     ctx.fillStyle='rgba(120,100,80,.45)';for(let n=Math.floor(g.scroll*.5/170)-1;n*170-g.scroll*.5<VW+60;n++){const x=n*170-g.scroll*.5+hash(n+11)*50;ctx.beginPath();ctx.ellipse(x,c-6,40+hash(n)*30,5,0,0,TAU);ctx.fill()}
     ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=3;ctx.beginPath();for(let x=0;x<=VW+20;x+=20)ctx.lineTo(x,c+Math.sin(x*.05+t*2+g.scroll*.02)*3);ctx.stroke();
     if(ebbH(t+1.5,hd)>ebbH(t,hd)+.02){ctx.fillStyle='rgba(60,60,60,.7)';ctx.font=`${14*U}px ${FONT}`;ctx.textAlign='center';ctx.fillText(tl('退潮中'),VW/2,c-14)}ctx.restore()}
   if(!L.fog&&!L.bell)return;
-  const bossOn=g.boss&&!g.boss.done,r=L.bell?(hd?110:130):bossOn?(hd?210:240):(hd?200:250),a=L.bell?.95:(hd?.9:.86),col=L.bell?'52,60,72':'196,204,212';
-  ctx.save();const gr=ctx.createRadialGradient(fishSX,F.y,r*.5,fishSX,F.y,r);gr.addColorStop(0,`rgba(${col},0)`);gr.addColorStop(1,`rgba(${col},${a})`);ctx.fillStyle=gr;ctx.fillRect(0,0,VW,VT);
+  const bossOn=g.boss&&!g.boss.done,r=L.bell?(hd?110:130):bossOn?(hd?210:240):L.pilot?(hd?270:310):(hd?200:250),fx=L.pilot?fishSX-80:fishSX,a=L.bell?.95:(hd?.9:.86),col=L.bell?'52,60,72':'196,204,212';
+  ctx.save();const gr=ctx.createRadialGradient(fx,F.y,r*.5,fx,F.y,r);gr.addColorStop(0,`rgba(${col},0)`);gr.addColorStop(1,`rgba(${col},${a})`);ctx.fillStyle=gr;ctx.fillRect(0,0,VW,VT);
   ctx.fillStyle=`rgba(${L.bell?'90,100,112':'235,238,240'},.18)`;for(let i=0;i<5;i++){const x=((i*260-g.scroll*.35-t*20)%(VW+400)+VW+400)%(VW+400)-200,y=yMin+(i*137)%(yMax-yMin);ctx.beginPath();ctx.ellipse(x,y,160,26,0,0,TAU);ctx.fill()}
   /* 珍珠在雾里发着微光，照着它们游 */
-  for(const e of g.E){if(e.gone||e.t!=='pearl')continue;const sx=e.x+(e.dx||0)-g.scroll;if(sx<-20||sx>VW+20)continue;const y=entY(e,t);if(Math.hypot(sx-fishSX,y-F.y)<r*.7)continue;
+  for(const e of g.E){if(e.gone||e.t!=='pearl')continue;const sx=e.x+(e.dx||0)-g.scroll;if(sx<-20||sx>VW+20)continue;const y=entY(e,t);if(Math.hypot(sx-fx,y-F.y)<r*.7)continue;
     ctx.globalAlpha=.5+.2*Math.sin(t*3+e.x);ctx.fillStyle='#fff8ee';ctx.shadowColor='#fff';ctx.shadowBlur=10;circ(sx,y,5);ctx.shadowBlur=0}ctx.globalAlpha=1;
   if(L.fog&&L.nodes)for(const e of g.E){if(e.gone||e.t!=='node'||e.k!=='croaker')continue;const sx=e.x-g.scroll;if(sx<-60||sx>VW+60)continue;const y=entY(e,t),q=(t*.8+e.x*.003)%1;
     ctx.strokeStyle=`rgba(255,236,160,${.8*(1-q)})`;ctx.lineWidth=3;ctx.beginPath();ctx.arc(sx,y,24+q*70,0,TAU);ctx.stroke();if(q<.4){ctx.fillStyle='rgba(120,90,20,.85)';ctx.font=`${15*U}px ${FONT}`;ctx.textAlign='center';ctx.fillText(tl('咕咕'),sx,y-40)}}
@@ -1461,7 +1466,7 @@ function v3Over(g,t){const L=g.L;if(!L||L.vol!==3)return;const F=g.fish,hd=g.mod
     if(cd>0){ctx.strokeStyle='#fff';ctx.lineWidth=4*U;ctx.beginPath();ctx.arc(bx,by,br+5*U,-Math.PI/2,-Math.PI/2+TAU*(1-cd/full));ctx.stroke()}
     ctx.fillStyle='#fff';ctx.font=`${12*U}px ${FONT}`;ctx.textAlign='center';ctx.fillText(tl('敲钟'),bx,by-br-8*U)}
   ctx.restore()}
-function v3BG(th,sc,t){if(th<24)return;
+function v3BG(th,sc,t){if(th<24)return;v3bBG(th,sc,t);
   ctx.fillStyle=th===26?'rgba(30,34,40,.7)':'rgba(50,54,60,.55)';const o=sc*.2;for(let n=Math.floor(o/320)-1;n*320-o<VW+120;n++){const x=n*320-o+hash(n+21)*90,h=110+hash(n+5)*150;ctx.beginPath();ctx.moveTo(x-90,PH-150);ctx.lineTo(x-30,PH-150-h);ctx.lineTo(x+20,PH-150-h*.8);ctx.lineTo(x+80,PH-150);ctx.fill()}
   if(th===24||th===26){ctx.strokeStyle='rgba(70,90,70,.5)';ctx.lineWidth=8;ctx.lineCap='round';const wo=sc*.45;for(let n=Math.floor(wo/110)-1;n*110-wo<VW+60;n++){const x=n*110-wo,h=90+hash(n+31)*130,sw=Math.sin(t*1.1+n)*16;ctx.beginPath();ctx.moveTo(x,PH);ctx.quadraticCurveTo(x+sw,PH-h*.6,x+sw*1.4,PH-h);ctx.stroke()}}
   if(th===25){ctx.fillStyle='rgba(90,76,60,.5)';for(let n=Math.floor(sc*.3/140)-1;n*140-sc*.3<VW+60;n++){const x=n*140-sc*.3+hash(n+41)*40;ctx.beginPath();ctx.ellipse(x,PH-140,60,14,0,0,TAU);ctx.fill()}}
@@ -1471,7 +1476,7 @@ function v3Node(e,t){
   if(e.k==='razor'){const op=nodeOpen(e,t),k=op?Math.sin(((t+e.x*.01)%3.2)/1.9*Math.PI):0;ctx.fillStyle='#4a3e30';ctx.beginPath();ctx.ellipse(0,14,24,7,0,0,TAU);ctx.fill();ctx.fillStyle='#2a2018';ctx.beginPath();ctx.ellipse(0,13,7,3,0,0,TAU);ctx.fill();
     ctx.save();ctx.beginPath();ctx.rect(-30,-60,60,73);ctx.clip();ctx.translate(0,13-k*34);ctx.fillStyle='#d8b888';ctx.fillRect(-6,-30,12,30);ctx.fillStyle='#f4e0c0';ctx.fillRect(-5,-30,4,30);ctx.fillStyle='#fff6e6';ctx.beginPath();ctx.ellipse(0,-31,5,3,0,0,TAU);ctx.fill();ctx.restore();if(!op)ctx.globalAlpha=.45;return 1}
   if(e.k==='kelp'){ctx.strokeStyle='#5a7a4a';ctx.lineCap='round';for(let i=-1;i<=1;i++){ctx.lineWidth=9;ctx.beginPath();ctx.moveTo(i*8,26);ctx.quadraticCurveTo(i*8+Math.sin(t*2+i)*10,0,i*6+Math.sin(t*2+i+1)*6,-26);ctx.stroke()}ctx.strokeStyle='#8aa870';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,24);ctx.quadraticCurveTo(Math.sin(t*2)*10,0,Math.sin(t*2+1)*6,-24);ctx.stroke();return 1}
-  return 0}
+  return v3bNode(e,t)}
 /* ---------- 涌潮 Boss：岔口从雾里推过来，钟响一声走上面、两声走下面 ---------- */
 function boreMk(g,hd,fin){const hp=hd?3:4;return{k:'bore',hp,hp0:hp,n:0,need:hd?12:8,fk:[],made:0,sp:1.6,t:-2.5,wall:0,ring:0,done:0,fin,
   reset(){this.hp=this.hp0;this.n=0;this.fk=[];this.made=0;this.sp=1.6;this.t=-2;this.wall=0;this.ring=0}}}
@@ -1500,6 +1505,161 @@ function boreHud(B,t){const g=G,w=Math.min(VW-40*U,300*U),x0=(VW-w)/2,y0=yMax+58
   ctx.globalAlpha=1;if(B.ring>0){ctx.strokeStyle=`rgba(255,226,140,${B.ring})`;ctx.lineWidth=4*U;for(let i=0;i<B.rc;i++){ctx.beginPath();ctx.arc(VW/2,yMin+44*U,(30+i*16+(1-B.ring)*30)*U,0,TAU);ctx.stroke()}}
   ctx.fillStyle='rgba(6,40,70,.55)';ctx.fillRect(x0-4*U,y0-4*U,w+8*U,h+8*U);const sg=w/B.need;for(let i=0;i<B.need;i++){ctx.fillStyle=i<B.n?'#4fe0b5':i<B.made-B.fk.filter(f=>!f.done).length?'#ff8a7a':'rgba(255,255,255,.25)';ctx.fillRect(x0+i*sg+2*U,y0,sg-4*U,h)}
   ctx.fillStyle='#fff';ctx.font=`${14*U}px ${FONT}`;ctx.fillText(tl('❤'.repeat(Math.max(0,B.hp))+' · 还差 '+Math.max(0,B.need-B.made+B.fk.filter(f=>!f.done).length)+' 个岔口'),VW/2,y0+h+16*U);ctx.restore()}
+/* ---------- 第三卷 第二幕、第三幕：漩涡海峡、沉钟湾、雾坊、哨岛、大潮滩、锚链海、雾心、散雾 ---------- */
+TH.push(
+ {n:'漩涡海峡',top:'#6a8a9a',bot:'#0e2230',far:'#4e6e80',mid:'#345468',sand:'#5a5a58',rock:'#3e4a52',rock2:'#28323a',weed:'#5a7a6a'},
+ {n:'沉钟湾',top:'#5e7480',bot:'#0c1820',far:'#46606c',mid:'#304a56',sand:'#6a6458',rock:'#4a4a44',rock2:'#30302c',weed:'#6a7a5a'},
+ {n:'雾坊',top:'#a0a4aa',bot:'#2a2c32',far:'#84888e',mid:'#62666e',sand:'#5a5650',rock:'#46464c',rock2:'#2e2e34',weed:'#6a7268'},
+ {n:'哨岛',top:'#c8cdd2',bot:'#5a6470',far:'#aab0b8',mid:'#8a929c',sand:'#7a7670',rock:'#5a5c62',rock2:'#3e4046',weed:'#7a8a80'},
+ {n:'大潮滩',top:'#b0aa98',bot:'#3e3a32',far:'#948e7c',mid:'#76705e',sand:'#5e5244',rock:'#6e5e4a',rock2:'#4e4234',weed:'#7e8a62'},
+ {n:'锚链海',top:'#64788a',bot:'#0e1a26',far:'#4a5e70',mid:'#344858',sand:'#4e4c4a',rock:'#3e4248',rock2:'#26292e',weed:'#5a6a6a'},
+ {n:'雾心',top:'#7a7488',bot:'#141220',far:'#5e5a6e',mid:'#423e54',sand:'#4a4652',rock:'#3a3644',rock2:'#24222c',weed:'#8a6a9a'},
+ {n:'散雾',top:'#8ab0d0',bot:'#1a2a40',far:'#6a90b0',mid:'#4a7090',sand:'#9a8a9a',rock:'#7a5a8a',rock2:'#5a3e6a',weed:'#a070c0'});
+LV.push(
+ {name:'漩涡海峡',vol:3,fish:['mack','saury','sard'],len:210,theme:28,nodes:['abalone'],gname:'鲍鱼',pool:{pearls:2,whirl:8,rockB:2,rockT:1,jelly:1,shield:1},goal:{k:'gather',n:[2,3]},extra:[20,30]},
+ {name:'沉钟湾',vol:3,fish:['cod','bream','yellow'],len:210,theme:29,nodes:['oyster'],gname:'牡蛎',pool:{pearls:2,sbell:9,rockB:1,octo:1,shield:1},goal:{k:'gather',n:[2,3]},extra:[20,30]},
+ {name:'雾坊',vol:3,fish:['sard','mack','eel'],len:210,theme:30,spray:1,nodes:['cod3'],gname:'大头鳕',pool:{pearls:2,rockB:3,rockT:3,gate:3,jelly:1,shield:1},goal:{k:'gather',n:[2,3]},extra:[20,30]},
+ {name:'哨岛',vol:3,fish:['sard','bream'],len:200,theme:31,fog:1,boss:'whistle',gtxt:'听哨声从哪边来，就往哪边游',pool:{pearls:2,rockB:2,rockT:1,jelly:1,shield:1},goal:{k:'boss'},extra:[20,30]},
+ {name:'大潮滩',vol:3,fish:['eel','yellow','bream'],len:210,theme:32,ebb:2,nodes:['mudskip'],gname:'弹涂鱼',pool:{pearls:2,rockB:5,octo:1,jelly:1,shield:1},goal:{k:'gather',n:[2,3]},extra:[20,30]},
+ {name:'锚链海',vol:3,fish:['cod','mack','tuna'],len:220,theme:33,nodes:['seacuc'],gname:'海参',pool:{pearls:2,chain:9,rockB:1,jelly:1,shield:1},goal:{k:'gather',n:[2,3]},extra:[20,30]},
+ {name:'雾心',vol:3,fish:['sard','saury','yellow'],len:220,theme:34,fog:1,pilot:1,nodes:['laver'],gname:'紫菜',pool:{pearls:2,rockB:3,rockT:3,gate:2,jelly:1,shield:1},goal:{k:'gather',n:[2,3]},extra:[20,30]},
+ {name:'散雾',vol:3,fish:['sard','bream'],len:200,theme:35,fog:1,boss:'fogbell',gtxt:'等钟摆到正中间再敲，把雾一层层敲散',pool:{pearls:2,rockB:2,rockT:1,jelly:1,shield:1},goal:{k:'boss'},extra:[20,30]});
+Object.assign(FISH,{abalone:{n:'鲍鱼',c:['#e8f0e0','#7a8a6a','#4a5a3a'],s:1,x:1},oyster:{n:'牡蛎',c:['#f4f0e8','#a8a090','#6a6458'],s:1,x:1},cod3:{n:'大头鳕',c:['#f0ece0','#a89a7a','#5a4e3a'],s:1,x:1},
+ mudskip:{n:'弹涂鱼',c:['#e8dcc0','#8a7a5a','#4a3e2a'],s:1,x:1},seacuc:{n:'海参',c:['#c8b8a8','#5a4a3e','#2e2420'],s:1,x:1},laver:{n:'紫菜',c:['#e0c8f0','#7a4a9a','#4a2a6a'],s:1,x:1}});
+Object.assign(NODE,{abalone:{tool:'',hp:2,f:.9,no:''},oyster:{tool:'',hp:3,f:.88,no:''},cod3:{tool:'',hp:2,f:.5,no:''},
+ mudskip:{tool:'',hp:1,timed:1,f:.9,wait:'等弹涂鱼跳出泥洞再点',no:''},seacuc:{tool:'',hp:1,f:.92,no:''},laver:{tool:'',hp:2,f:.1,no:''}});
+Object.assign(BOSSMSG,{whistle:'阿岚躲在雾里吹哨。哨声从哪边来，就点哪边。后面会有假回声：声音小、波纹淡的那个是假的',
+ fogbell:'水下几口雾钟在来回摇。等一口钟摆到正中间再点它，敲响一口就散一点雾。一共五层雾'});
+Object.assign(TIPS,{whirl:'前面是漩涡！离它远一点。被卷进去就快速连点屏幕挣出来',sbell:'沉钟会来回摆。钟身会撞人，吊钟的铁链不会',chain:'锚链一上一下地拉动。等锚提上去，从下面钻过去'});
+Object.assign(V3TIP,{spray:'雾坊会一阵阵喷雾，喷雾时什么都看不见。趁雾没来，先记住前面的路',ebb2:'一年最大的退潮！水面会一直往下降，不会再涨回来。趁水还没干，游到头',
+ pilot:'远洋号跟在你后面，沿着你游过的路走。船比你大，别让它擦到礁石'});
+/* 漩涡：靠近会被往中间吸，掉进漩涡眼就被卷住，连点才能挣出来；沉钟：吊在横梁上来回摆；锚链：一上一下地拉动 */
+Object.assign(PAT,{
+ whirl(g,x,d){const hd=g.mode!=='simple',f=g.r(.3,.7);g.E.push({t:'whirl',x,f,r:hd?118:100,ph:g.r(0,6)});const f2=f<.5?clamp(f+.42,.1,.9):clamp(f-.42,.1,.9);arc(g,x-130,f2,f2,6)},
+ sbell(g,x,d){const hd=g.mode!=='simple',n=d>.5&&hd?2:1;for(let i=0;i<n;i++){const len=g.r(.32,.66);g.E.push({t:'sbell',x:x+i*210,len,amp:hd?120:95,sp:g.r(1.5,2.1)*(hd?1.15:1),ph:g.r(0,6)});
+   const f=len<.5?clamp(len+.32,.1,.9):clamp(len-.34,.1,.9);arc(g,x+i*210-150,f,f,5)}g.x+=(n-1)*210},
+ chain(g,x,d){const hd=g.mode!=='simple',n=hd&&d>.4?3:2,sp=hd?1.9:1.5,ph=g.r(0,6);for(let i=0;i<n;i++)g.E.push({t:'chain',x:x+i*170,lo:.12,hi:hd?.8:.74,sp,ph:ph+i*Math.PI*.8});arc(g,x-160,.86,.86,4+n*2);g.x+=(n-1)*170}});
+const SB={pos:(e,sx,t)=>{const a=Math.sin(t*e.sp+e.ph);return[sx+a*e.amp,fy(e.len)]},R:44},CHN={y:(e,t)=>fy(e.lo+(e.hi-e.lo)*(.5-.5*Math.cos(t*e.sp+e.ph)))};
+function v3bHit(g,e,sx,y,dx,dist,dt,k){const F=g.fish;
+  if(e.t==='whirl'){const R=e.r*1.8;if(dist<R&&!g.trap){const pull=230*k*(1-dist/R);F.y+=Math.sign(y-F.y)*Math.min(Math.abs(y-F.y),pull*dt)}
+    if(dist<e.r*.42&&!g.trap&&g.inv<=0){if(g.shield||g.whale){absorb();e.gone=1;burst(sx,y,'#dff4ff',14);return}
+      const T=g.mode==='simple'?6:8;g.trap={t:T,T,p:0,need:g.mode==='simple'?7:12,e};e.hold=1;g.combo=0;SFX.hit();toast(g.mode==='simple'?'被漩涡卷住了！快速连点屏幕！':'被漩涡卷住了！连点挣出来！',2,1)}return}
+  if(e.t==='sbell'){const[bx,by]=SB.pos(e,sx,g.t);if(Math.hypot(bx-fishSX,by-F.y)<SB.R+14&&hurt(1)){SFX.hit();bellSnd()}return}
+  if(e.t==='chain'){const ay=CHN.y(e,g.t);if(Math.abs(dx)<20&&F.y-16<ay+18)hurt(1)}}
+function v3bDraw(e,sx,g,t,T){
+  if(e.t==='whirl'){const y=fy(e.f);ctx.save();ctx.translate(sx,y);if(e.hold){ctx.restore();return}
+    for(let i=0;i<5;i++){const r=e.r*(1.75-i*.3);ctx.strokeStyle=`rgba(220,236,244,${.12+i*.1})`;ctx.lineWidth=3+i;ctx.beginPath();for(let a=0;a<TAU*1.1;a+=.2){const q=r*(1-a/TAU*.35);ctx.lineTo(Math.cos(a-t*(2+i*.6)+e.ph)*q,Math.sin(a-t*(2+i*.6)+e.ph)*q*.8)}ctx.stroke()}
+    ctx.fillStyle='rgba(10,20,30,.75)';ctx.beginPath();ctx.ellipse(0,0,e.r*.38,e.r*.3,0,0,TAU);ctx.fill();ctx.restore();return}
+  if(e.t==='sbell'){const[bx,by]=SB.pos(e,sx,t);ctx.save();ctx.fillStyle=T.rock2;ctx.fillRect(sx-140,yMin-4,280,12);ctx.strokeStyle='#5a5448';ctx.lineWidth=4;ctx.setLineDash([7,4]);ctx.beginPath();ctx.moveTo(sx,yMin+6);ctx.lineTo(bx,by-36);ctx.stroke();ctx.setLineDash([]);
+    ctx.translate(bx,by);ctx.rotate((sx-bx)/e.amp*-.35);ctx.fillStyle='#7a6a3a';ctx.beginPath();ctx.moveTo(-40,26);ctx.quadraticCurveTo(-36,-30,0,-38);ctx.quadraticCurveTo(36,-30,40,26);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#5a4e2a';ctx.fillRect(-44,22,88,8);ctx.strokeStyle='#a8945a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,-6,12,0,TAU);ctx.stroke();ctx.beginPath();ctx.moveTo(-12,-6);ctx.lineTo(12,-6);ctx.moveTo(0,-18);ctx.lineTo(0,6);ctx.stroke();
+    ctx.fillStyle='rgba(90,140,110,.5)';circ(-22,10,5);circ(18,14,4);ctx.restore();return}
+  if(e.t==='chain'){const ay=CHN.y(e,t);ctx.save();ctx.strokeStyle='#4a4e54';ctx.lineWidth=5;for(let y=yMin-10;y<ay-14;y+=16){ctx.beginPath();ctx.ellipse(sx,y+8,5,9,0,0,TAU);ctx.stroke()}
+    ctx.fillStyle='#3a3e44';ctx.fillRect(sx-4,ay-18,8,30);ctx.beginPath();ctx.moveTo(sx-30,ay+4);ctx.quadraticCurveTo(sx,ay+34,sx+30,ay+4);ctx.lineTo(sx+24,ay+2);ctx.quadraticCurveTo(sx,ay+24,sx-24,ay+2);ctx.closePath();ctx.fill();
+    ctx.fillRect(sx-16,ay-14,32,6);ctx.beginPath();ctx.moveTo(sx-34,ay+4);ctx.lineTo(sx-26,ay-6);ctx.lineTo(sx-24,ay+6);ctx.fill();ctx.beginPath();ctx.moveTo(sx+34,ay+4);ctx.lineTo(sx+26,ay-6);ctx.lineTo(sx+24,ay+6);ctx.fill();ctx.restore()}}
+/* 大潮滩：水面跟着游过的路一直往下降，不再涨回来 */
+const ebb2D=hd=>hd?.55:.48,ebb2At=(g,x,L)=>ebb2D(g.mode!=="simple")*clamp(x/((L||g.L).len*60*.85),0,1);
+function v3bBuild(L,g){const hd=g.mode!=='simple';
+  if(L.ebb===2){for(const e of g.E){const dd=ebb2At(g,e.x,L);if(e.t==='rock')e.h=Math.min(e.h,Math.max(.08,1-dd-(hd?.24:.28)));else if(e.f!=null&&e.t!=='node'){e.f=Math.max(e.f,dd+.1);if(e.amp)e.amp=Math.min(e.amp,(1-dd-.1)*.2)}}}
+  if(L.pilot)for(const e of g.E)if(e.t==='rock')e.h=Math.min(e.h,.36);
+  if(L.spray)g.spT=4}
+function v3bTick(g,dt){const L=g.L,F=g.fish,hd=g.mode!=='simple';
+  if(L.spray&&!g.boss){if(g.spT==null)g.spT=4;g.spT-=dt;if(g.spT<=0){if(g.spP==='warn'){g.spP='fog';g.spT=hd?2.4:1.8;CSND.crash()}else if(g.spP==='fog'){g.spP='';g.spT=hd?4.5:6}else{g.spP='warn';g.spT=1.2;SFX.alarm();if(!g.tips.spray&&g.mode==='simple'){g.tips.spray=1;toast(V3TIP.spray,3.4)}}}}
+  if(L.ebb===2&&!g.trap){const c=yMin+ebb2At(g,g.scroll+fishSX)*(yMax-yMin);if(F.y<c+22){F.y=c+22;if(F.vy<0)F.vy=0}if(!g.tips.v3ebb2&&g.t>2&&g.mode==='simple'){g.tips.v3ebb2=1;toast(V3TIP.ebb2,3.4)}}
+  if(L.pilot){const tr=g.trail=g.trail||[];tr.push([g.scroll,F.y]);while(tr.length>2&&tr[1][0]<g.scroll-260)tr.shift();g.shipInv=Math.max(0,(g.shipInv||0)-dt);
+    if(!g.tips.pilot&&g.t>2&&g.mode==='simple'){g.tips.pilot=1;toast(V3TIP.pilot,3.4)}
+    const sy=pilotY(g);if(sy!=null&&g.shipInv<=0&&!(g.boss&&!g.boss.done))for(const e of g.E){if(e.gone||e.t!=='rock')continue;const sx=e.x+(e.dx||0)-g.scroll,hw=e.w/2-10,ry=e.top?fy(e.h)-10:fy(1-e.h)+10;
+      if(Math.abs(sx-(fishSX-PILOT.d))<hw+30&&(e.top?sy-14<ry:sy+14>ry)){g.shipInv=1.6;if(hurt(1)){ftext(tl('船擦到礁石了！'),fishSX-PILOT.d-40,sy-40,'#ffb3b3');CSND.crash()}break}}}}
+const PILOT={d:170},pilotY=g=>{const tr=g.trail;if(!tr||!tr.length)return null;const x=g.scroll-PILOT.d;if(tr[0][0]>x)return tr[0][1];for(let i=tr.length-1;i>0;i--)if(tr[i-1][0]<=x){const a=tr[i-1],b=tr[i],k=(x-a[0])/Math.max(1,b[0]-a[0]);return lerp(a[1],b[1],k)}return tr[0][1]};
+function v3bOver(g,t){const L=g.L,F=g.fish,hd=g.mode!=='simple';
+  if(L.ebb===2){const c=yMin+ebb2At(g,g.scroll+fishSX)*(yMax-yMin);ctx.save();ctx.fillStyle='#c8c0ac';ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(VW,0);for(let x=VW;x>=-20;x-=20){const cx=yMin+ebb2At(g,g.scroll+x)*(yMax-yMin);ctx.lineTo(x,cx+Math.sin(x*.05+t*2)*3)}ctx.fill();
+    ctx.fillStyle='rgba(110,90,70,.5)';for(let n=Math.floor(g.scroll*.6/150)-1;n*150-g.scroll*.6<VW+60;n++){const x=n*150-g.scroll*.6+hash(n+3)*40,cx=yMin+ebb2At(g,g.scroll+x)*(yMax-yMin);ctx.beginPath();ctx.ellipse(x,cx-8,46,6,0,0,TAU);ctx.fill()}
+    ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=3;ctx.beginPath();for(let x=0;x<=VW+20;x+=20){const cx=yMin+ebb2At(g,g.scroll+x)*(yMax-yMin);ctx.lineTo(x,cx+Math.sin(x*.05+t*2)*3)}ctx.stroke();
+    const p=clamp((g.scroll+fishSX)/(L.len*60),0,1);ctx.fillStyle='rgba(60,50,40,.75)';ctx.font=`${14*U}px ${FONT}`;ctx.textAlign='center';ctx.fillText(tl(p<.85?'水还在退':'快到头了！'),VW/2,c-14);ctx.restore()}
+  if(L.pilot){const sy=pilotY(g);if(sy!=null){const x=fishSX-PILOT.d;ctx.save();if(g.shipInv>0&&Math.sin(t*30)>0)ctx.globalAlpha=.4;ctx.translate(x,sy);
+      ctx.fillStyle='rgba(30,26,40,.85)';ctx.beginPath();ctx.moveTo(-46,-10);ctx.lineTo(40,-10);ctx.quadraticCurveTo(52,-8,46,4);ctx.quadraticCurveTo(0,20,-40,8);ctx.closePath();ctx.fill();
+      ctx.fillStyle='#ffd870';ctx.shadowColor='#ffd870';ctx.shadowBlur=14;circ(34,-14,4);ctx.shadowBlur=0;ctx.strokeStyle='rgba(255,236,170,.5)';ctx.setLineDash([3,6]);ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(48,0);ctx.lineTo(PILOT.d-30,F.y-sy);ctx.stroke();ctx.setLineDash([]);ctx.restore()}}
+  if(L.spray&&(g.spP==='warn'||g.spP==='fog')){ctx.save();if(g.spP==='warn'){const a=.25+.25*Math.sin(t*16);ctx.fillStyle=`rgba(255,255,255,${a})`;ctx.fillRect(0,yMin,VW,10*U);ctx.fillStyle='#fff';ctx.font=`bold ${16*U}px ${FONT}`;ctx.textAlign='center';ctx.fillText(tl('雾坊要喷雾了！'),VW/2,yMin+34*U)}
+    else{const k=Math.min(1,(hd?2.4:1.8)-g.spT<.3?((hd?2.4:1.8)-g.spT)/.3:g.spT/.3);const gr=ctx.createRadialGradient(fishSX,F.y,30,fishSX,F.y,110);gr.addColorStop(0,`rgba(244,246,248,${.3*k})`);gr.addColorStop(1,`rgba(244,246,248,${.97*k})`);ctx.fillStyle=gr;ctx.fillRect(0,0,VW,VT)}ctx.restore()}}
+function v3bBG(th,sc,t){
+  if(th===28){ctx.strokeStyle='rgba(200,220,230,.18)';ctx.lineWidth=3;for(let n=0;n<4;n++){const x=((n*300-sc*.3)%(VW+300)+VW+300)%(VW+300)-150,y=PH*.45+n%2*60;ctx.beginPath();for(let a=0;a<TAU*2;a+=.25){const r=10+a*9;ctx.lineTo(x+Math.cos(a-t*1.5)*r,y+Math.sin(a-t*1.5)*r*.4)}ctx.stroke()}}
+  if(th===29){ctx.fillStyle='rgba(60,56,40,.45)';const o=sc*.25;for(let n=Math.floor(o/260)-1;n*260-o<VW+100;n++){const x=n*260-o+hash(n+9)*80,y=PH-120-hash(n)*40,r=30+hash(n+4)*24;ctx.save();ctx.translate(x,y);ctx.rotate((hash(n+2)-.5)*.9);ctx.beginPath();ctx.moveTo(-r,r*.7);ctx.quadraticCurveTo(-r*.9,-r*.8,0,-r);ctx.quadraticCurveTo(r*.9,-r*.8,r,r*.7);ctx.fill();ctx.restore()}}
+  if(th===30){ctx.fillStyle='rgba(50,50,56,.6)';const o=sc*.2;for(let n=Math.floor(o/420)-1;n*420-o<VW+200;n++){const x=n*420-o+hash(n+13)*120;ctx.fillRect(x-60,PH-260,120,110);ctx.fillRect(x+20,PH-340,24,90);
+    ctx.fillStyle=`rgba(230,232,236,${.3+.2*Math.sin(t*2+n)})`;for(let i=0;i<4;i++){const q=(t*.25+i/4)%1;circ(x+32+Math.sin(q*4+n)*20,PH-350-q*200,16+q*40)}ctx.fillStyle='rgba(50,50,56,.6)'}}
+  if(th===32){ctx.fillStyle='rgba(100,84,64,.45)';for(let n=Math.floor(sc*.3/120)-1;n*120-sc*.3<VW+60;n++){const x=n*120-sc*.3+hash(n+51)*30;ctx.beginPath();ctx.ellipse(x,PH-130,54,12,0,0,TAU);ctx.fill()}}
+  if(th===33){ctx.fillStyle='rgba(20,24,30,.55)';const o=sc*.12;for(let n=Math.floor(o/600)-1;n*600-o<VW+300;n++){const x=n*600-o+hash(n+17)*200;ctx.beginPath();ctx.moveTo(x-200,yMin*.6);ctx.lineTo(x+200,yMin*.6);ctx.lineTo(x+160,yMin*.6+40);ctx.lineTo(x-170,yMin*.6+40);ctx.fill()}}
+  if(th===34||th===35){ctx.fillStyle=th===35?'rgba(160,110,200,.22)':'rgba(120,90,150,.25)';for(let n=Math.floor(sc*.4/90)-1;n*90-sc*.4<VW+60;n++){const x=n*90-sc*.4+hash(n+61)*30;circ(x,PH-150+hash(n)*20,10+hash(n+1)*12)}}}
+function v3bNode(e,t){
+  if(e.k==='abalone'){ctx.fillStyle='#5a6a4a';ctx.beginPath();ctx.ellipse(0,4,24,14,-.2,0,TAU);ctx.fill();ctx.strokeStyle='#9aaa8a';ctx.lineWidth=2;for(let i=0;i<3;i++){ctx.beginPath();ctx.ellipse(-4,4,8+i*6,4+i*4,-.2,0,TAU);ctx.stroke()}ctx.fillStyle='#d8e8f0';for(let i=0;i<4;i++)circ(-14+i*8,-4-i,2);return 1}
+  if(e.k==='oyster'){ctx.rotate(Math.sin(t*.6+e.x)*.05);ctx.fillStyle='#8a8478';ctx.beginPath();ctx.moveTo(-24,6);ctx.quadraticCurveTo(-20,-16,6,-14);ctx.quadraticCurveTo(26,-8,22,8);ctx.quadraticCurveTo(0,18,-24,6);ctx.fill();ctx.strokeStyle='#c8c0b0';ctx.lineWidth=2;for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(-2,8,10+i*6,Math.PI*1.1,Math.PI*1.9);ctx.stroke()}return 1}
+  if(e.k==='cod3'){ctx.rotate(Math.sin(t*1.3+e.x)*.1);ctx.fillStyle='#a89a7a';ctx.beginPath();ctx.ellipse(0,0,26,11,0,0,TAU);ctx.fill();ctx.fillStyle='#f0ece0';ctx.beginPath();ctx.ellipse(2,5,20,4,0,0,TAU);ctx.fill();ctx.fillStyle='#5a4e3a';for(let i=0;i<5;i++)circ(-14+i*7,-4+(i%2)*2,1.8);ctx.beginPath();ctx.moveTo(-24,0);ctx.lineTo(-36,-9);ctx.lineTo(-36,9);ctx.fill();ctx.strokeStyle='#5a4e3a';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(22,6);ctx.lineTo(24,14);ctx.stroke();ctx.fillStyle='#1b2a41';circ(16,-3,2.4);return 1}
+  if(e.k==='mudskip'){const op=nodeOpen(e,t),k=op?Math.abs(Math.sin(((t+e.x*.01)%3.2)/1.9*Math.PI)):0;ctx.fillStyle='#4e4234';ctx.beginPath();ctx.ellipse(0,16,26,7,0,0,TAU);ctx.fill();ctx.fillStyle='#2a2018';ctx.beginPath();ctx.ellipse(0,15,8,3,0,0,TAU);ctx.fill();
+    ctx.save();ctx.translate(0,12-k*30);ctx.rotate(-.3*k);ctx.fillStyle='#8a7a5a';ctx.beginPath();ctx.ellipse(0,0,16,7,0,0,TAU);ctx.fill();ctx.fillStyle='#bfe0ff';circ(8,-7,3.5);circ(3,-7,3.5);ctx.fillStyle='#1b2a41';circ(8,-7,1.6);circ(3,-7,1.6);ctx.fillStyle='#6a5a3a';ctx.beginPath();ctx.moveTo(-6,-6);ctx.lineTo(0,-12);ctx.lineTo(4,-6);ctx.fill();ctx.restore();if(!op)ctx.globalAlpha=.45;return 1}
+  if(e.k==='seacuc'){ctx.fillStyle='#5a4a3e';ctx.beginPath();ctx.ellipse(0,6,26,9,Math.sin(t+e.x)*.05,0,TAU);ctx.fill();ctx.fillStyle='#7a6a5a';for(let i=0;i<7;i++)circ(-20+i*7,0+Math.sin(i)*2,2.5);ctx.fillStyle='#e8d8c8';for(let i=0;i<4;i++)circ(24+Math.cos(i*1.6)*4,4+Math.sin(i*1.6)*4,1.5);return 1}
+  if(e.k==='laver'){ctx.fillStyle='#6a5a6a';ctx.fillRect(-28,-16,56,8);for(let i=-2;i<=2;i++){ctx.fillStyle=i%2?'#7a4a9a':'#9a6aba';ctx.beginPath();ctx.moveTo(i*10-4,-8);ctx.quadraticCurveTo(i*10+Math.sin(t*2+i)*8,8,i*10+Math.sin(t*2+i+1)*4,22);ctx.lineTo(i*10+4,-8);ctx.fill()}return 1}
+  return 0}
+/* ---------- 海女哨 Boss：满屏大雾，阿岚在上下左右某一边吹哨，点对方向就钻过一层雾 ---------- */
+const WH={D:[[0,-1],[1,0],[0,1],[-1,0]],N:['上','右','下','左'],need:()=>G.mode==='hard'?14:10,fake:()=>G.mode==='hard'?3:5};
+function whSnd(d,v){if(SAVE.mute)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state!=='running')AC.resume();const t=AC.currentTime,o=AC.createOscillator(),gn=AC.createGain();
+  const f0=d===0?1900:d===2?1300:1600,f1=d===0?2500:d===2?1000:1750;o.type='sine';o.frequency.setValueAtTime(f0,t);o.frequency.linearRampToValueAtTime(f1,t+.55);gn.gain.setValueAtTime(.0001,t);gn.gain.linearRampToValueAtTime(.12*v,t+.05);gn.gain.exponentialRampToValueAtTime(.001,t+.7);
+  let nd=gn;if(AC.createStereoPanner&&(d===1||d===3)){const p=AC.createStereoPanner();p.pan.value=d===1?.9:-.9;gn.connect(p);nd=p}o.connect(gn);nd.connect(AC.destination);o.start(t);o.stop(t+.75)}catch(e){}}
+function whistleMk(g,hd,fin){const B={k:'whistle',mini:1,fin,tries:0,
+  reset(){const hd=G.mode==='hard';this.hp=hd?3:4;this.n=0;this.t=this.seen?-3:-6.5;this.seen=1;this.cur=null;this.wt=1.2;this.dz=0;this.dash=0;this.rings=[];this.layer=0}};B.reset();return B}
+function whNext(B){const n=B.n,d=Math.floor(Math.random()*4);let f=-1;if(n>=WH.fake()){f=(d+1+Math.floor(Math.random()*3))%4}B.cur={d,f,rp:0};whPlay(B)}
+function whPlay(B){const c=B.cur;c.rp=3.2;whSnd(c.d,1);B.rings.push({d:c.d,t:0,big:1});if(c.f>=0)setTimeout(()=>{if(B.cur===c){whSnd(c.f,.3);B.rings.push({d:c.f,t:0,big:0})}},260)}
+function whistleUpd(B,dt){const g=G;B.t+=dt;g.fish.y=(yMin+yMax)/2;g.fish.vy=0;B.dz=Math.max(0,B.dz-dt);B.dash=Math.max(0,B.dash-dt);for(const r of B.rings)r.t+=dt;B.rings=B.rings.filter(r=>r.t<1.4);
+  if(B.t<0)return;if(!B.cur){B.wt-=dt;if(B.wt<=0)whNext(B);return}B.cur.rp-=dt;if(B.cur.rp<=0)whPlay(B)}
+function whistlePt(cx,cy){const B=G.boss;if(B.t<-3){B.t=-3;return}if(B.t<0||!B.cur||B.dz>0)return;const r=cv.getBoundingClientRect(),ux=(cx-r.left)/S-VW/2,uy=(cy-r.top)/S-(yMin+yMax)/2,d=Math.hypot(ux,uy);if(d<20)return;
+  let di=0,bs=-2;WH.D.forEach((D,i)=>{const q=(ux*D[0]+uy*D[1])/d;if(q>bs){bs=q;di=i}});whistleTry(B,di)}
+function whistleTry(B,di){const g=G,c=B.cur;if(!c)return;
+  if(di===c.d){B.n++;B.cur=null;B.wt=G.mode==='hard'?.8:1.1;B.dash=.5;B.dd=di;g.bonus+=20;SFX.free();burst(VW/2+WH.D[di][0]*80,(yMin+yMax)/2+WH.D[di][1]*80,'#ffffff',16,1);
+    if(B.n>=WH.need()){bossWin(B,'阿岚收起了哨子。雾里，她第一次开口说话');g.fish.y=(yMin+yMax)/2;g.inv=2;return}ftext(tl('钻过了一层雾！'),VW/2-70,(yMin+yMax)/2-70,'#ffffff')}
+  else{B.hp--;B.dz=.7;g.flash=.4;g.shake=.3;SFX.hit();ftext(tl(c.f===di?'那是假回声！':'哨声不是从那边来的'),VW/2-90,(yMin+yMax)/2-70,'#ffb3b3');if(B.hp<=0){die('whistle');return}c.rp=1}}
+function whistleHud(B,t){const g=G,cx=VW/2,cy=(yMin+yMax)/2,k=B.n/WH.need();ctx.save();
+  ctx.fillStyle=`rgb(${Math.round(232-30*k)},${Math.round(236-24*k)},${Math.round(240-10*k)})`;ctx.fillRect(0,0,VW,VT);
+  for(let i=0;i<9;i++){ctx.fillStyle=`rgba(255,255,255,${.35-.25*k})`;const x=((i*170+t*(20+i*4))%(VW+300))-150,y=yMin+((i*97)%(yMax-yMin));ctx.beginPath();ctx.ellipse(x,y,140,30,0,0,TAU);ctx.fill()}
+  for(const r of B.rings){const D=WH.D[r.d],ex=cx+D[0]*(VW/2-10),ey=cy+D[1]*((yMax-yMin)/2-10),q=r.t/1.4;for(let i=0;i<(r.big?3:2);i++){const rr=(r.big?40:26)+q*(r.big?220:120)+i*(r.big?28:18);
+      ctx.strokeStyle=r.big?`rgba(40,70,100,${.75*(1-q)})`:`rgba(90,110,130,${.3*(1-q)})`;ctx.lineWidth=r.big?5:2;ctx.beginPath();ctx.arc(ex,ey,rr,0,TAU);ctx.stroke()}}
+  for(let i=0;i<4;i++){const D=WH.D[i],ax=cx+D[0]*110,ay=cy+D[1]*Math.min(110,(yMax-yMin)/2-40);ctx.save();ctx.translate(ax,ay);ctx.rotate(Math.atan2(D[1],D[0]));ctx.globalAlpha=.35;ctx.fillStyle='#34506a';ctx.beginPath();ctx.moveTo(26,0);ctx.lineTo(0,-20);ctx.lineTo(0,20);ctx.fill();ctx.restore()}
+  ctx.save();const off=B.dash>0?(1-B.dash/.5)*60:0,dd=WH.D[B.dd||0];ctx.translate(cx+dd[0]*off,cy+dd[1]*off);drawFish(0,0,0,t,{s:.8,scared:B.dz>0,...skin()});ctx.restore();
+  ctx.textAlign='center';ctx.fillStyle='#1b2a41';const y0=yMin+22*U;ctx.font=`${17*U}px ${FONT}`;
+  if(B.t>=0){ctx.fillText(tl('哨声 '+B.n+' / '+WH.need())+'  '+'♥'.repeat(Math.max(0,B.hp)),cx,y0);ctx.fillStyle='#34506a';ctx.font=`${14*U}px ${FONT}`;ctx.fillText(tl(B.cur?(B.cur.f>=0?'有回声！点声音大、波纹深的那一边':'哨声从哪边来，就点哪边'):'听……'),cx,y0+24*U)}
+  else{ctx.fillStyle='rgba(6,40,70,.66)';ctx.fillRect(0,cy-70*U,VW,140*U);ctx.fillStyle='#fff';ctx.font=`${(VW<500?14:17)*U}px ${FONT}`;
+    const L2=B.t<-3?[tl('海面白茫茫一片，什么都看不见。'),tl('雾里传来一声长哨。'),tl('点屏幕跳过')]:[tl('哨声从哪边来，就点屏幕的哪一边'),tl('后面会有假回声：声音小、波纹淡'),tl(Math.ceil(-B.t)+' 秒后开始')];L2.forEach((x,i)=>ctx.fillText(x,cx,cy-28*U+i*30*U))}
+  ctx.restore()}
+/* ---------- 雾钟 Boss：几口钟在水下来回摇，摆到正中间时点它；五层雾，敲完一层散一层 ---------- */
+const FB={L:()=>G.mode==='hard'?[3,4,5,6,7]:[2,3,3,4,5],win:()=>G.mode==='hard'?.17:.24,geo(){const y0=yMin+30,len=Math.min((yMax-yMin)*.5,260);return{y0,len}},
+ pos(b,i,n){const o=FB.geo(),px=VW*(i+1)/(n+1),a=b.A*Math.sin(b.ph);return[px+Math.sin(a)*o.len,o.y0+Math.cos(a)*o.len,px,a]}};
+function fogbellMk(g,hd,fin){const B={k:'fogbell',mini:1,fin,tries:0,
+  reset(){const hd=G.mode==='hard';this.hp=hd?3:5;this.ly=0;this.t=this.seen?-3:-6.5;this.seen=1;this.dz=0;this.clr=0;this.nx=0;fbLayer(this)}};B.reset();return B}
+function fbLayer(B){const n=FB.L()[B.ly],hd=G.mode==='hard';B.bells=Array.from({length:n},(_,i)=>({A:hd?.62:.55,w:(hd?2.6:2.1)+Math.random()*(hd?1.6:1.1),ph:Math.random()*TAU,rung:0,glow:0,bad:0}))}
+function fogbellUpd(B,dt){const g=G;B.t+=dt;g.fish.y=(yMin+yMax)/2;g.fish.vy=0;B.dz=Math.max(0,B.dz-dt);B.clr=Math.max(0,B.clr-dt);if(B.nx>0){B.nx-=dt;if(B.nx<=0)fbLayer(B)}if(B.t<0)return;
+  for(const b of B.bells){if(!b.rung)b.ph+=b.w*dt;b.glow=Math.max(0,b.glow-dt);b.bad=Math.max(0,b.bad-dt)}}
+function fogbellPt(cx,cy){const B=G.boss;if(B.t<-3){B.t=-3;return}if(B.t<0||B.dz>0||B.clr>0)return;const r=cv.getBoundingClientRect(),x=(cx-r.left)/S,y=(cy-r.top)/S,n=B.bells.length;
+  let best=-1,bd=1e9;B.bells.forEach((b,i)=>{if(b.rung)return;const[bx,by]=FB.pos(b,i,n),d=Math.hypot(bx-x,by-y);if(d<bd){bd=d;best=i}});if(best>=0&&bd<80*Math.max(1,U*.8))fogbellTry(B,best)}
+function fogbellTry(B,i){const g=G,b=B.bells[i],n=B.bells.length,[bx,by]=FB.pos(b,i,n),a=Math.sin(b.ph);
+  if(Math.abs(a)<=FB.win()){b.rung=1;b.glow=1;b.ph=0;bellSnd();g.bonus+=15;burst(bx,by,'#fff8d0',16,1);
+    if(B.bells.every(q=>q.rung)){B.ly++;g.bonus+=40;SFX.free();g.flash=.5;if(B.ly>=FB.L().length){bossWin(B,'雾散开了一半……第一缕太阳照在礁石上');g.fish.y=(yMin+yMax)/2;g.inv=2;return}
+      B.clr=1.4;ftext(tl('散了一层雾！'),VW/2-60,(yMin+yMax)/2-60,'#ffe27a');B.nx=.7}}
+  else{B.hp--;b.bad=.6;B.dz=.6;g.flash=.35;g.shake=.3;SFX.hit();ftext(tl('还没摆到正中间'),bx-60,by-60,'#ffb3b3');if(B.hp<=0){die('fogbell');return}}}
+function fogbellHud(B,t){const g=G,o=FB.geo(),n=B.bells.length,k=B.ly/FB.L().length;ctx.save();
+  {const gr=ctx.createLinearGradient(0,0,0,VT);gr.addColorStop(0,mixc('#8a96a2','#8ab0d8',k));gr.addColorStop(1,mixc('#2a323e','#1a2a48',k));ctx.fillStyle=gr;ctx.fillRect(0,0,VW,VT)}
+  if(k>0){ctx.fillStyle=`rgba(160,110,200,${.35*k})`;for(let i=0;i<14;i++)circ((i*83)%VW,yMax-10-(i*13)%40,14+i%3*6)}
+  ctx.fillStyle='#3a3e46';ctx.fillRect(0,o.y0-10,VW,10);
+  B.bells.forEach((b,i)=>{const[bx,by,px,a]=FB.pos(b,i,n),inw=!b.rung&&Math.abs(Math.sin(b.ph))<=FB.win();
+    ctx.strokeStyle='rgba(255,226,140,.5)';ctx.lineWidth=2;ctx.setLineDash([4,6]);ctx.beginPath();ctx.moveTo(px,o.y0);ctx.lineTo(px,o.y0+o.len+40);ctx.stroke();ctx.setLineDash([]);
+    ctx.strokeStyle='#5a5448';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(px,o.y0);ctx.lineTo(bx,by-30);ctx.stroke();
+    ctx.save();ctx.translate(bx,by);ctx.rotate(-a);if(b.rung||b.glow){ctx.shadowColor='#ffe27a';ctx.shadowBlur=30}else if(inw&&G.mode==='simple'){ctx.shadowColor='#9ff0ff';ctx.shadowBlur=22}
+    ctx.fillStyle=b.bad>0?'#a85a4a':b.rung?'#c8a050':'#7a6a3a';ctx.beginPath();ctx.moveTo(-34,22);ctx.quadraticCurveTo(-30,-26,0,-32);ctx.quadraticCurveTo(30,-26,34,22);ctx.closePath();ctx.fill();ctx.shadowBlur=0;
+    ctx.fillStyle='#5a4e2a';ctx.fillRect(-38,18,76,7);ctx.strokeStyle='#d8c48a';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,-4,10,0,TAU);ctx.stroke();ctx.restore();
+    ctx.fillStyle='#ffd870';ctx.beginPath();ctx.moveTo(px,o.y0+o.len+44);ctx.lineTo(px-7,o.y0+o.len+56);ctx.lineTo(px+7,o.y0+o.len+56);ctx.fill()});
+  const fl=FB.L().length-B.ly;for(let i=0;i<fl;i++){ctx.fillStyle=`rgba(225,230,236,${.12+.03*i})`;ctx.fillRect(0,0,VW,VT)}
+  ctx.textAlign='center';const cx=VW/2,cy=(yMin+yMax)/2,y0=yMax-30*U;ctx.font=`${17*U}px ${FONT}`;ctx.fillStyle='#fff';ctx.lineWidth=4*U;ctx.strokeStyle='rgba(6,40,70,.7)';
+  if(B.t>=0&&B.ly<FB.L().length){const s1=tl('第 '+(B.ly+1)+' / '+FB.L().length+' 层雾 · '+n+' 口钟')+'  '+'♥'.repeat(Math.max(0,B.hp)),s2=tl('等钟摆到正中间（金色记号）再点');ctx.strokeText(s1,cx,y0-24*U);ctx.fillText(s1,cx,y0-24*U);ctx.fillStyle='#ffe27a';ctx.strokeText(s2,cx,y0);ctx.fillText(s2,cx,y0)}
+  if(B.t<0){ctx.fillStyle='rgba(6,40,70,.66)';ctx.fillRect(0,cy-70*U,VW,140*U);ctx.fillStyle='#fff';ctx.font=`${(VW<500?14:17)*U}px ${FONT}`;
+    const L2=B.t<-3?[tl('雾心的水底下，挂着几口很老的钟。'),tl('阿岚游到你身边，比了一个“敲”的手势。'),tl('点屏幕跳过')]:[tl('钟摆到正中间的时候点它'),tl('一层的钟全敲响，雾就散一层'),tl(Math.ceil(-B.t)+' 秒后开始')];L2.forEach((x,i)=>ctx.fillText(x,cx,cy-28*U+i*30*U))}
+  ctx.restore()}
+function v3MiniPt(cx,cy){const B=G.boss;if(B.k==='whistle'){whistlePt(cx,cy);return 1}if(B.k==='fogbell'){fogbellPt(cx,cy);return 1}return 0}
 /* ---------- drawing ---------- */
 const circ=(x,y,r)=>{ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.fill()};
 function hills(col,off,base,amp,a,b){ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(0,VT);for(let x=0;x<=VW+30;x+=30){const wx=x+off;ctx.lineTo(x,base-(Math.sin(wx*a)+Math.sin(wx*b+1.3))*amp*.5-amp)}ctx.lineTo(VW+30,VT);ctx.fill()}
@@ -1662,6 +1822,7 @@ function drawEntity(e,sx,y,g,T){const t=g.t;switch(e.t){
   case'fnet':drawFnet(e,sx,g,t);break;
   case'fork':case'vent':case'lamp':a2Draw(e,sx,g,t,T);break;
   case'lava':case'pumice':case'sline':a3Draw(e,sx,g,t,T);break;
+  case'whirl':case'sbell':case'chain':v3bDraw(e,sx,g,t,T);break;
   case'octo':drawOcto(sx,y,octoR(e,t),octoWarn(e,t),t,e);break;
   case'jelly':drawJelly(sx,y,t,e);break;
   case'net':if(!e.hold)drawNet(sx,y,t);break;
@@ -1739,7 +1900,7 @@ function drawWorld(){
     ctx.translate(-8,-70+Math.sin(t*3)*3);ctx.fillStyle='#4a90d9';ctx.beginPath();ctx.ellipse(0,0,20,12,0,0,TAU);ctx.fill();ctx.beginPath();ctx.moveTo(-17,0);ctx.lineTo(-30,-10);ctx.lineTo(-27,0);ctx.lineTo(-30,9);ctx.fill();
     ctx.fillStyle='#d9efff';ctx.beginPath();ctx.ellipse(3,6,13,5,0,0,TAU);ctx.fill();ctx.fillStyle='#1b2a41';circ(11,-2,2.2);ctx.strokeStyle='#d9efff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(2,-12);ctx.lineTo(-2,-20);ctx.moveTo(2,-12);ctx.lineTo(6,-20);ctx.stroke();ctx.restore()}
   if(g.magnet&&!dead){ctx.strokeStyle=`rgba(255,255,255,${.18+.1*Math.sin(t*5)})`;ctx.lineWidth=2;ctx.beginPath();ctx.arc(fishSX,F.y,115,0,TAU);ctx.stroke()}
-  if(g.trap){if(g.trap.e.lamp){ctx.save();ctx.strokeStyle='rgba(255,240,170,.85)';ctx.lineWidth=4;for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(fishSX,F.y,40+i*12+Math.sin(t*8+i)*4,0,TAU);ctx.stroke()}ctx.restore()}else drawNet(fishSX,F.y,t*6)}
+  if(g.trap){if(g.trap.e.t==='whirl'){ctx.save();ctx.translate(fishSX,F.y);for(let i=0;i<4;i++){ctx.strokeStyle=`rgba(220,236,244,${.35+i*.12})`;ctx.lineWidth=3+i;ctx.beginPath();ctx.arc(0,0,44+i*14,t*(4+i)+i,t*(4+i)+i+4.2);ctx.stroke()}ctx.restore()}else if(g.trap.e.lamp){ctx.save();ctx.strokeStyle='rgba(255,240,170,.85)';ctx.lineWidth=4;for(let i=0;i<3;i++){ctx.beginPath();ctx.arc(fishSX,F.y,40+i*12+Math.sin(t*8+i)*4,0,TAU);ctx.stroke()}ctx.restore()}else drawNet(fishSX,F.y,t*6)}
   if(g.lcap)a2CapDraw(g,t);
   for(const s of g.sharks)if(s.ph===1)drawShark(s.sx,s.y,t);
   for(const p of g.parts){ctx.globalAlpha=clamp(p.l*2,0,1);if(p.k){ctx.strokeStyle=p.c;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,TAU);ctx.stroke()}else{ctx.fillStyle=p.c;circ(p.x,p.y,p.r)}}
@@ -1811,7 +1972,7 @@ $('shopList').onclick=e=>{const b=e.target.closest('button');if(!b||b.disabled)r
   persist();refreshMenu();showShop()};
 const dot=k=>`<i style="background:radial-gradient(circle at 35% 30%,${FISH[k].c[0]},${FISH[k].c[1]})"></i>`;
 function showKitchen(){
-  ensureOrders();svPanel();const lv=restLv(),nx=REPLV[lv],pv=REPLV[lv-1];
+  ensureOrders();svPanel();jarRender();const lv=restLv(),nx=REPLV[lv],pv=REPLV[lv-1];
   $('restCard').innerHTML=`<div class="stat"><span>小馆等级</span><span>Lv.${lv}「${RESTN[lv-1]}」</span></div><div class="stat"><span>声望</span><span>${SAVE.rep}${nx?' / '+nx:'（已满级）'}</span></div><div class="stat"><span>菜价加成</span><span>+${(lv-1)*2}%</span></div>${nx?`<div class="stat"><span>下一级</span><span style="text-align:end">菜价再 +2%${PERK[lv+1]?'，'+PERK[lv+1]:''}</span></div>`:''}<div id="prog2"><i style="width:${nx?Math.min(100,(SAVE.rep-pv)/(nx-pv)*100):100}%"></i></div>`;
   const needs=d=>Object.entries(d.need).map(([k,n])=>`<span class="${(SAVE.fish[k]||0)>=n?'':'no'}">${dot(k)} ${FISH[k].n}×${n}</span>`).join('　');
   $('ordList').innerHTML=SAVE.orders.list.map((o,i)=>{const d=DISH.find(x=>x.id===o.d),ok=hasFish(d);
@@ -1845,7 +2006,7 @@ function showLevels(mode){
   {const tot=starTotal(),nx=STARGIFT[SAVE.sg||0],t='⭐ 已集 '+tot+' 颗星'+(nx?(tot>=nx[0]?' · 下次通关领取礼物':' · 再集 '+(nx[0]-tot)+' 颗有礼物'):'');$('starInfo').textContent=t;$('starInfo').dataset.raw=t}
   lastMode=mode;document.querySelectorAll('#modeTabs .tab').forEach(t=>t.classList.toggle('on',t.dataset.mode===mode));const em=mode==='endless';$('lvGrid').hidden=em;$('lvInfo').hidden=em;$('endPanel').hidden=!em;$('sLevels').classList.toggle('map',!em);if(em){WM=null;cancelAnimationFrame(wmFr);$('volTabs').hidden=true;show('sLevels');return}
   const hi=mode==='hard'?1:0,sv=SAVE[mode];$('lvTitle').textContent=(hi?'困难模式':'普通模式')+' · 选择关卡';
-  const vtab=v2Open(),vmax=hi?(hard2Open()?2:1):v3Open()?3:2,vol=vtab?Math.min(SAVE.vol||2,vmax):1,base=volStart(vol);$('volTabs').hidden=!vtab;$('volTabs').querySelector('[data-vol="3"]').hidden=!v3Open();document.querySelectorAll('#volTabs .tab').forEach(t=>t.classList.toggle('on',+t.dataset.vol===vol));
+  const vtab=v2Open(),vmax=hi?(hard3Open()?3:hard2Open()?2:1):v3Open()?3:2,vol=vtab?Math.min(SAVE.vol||2,vmax):1,base=volStart(vol);$('volTabs').hidden=!vtab;$('volTabs').querySelector('[data-vol="3"]').hidden=!v3Open();document.querySelectorAll('#volTabs .tab').forEach(t=>t.classList.toggle('on',+t.dataset.vol===vol));
   $('lvGrid').dataset.mode=mode;show('sLevels');renderMap(mode,vol,hi,sv,base)}
 const STARGIFT=[[4,'gold',2,'金鱼结界 ×2'],[9,'life',1,'生命星 ×1'],[14,'pearl',150,'150 颗珍珠'],[20,'whale',2,'鲸鱼结界 ×2'],[27,'revive',1,'复活海星 ×1'],[34,'pearl',400,'400 颗珍珠'],[42,'double',3,'双倍珍珠袋 ×3'],[52,'pearl',800,'800 颗珍珠'],[66,'revive',3,'复活海星 ×3'],[80,'pearl',1500,'1500 颗珍珠'],[96,'pearl',3000,'3000 颗珍珠']];
 const starTotal=()=>['simple','hard'].reduce((a,m)=>a+SAVE[m].st.reduce((x,y)=>x+y,0)+SAVE[m].s4.reduce((x,y)=>x+(y?1:0),0),0);
@@ -1862,7 +2023,7 @@ function showEnd(win,stars,prev){
     {const tot=starTotal(),nw=tot-(SAVE.starPaid||0);if(nw>0){SAVE.starPaid=tot;SAVE.wallet+=nw*15;html+=stat('新得到 '+nw+' 颗星','+'+nw*15+' ⚪')}
       const got=[];while((SAVE.sg||0)<STARGIFT.length&&tot>=STARGIFT[SAVE.sg||0][0]){const m=STARGIFT[SAVE.sg||0];if(m[1]==='pearl')SAVE.wallet+=m[2];else SAVE.inv[m[1]]=(SAVE.inv[m[1]]||0)+m[2];got.push(m[3]);SAVE.sg=(SAVE.sg||0)+1}
       if(got.length)html+=stat('集星礼物（共 '+tot+' 颗星）',got.join('、'));const nx=STARGIFT[SAVE.sg||0];if(nx)html+=`<div class="cond"><span>再集 ${nx[0]-tot} 颗星，还有一份礼物</span></div>`;persist()}
-    btns=(g.li<LV.length-1&&!(hi&&g.li===VOL1-1&&!hard2Open())&&!(hi&&g.li===VOL2-1)?'<button class="btn mint" data-act="next">下一关</button>':'')+'<button class="btn sm" data-act="retry">再次挑战</button><button class="btn sm" data-act="menu">主菜单</button>';
+    btns=(g.li<LV.length-1&&!(hi&&g.li===VOL1-1&&!hard2Open())&&!(hi&&g.li===VOL2-1&&!hard3Open())?'<button class="btn mint" data-act="next">下一关</button>':'')+'<button class="btn sm" data-act="retry">再次挑战</button><button class="btn sm" data-act="menu">主菜单</button>';
   }else{
     title={shark:'小鱼被鲨鱼吃掉了！',net:'小鱼没能逃出渔网…',hp:'星星用完了！',goal:'到终点了，但目标还没完成',orb:'潮心被撞灭了…'}[g.cause]||'游戏结束';
     if(endless){const sc=score(),b=SAVE.end,rec=sc>b.score;b.score=Math.max(b.score,sc);b.dist=Math.max(b.dist,m);b.combo=Math.max(b.combo,g.maxCombo);persist();
@@ -1885,14 +2046,14 @@ document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>show(b.dataset.g
 $('bHelp').onclick=()=>show('sHelp');
 $('bMusic').onclick=()=>{SAVE.music=SAVE.music===0?1:0;persist();refreshMenu();SFX.tap()};
 $('bMute').onclick=()=>{SAVE.mute=SAVE.mute?0:1;persist();refreshMenu();SFX.tap()};
-$('volTabs').onclick=e=>{const b=e.target.closest('[data-vol]');if(b){SFX.tap();if(lastMode==='hard'&&+b.dataset.vol===2&&!hard2Open()){toast('先通关第二卷普通模式的全部关卡，才能挑战第二卷的困难模式',2.8);return}if(lastMode==='hard'&&+b.dataset.vol===3){toast('第三卷的困难模式，等第三卷全部做完再开放',2.8);return}SAVE.vol=+b.dataset.vol;persist();showLevels(lastMode)}};
+$('volTabs').onclick=e=>{const b=e.target.closest('[data-vol]');if(b){SFX.tap();if(lastMode==='hard'&&+b.dataset.vol===2&&!hard2Open()){toast('先通关第二卷普通模式的全部关卡，才能挑战第二卷的困难模式',2.8);return}if(lastMode==='hard'&&+b.dataset.vol===3&&!hard3Open()){toast('先通关第三卷普通模式的全部关卡，才能挑战第三卷的困难模式',2.8);return}SAVE.vol=+b.dataset.vol;persist();showLevels(lastMode)}};
 $('bPause').onclick=pause;
 $('bResume').onclick=()=>{show('');state='play'};
 $('bRestart').onclick=()=>startGame(...lastArgs);
 $('bQuit').onclick=toMenu;
 $('endBtns').onclick=e=>{const a=e.target.dataset.act;if(a==='retry')startGame(...lastArgs);else if(a==='next')launch(lastArgs[0],lastArgs[1]+1);else if(a==='menu')toMenu();else if(a==='shop'){toMenu();showShop()}else if(a==='kit'){toMenu();showKitchen()}};
 
-cv.addEventListener('pointerdown',e=>{e.preventDefault();if(v3Tap(e))return;if(G&&G.tcap&&state==='play'){a3PotTap(e.clientX,e.clientY);return}if(G&&G.lcap&&state==='play'){a2CapTap(e.clientX,e.clientY);return}if(G&&G.boss&&G.boss.mini&&!G.boss.done&&state==='play'){if(G.boss.k==='light')lightPt(e.clientX,e.clientY,true);else herdPt(e.clientX,e.clientY);return}const B=G&&G.boss;if(!(B&&B.carry>0?bossTap(e)||tryCatch(e):tryCatch(e)||bossTap(e)))press()});
+cv.addEventListener('pointerdown',e=>{e.preventDefault();if(v3Tap(e))return;if(G&&G.tcap&&state==='play'){a3PotTap(e.clientX,e.clientY);return}if(G&&G.lcap&&state==='play'){a2CapTap(e.clientX,e.clientY);return}if(G&&G.boss&&G.boss.mini&&!G.boss.done&&state==='play'){if(G.boss.k==='light')lightPt(e.clientX,e.clientY,true);else if(!v3MiniPt(e.clientX,e.clientY))herdPt(e.clientX,e.clientY);return}const B=G&&G.boss;if(!(B&&B.carry>0?bossTap(e)||tryCatch(e):tryCatch(e)||bossTap(e)))press()});
 window.addEventListener('pointerup',()=>{hold=false});window.addEventListener('pointercancel',()=>{hold=false});
 window.addEventListener('keydown',e=>{if(G&&G.tcap&&state==='play'){const i=['ArrowUp','ArrowRight','ArrowDown','ArrowLeft'].indexOf(e.code);if(i>=0||e.code==='Space'){e.preventDefault();if(!e.repeat)a3PotGo(G,i);return}}if(G&&G.lcap&&state==='play'){const i=['ArrowUp','ArrowRight','ArrowDown','ArrowLeft'].indexOf(e.code);if(i>=0){e.preventDefault();if(!e.repeat)a2CapGo(G,i);return}}if(e.code==='Space'||e.code==='ArrowUp'){if(state==='play'){e.preventDefault();if(!e.repeat)press()}}else if(e.code==='Escape'||e.code==='KeyP')pause()});
 window.addEventListener('keyup',e=>{if(e.code==='Space'||e.code==='ArrowUp')hold=false});
@@ -2028,7 +2189,7 @@ const TOOLS=[{id:'lamp',ic:'🔦',n:'探洞灯',d:'照亮钟乳洞，没有它�
  {id:'tongs',ic:'🥢',n:'长夹子',d:'夹起海藻迷林里的海胆',p:400,ch:7},{id:'trap',ic:'🧺',n:'虾笼',d:'捞住逆潮海沟的逆潮虾',p:400,ch:8},{id:'lure',ic:'🏮',n:'诱鱼灯',d:'引出沉灯之城的鱿鱼',p:450,ch:9},{id:'bottle',ic:'🫙',n:'琉璃瓶',d:'接住潮心井的潮心露',p:500,ch:10},
  {id:'scoop',ic:'🥅',n:'抄网',d:'接住跳出水面的飞鱼，没有它进不了飞鱼水道',p:450,ch:13},{id:'hook',ic:'🪝',n:'蟹钩',d:'从根缝里勾出泥蟹，没有它进不了红树林',p:500,ch:14}];
 const TOOLN={lamp:['🔦','探洞灯','洞里一片漆黑，先去墨墨的杂货铺买探洞灯'],knife:['🔪','贝刀','遗迹里的扇贝要用贝刀撬，先去墨墨的杂货铺买一把'],tongs:['🥢','长夹子','海胆扎手，先去墨墨的杂货铺买长夹子'],trap:['🧺','虾笼','逆潮虾要用虾笼，先去墨墨的杂货铺买一个'],lure:['🏮','诱鱼灯','鱿鱼要用诱鱼灯引出来，先去墨墨的杂货铺买一盏'],bottle:['🫙','琉璃瓶','潮心露要用琉璃瓶接，先去墨墨的杂货铺买一个'],scoop:['🥅','抄网','飞鱼要用抄网接，先去墨墨的杂货铺买一张'],hook:['🪝','蟹钩','泥蟹躲在根缝里，先去墨墨的杂货铺买一把蟹钩']};
-const hardOpen=()=>SAVE.simple.st.slice(0,VOL1).every(x=>x>0),hard2Open=()=>SAVE.simple.st.slice(VOL1,VOL1+12).every(x=>x>0),endOpen=()=>SAVE.simple.st[0]>0||SAVE.hard.st[0]>0;
+const hardOpen=()=>SAVE.simple.st.slice(0,VOL1).every(x=>x>0),hard2Open=()=>SAVE.simple.st.slice(VOL1,VOL1+12).every(x=>x>0),hard3Open=()=>SAVE.simple.st.slice(VOL2,VOL2+12).every(x=>x>0),endOpen=()=>SAVE.simple.st[0]>0||SAVE.hard.st[0]>0;
 const UNL={d1:[0,1],d2:[0,1],d25:[0,1],d3:[0,2],d10:[0,2],d11:[0,3],d12:[0,3],
  d14:[1,1],d4:[1,1],d33:[1,2],d15:[1,2],d5:[1,3],d28:[1,3],d13:[1,3],d32:[1,4],d16:[1,4],
  d17:[2,2],d27:[2,2],d7:[2,3],d26:[2,3],d19:[2,3],d6:[2,4],d34:[2,4],d20:[2,4],d18:[2,4],d8:[2,5],d21:[2,5],d22:[2,5],
@@ -2068,22 +2229,22 @@ function svPending(id){let w=0,s=0;SV.seats.forEach(x=>{if(x&&x.d===id)w++});SV.
 function svAvail(){const f={...SAVE.fish},seen={};SV.seats.forEach(s=>{if(!s||seen[s.d])return;seen[s.d]=1;const n=Math.max(0,svPending(s.d)),d=dById(s.d);for(const k in d.need)f[k]=(f[k]||0)-n*d.need[k]});return f}
 function startServe(banq){
   if(!banq&&!DISH.some(d=>unlocked(d)&&canMake(d,SAVE.fish))){toast('鱼篓里的鱼不够做任何一道菜，先出海捕鱼吧',2.8);return}
-  ensureOrders();let wage=0;const staff={},came=[],broke=[];for(const s of STAFF)if(banq!==1&&SAVE.staff[s.id]&&s.ok()){if(SAVE.wallet-wage>=wageOf(s)){staff[s.id]=1;wage+=wageOf(s);came.push(s.n.split('（')[0])}else broke.push(s.n.split('（')[0])}if(banq===2){wage=0;broke.length=0}SAVE.wallet-=wage;
+  ensureOrders();let wage=0;const staff={},came=[],broke=[];for(const s of STAFF)if(banq!==1&&SAVE.staff[s.id]&&s.ok()){if(SAVE.wallet-wage>=wageOf(s)){staff[s.id]=1;wage+=wageOf(s);came.push(s.n.split('（')[0])}else broke.push(s.n.split('（')[0])}if(banq>=2){wage=0;broke.length=0}SAVE.wallet-=wage;
   const st=[{k:'cut'},{k:'grill'},{k:'pot'},{k:'asm'}];if(SAVE.up.grill)st.push({k:'grill'});if(SAVE.up.pot)st.push({k:'pot'});if(SAVE.story.post17)st.push({k:'umu'});
   SAVE.orders.list.forEach(o=>delete o.in);
   SV={t:90,earn:0,tips:0,rep:0,served:0,lost:0,wage,staff,seats:Array(2+SAVE.up.seat).fill(null),shelf:[],st,next:1,wt:0,dirty:1,over:0,salt:!banq&&(SAVE.fish.salt||0)>0};
-  if(banq===2){SV.banq=2;SV.t=150;SV.seats=Array(4).fill(null);let un=DISH.filter(d=>+d.id.slice(1)>=52&&chN()>=(UNL[d.id]||[0])[0]);if(!un.length)un=DISH.filter(d=>+d.id.slice(1)>=52);SV.q=Array.from({length:12},(_,i)=>un[(i*5+2)%un.length].id)}
+  if(banq===2||banq===3){const f3=banq===3,lo=f3?80:52,hi=f3?98:80;SV.banq=2;SV.f3=f3?1:0;SV.t=150;SV.seats=Array(4).fill(null);let un=DISH.filter(d=>{const n=+d.id.slice(1);return n>=lo&&n<hi&&chN()>=(UNL[d.id]||[0])[0]});if(!un.length)un=DISH.filter(d=>{const n=+d.id.slice(1);return n>=lo&&n<hi});SV.q=Array.from({length:12},(_,i)=>un[(i*5+2)%un.length].id);if(f3)SV.q[11]='d98'}
   else if(banq){SV.banq=1;SV.t=110;SV.seats=Array(4).fill(null);const un=DISH.filter(d=>unlocked(d)&&Object.keys(d.need).length<=2&&methodOf(d.id)!=='umu').sort((a,b)=>b.p-a.p).slice(0,8);SV.q=Array.from({length:10},(_,i)=>un[(i*3)%un.length].id)}
   $('svEnd').hidden=true;$('app').classList.add('serve');$('svScene').hidden=$('svShelf').hidden=false;show('sServe');svBuild();svRender();
-  if(banq===2)toast('石焖宴：全岛的人都来了！店员忙着招呼客人，后厨主要靠你',3.4);else if(banq)toast('宴席挑战：店员进不了后厨，全靠你自己！',3.2);else if(broke.length)toast('珍珠不够付工资，'+broke.join('、')+'这场没来',3.2,1);else if(came.length)toast('本场店员：'+came.join('、')+'（工资 '+wage+' ⚪）',3);else toast('客人点什么，就在下面点那道菜开始做',3)}
+  if(banq===3)toast('百日汤宴：雾散了，群岛的人都来了！店员忙着招呼客人，后厨主要靠你',3.4);else if(banq===2)toast('石焖宴：全岛的人都来了！店员忙着招呼客人，后厨主要靠你',3.4);else if(banq)toast('宴席挑战：店员进不了后厨，全靠你自己！',3.2);else if(broke.length)toast('珍珠不够付工资，'+broke.join('、')+'这场没来',3.2,1);else if(came.length)toast('本场店员：'+came.join('、')+'（工资 '+wage+' ⚪）',3);else toast('客人点什么，就在下面点那道菜开始做',3)}
 function svSigNeed(id){const v=SV;return v.seats.filter(x=>x&&x.d===id&&x.sig).length-v.st.filter(x=>x.d===id&&x.hand&&x.ph!=='burn').length-v.shelf.filter(p=>p.d===id&&p.hand).length}
 /* 宴席里地炉一次焖三份，剩下的没人要时，别的地炉菜可以把它腾出来 */
 function svFreeSt(m){const v=SV;return v.st.find(x=>x.k===m&&!x.d)||v.banq&&v.st.find(x=>x.k===m&&x.open&&!v.seats.some(y=>y&&y.d===x.d))}
 function svStart(id,byHand){const v=SV,d=dById(id),m=startKind(id),s=svFreeSt(m);if(!s||svPending(id)<=0||!(v.banq||canMake(d,SAVE.fish)))return;s.hand=byHand&&svSigNeed(id)>0?1:0;
-  if(!v.banq)for(const k in d.need)SAVE.fish[k]-=d.need[k];s.d=id;s.t=0;s.n=0;s.left=s.k==='umu'?3:0;s.open=0;s.ph=m==='cut'||m==='asm'?'work':'cook';s.need=m==='cut'?6:3+Object.values(d.need).reduce((a,b)=>a+b,0);v.dirty=1;SFX.tap();svFx('start',v.st.indexOf(s),d.ic,id)}
-function svPlate(s,q){const v=SV;if(M2[s.d]&&!s.stg){const k2=M2[s.d][1],t2=v.st.find(x=>x.k===k2&&!x.d);if(!t2){if(!v.banq||true)toast(STN[k2][1]+'没空，先腾出来',1.3);return false}t2.d=s.d;t2.ph=k2==='grill'||k2==='pot'?'cook':'work';t2.t=0;t2.n=0;t2.stg=1;t2.q0=q;t2.hand=s.hand;svFx('plate',v.st.indexOf(s),dById(s.d).ic);s.d=null;s.ph='';s.hand=0;v.dirty=1;SFX.tap();return true}if(s.q0&&s.q0!=='ok')q=s.q0;s.stg=0;s.q0=0;if(v.shelf.length>=4){toast('出菜口满了，先把菜端给客人',1.6);return false}
-  if(s.k==='umu'){svFx('plate',v.st.indexOf(s),dById(s.d).ic);v.shelf.push({d:s.d,q,hand:s.hand,age:0});s.left=(s.left||3)-1;s.open=1;v.dirty=1;if(s.left<=0){s.d=null;s.ph='';s.hand=0;s.open=0}return true}
-  svFx('plate',v.st.indexOf(s),dById(s.d).ic);v.shelf.push({d:s.d,q,hand:s.hand,age:0});s.d=null;s.ph='';s.hand=0;v.dirty=1;if(!v.banq&&!SAVE.tipFin){SAVE.tipFin=1;toast('点一下出菜口的菜，给它“点睛”，多卖一成半',3.2)}return true}
+  if(!v.banq)for(const k in d.need)SAVE.fish[k]-=d.need[k];s.aged=0;if(!v.banq&&JARD[id]&&SAVE.aged&&SAVE.aged[JARD[id]]>0){SAVE.aged[JARD[id]]--;s.aged=1}s.d=id;s.t=0;s.n=0;s.left=s.k==='umu'?3:0;s.open=0;s.ph=m==='cut'||m==='asm'?'work':'cook';s.need=m==='cut'?6:3+Object.values(d.need).reduce((a,b)=>a+b,0);v.dirty=1;SFX.tap();svFx('start',v.st.indexOf(s),d.ic,id)}
+function svPlate(s,q){const v=SV;if(M2[s.d]&&!s.stg){const k2=M2[s.d][1],t2=v.st.find(x=>x.k===k2&&!x.d);if(!t2){if(!v.banq||true)toast(STN[k2][1]+'没空，先腾出来',1.3);return false}t2.d=s.d;t2.ph=k2==='grill'||k2==='pot'?'cook':'work';t2.t=0;t2.n=0;t2.stg=1;t2.q0=q;t2.hand=s.hand;t2.aged=s.aged;svFx('plate',v.st.indexOf(s),dById(s.d).ic);s.d=null;s.ph='';s.hand=0;v.dirty=1;SFX.tap();return true}if(s.q0&&s.q0!=='ok')q=s.q0;s.stg=0;s.q0=0;if(v.shelf.length>=4){toast('出菜口满了，先把菜端给客人',1.6);return false}
+  if(s.k==='umu'){svFx('plate',v.st.indexOf(s),dById(s.d).ic);v.shelf.push({d:s.d,q,hand:s.hand,age:0,aged:s.aged});s.left=(s.left||3)-1;s.open=1;v.dirty=1;if(s.left<=0){s.d=null;s.ph='';s.hand=0;s.open=0}return true}
+  svFx('plate',v.st.indexOf(s),dById(s.d).ic);v.shelf.push({d:s.d,q,hand:s.hand,age:0,aged:s.aged});s.d=null;s.ph='';s.hand=0;v.dirty=1;if(!v.banq&&!SAVE.tipFin){SAVE.tipFin=1;toast('点一下出菜口的菜，给它“点睛”，多卖一成半',3.2)}return true}
 function svTapSt(s){const v=SV;if(!s.d)return;
   if(s.k==='cut'||s.k==='asm'){if(s.n<s.need){s.n++;SFX.tap();v.dirty=1;svFx('chop',v.st.indexOf(s))}if(s.n>=s.need)svPlate(s,'ok')}
   else if(s.ph==='cook')toast(s.k==='umu'?'地炉封着，中途不能打开':'还没熟，再等等',1.2);
@@ -2096,7 +2257,7 @@ function svSeatTap(i){const v=SV,s=v.seats[i];if(!s)return;if(v.shelf.some(p=>p.
 function svSeatFor(p){const v=SV,w=v.seats.map((s,i)=>s&&s.d===p.d?i:-1).filter(i=>i>=0);if(!w.length)return -1;const a=w.find(i=>!!v.seats[i].sig===!!p.hand);return a!==undefined?a:w[0]}
 function svServe(i){const v=SV,s=v.seats[i];if(!s)return;const ord=p=>(p.d===s.d?1:0)*((!!p.hand===!!s.sig?4:0)+(p.q==='perfect'?2:0)+1);let j=-1,best=0;v.shelf.forEach((p,k)=>{const o=ord(p);if(o>best){best=o;j=k}});
   if(j<0){toast('这道菜还没做好',1.2);return}const p=v.shelf.splice(j,1)[0],d=dById(s.d),first=!SAVE.dishes[d.id];
-  const salted=v.salt&&SAVE.fish.salt>0;if(salted)SAVE.fish.salt--;const sigOk=s.sig&&p.hand,pay=v.banq?0:Math.round(d.p*(first?1.5:1)*(p.q==='perfect'?1.2:1)*(s.o?1.5:1)*(salted?1.5:1)*(p.fin?(restLv()>=10?1.25:1.15):1)*(sigOk?(restLv()>=13?1.6:1.4):1)*(1+.02*(restLv()-1))),tip=v.banq?0:Math.round(d.p*.3*Math.max(0,s.p)/s.P);
+  const salted=v.salt&&SAVE.fish.salt>0;if(salted)SAVE.fish.salt--;const sigOk=s.sig&&p.hand,pay=v.banq?0:Math.round(d.p*(first?1.5:1)*(p.q==='perfect'?1.2:1)*(s.o?1.5:1)*(salted?1.5:1)*(p.aged?1.5:1)*(p.fin?(restLv()>=10?1.25:1.15):1)*(sigOk?(restLv()>=13?1.6:1.4):1)*(1+.02*(restLv()-1))),tip=v.banq?0:Math.round(d.p*.3*Math.max(0,s.p)/s.P);
   if(p.q==='perfect')SAVE.stat.perfect=(SAVE.stat.perfect||0)+1;SAVE.dishes[d.id]=(SAVE.dishes[d.id]||0)+1;v.earn+=pay;v.tips+=tip;v.rep+=Math.round(d.p/5)+(s.o?15:0)+(sigOk?8:0);v.served++;if(p.fin)v.fins=(v.fins||0)+1;if(sigOk)v.sigs=(v.sigs||0)+1;if(s.o)s.o.done=1;svFx('serve',i,d.ic,pay+tip);svGhost(s,i,1);v.seats[i]=null;v.dirty=1;SFX.pearl(v.served);if(!v.banq&&(first||p.q==='perfect'||sigOk))
   toast([sigOk&&'招牌菜，亲手做的！',p.q==='perfect'&&'火候刚好！',first&&'新菜谱，多得五成！'].filter(Boolean).map(tl).join(/^(zh|ja)$/.test(SAVE.lang)?'':' '),1.4)}
 function svTick(dt){const v=SV;v.t-=dt;{const rd=dt/(SAVE.spd||1);v.gcd=Math.max(0,(v.gcd||0)-rd);for(const p of v.shelf)p.age=(p.age||0)+rd}
@@ -2175,16 +2336,16 @@ function svScene(dt){const v=SV,c=document.getElementById('svCv');if(!c||!c.clie
   for(let i=0;i<n;i++){const sx=Math.round(w*svSeatF(i,n));R(sx-4,gy-1,9,1,'#ffffff');R(sx+6,gy-2,1,2,'#e0503f')}
   const g2=c.getContext('2d');g2.imageSmoothingEnabled=false;g2.clearRect(0,0,w,h);g2.drawImage(pcv,0,0)}
 
-function svEnd(why){const v=SV;v.over=1;if(v.banq===2){const ok=v.served>=9,first=ok&&!SAVE.feast2;if(ok){SAVE.feast2=1;if(v.served>=12)SAVE.stat.feast12=1;if(first)SAVE.wallet+=500}persist();refreshMenu();ok?SFX.win():SFX.lose();
-  $('svEnd').innerHTML=`<h3>${ok?'石焖宴成功！':'石焖宴没办好…'}</h3><div class="stat"><span>上菜</span><span>上了 ${v.served} 道 · 共 12 道（至少 9 道）</span></div>`+(first?'<div class="stat"><span>全岛的谢礼</span><span>+500 ⚪</span></div>':'')+(ok?'<p>奇珍书里多了一项事迹：石焖宴。</p>':'<p>选关页最下面的“石焖宴”可以再开一次。</p>')+'<div class="rowb" style="margin-top:12px"><button class="btn mint" id="svBack">好的</button></div>';$('svEnd').hidden=false;SVE=null;$('svStaff').hidden=true;$('svScene').hidden=$('svShelf').hidden=true;$('svSt').innerHTML=$('svMenu').innerHTML='';return}
-  if(v.banq){if(v.served>=10)SAVE.stat.banq6=1}else SAVE.stat.maxServe=Math.max(SAVE.stat.maxServe||0,v.served);
+function svEnd(why){const v=SV;v.over=1;if(v.banq===2){const f3=v.f3,ok=v.served>=9,first=ok&&!(f3?SAVE.feast3:SAVE.feast2);if(ok){if(f3){SAVE.feast3=1;if(v.served>=12)SAVE.stat.feast3_12=1}else{SAVE.feast2=1;if(v.served>=12)SAVE.stat.feast12=1}if(first)SAVE.wallet+=500}persist();refreshMenu();ok?SFX.win():SFX.lose();
+  $('svEnd').innerHTML=`<h3>${f3?(ok?'百日汤宴成功！':'百日汤宴没办好…'):(ok?'石焖宴成功！':'石焖宴没办好…')}</h3><div class="stat"><span>上菜</span><span>上了 ${v.served} 道 · 共 12 道（至少 9 道）</span></div>`+(first?(f3?'<div class="stat"><span>群岛的谢礼</span><span>+500 ⚪</span></div>':'<div class="stat"><span>全岛的谢礼</span><span>+500 ⚪</span></div>'):'')+(f3?(ok?'<p>奇珍书里多了一项事迹：百日汤宴。</p>':'<p>选关页最下面的“百日汤宴”可以再开一次。</p>'):(ok?'<p>奇珍书里多了一项事迹：石焖宴。</p>':'<p>选关页最下面的“石焖宴”可以再开一次。</p>'))+'<div class="rowb" style="margin-top:12px"><button class="btn mint" id="svBack">好的</button></div>';$('svEnd').hidden=false;SVE=null;$('svStaff').hidden=true;$('svScene').hidden=$('svShelf').hidden=true;$('svSt').innerHTML=$('svMenu').innerHTML='';return}
+  if(v.banq){if(v.served>=10)SAVE.stat.banq6=1}else{SAVE.stat.maxServe=Math.max(SAVE.stat.maxServe||0,v.served);SAVE.svN=(SAVE.svN||0)+1}
   if(v.banq){const ok=v.served>=7;if(ok){SAVE.banq=1;SAVE.wallet+=200}persist();refreshMenu();ok?SFX.win():SFX.lose();$('svEnd').innerHTML=`<h3>${ok?'宴席成功！':'宴席没办好…'}</h3><div class="stat"><span>上菜</span><span>${v.served} / 10 道（至少 7 道）</span></div>`+(ok?'<div class="stat"><span>商会的酬劳</span><span>+200 ⚪</span></div><p>趁宴席散场，可以溜进沉灯之城了。</p>':'<p>再去选关里进一次沉灯之城，就能重办宴席。</p>')+'<div class="rowb" style="margin-top:12px"><button class="btn mint" id="svBack">好的</button></div>';$('svEnd').hidden=false;SVE=null;$('svStaff').hidden=true;$('svScene').hidden=$('svShelf').hidden=true;$('svSt').innerHTML=$('svMenu').innerHTML='';return}SAVE.orders.list.forEach(o=>delete o.in);const tot=v.earn+v.tips;SAVE.wallet+=tot;let bonus=0;
   if(!SAVE.orders.bonus&&SAVE.orders.list.length&&SAVE.orders.list.every(x=>x.done)){SAVE.orders.bonus=1;bonus=50;SAVE.wallet+=50;v.rep+=20}
   SAVE.rep=Math.max(0,SAVE.rep);addRep(Math.max(v.rep,-SAVE.rep));persist();refreshMenu();SFX.win();
   const st=(a,b)=>`<div class="stat"><span>${a}</span><span>${b}</span></div>`;
   $('svEnd').innerHTML=`<h3>${why==='stock'?'食材用完，打烊！':why==='quit'?'提前打烊':'今天辛苦了！'}</h3>`+st('上菜',v.served+' 道')+st('没等到的客人',v.lost+' 位')+st('菜钱','+'+v.earn+' ⚪')+st('小费','+'+v.tips+' ⚪')+(v.wage?st('店员工资','-'+v.wage+' ⚪'):'')+(bonus?st('今日订单全部完成','+50 ⚪'):'')+st('声望',(v.rep>=0?'+':'')+v.rep)+st('本场净收入',(tot+bonus-v.wage)+' ⚪')+'<div class="rowb" style="margin-top:12px"><button class="btn mint" id="svBack">回到小馆</button></div>';
   $('svEnd').hidden=false;SVE=null;$('svStaff').hidden=true;$('svScene').hidden=$('svShelf').hidden=true;$('svSt').innerHTML=$('svMenu').innerHTML=''}
-$('sServe').addEventListener('pointerdown',e=>{const t=e.target;if(t.closest('#svBack')){const bq=SV&&SV.banq;SV=null;$('app').classList.remove('serve');if(bq===2&&SAVE.feast2&&!SAVE.story.v2end){playStory(STORY.v2end,()=>{SAVE.story.v2end=1;persist();showLevels('simple')});return}if(bq)showLevels('simple');else showKitchen();return}if(!SV||SV.over)return;
+$('sServe').addEventListener('pointerdown',e=>{const t=e.target;if(t.closest('#svBack')){const bq=SV&&SV.banq,f3=SV&&SV.f3;SV=null;$('app').classList.remove('serve');if(f3&&SAVE.feast3&&!SAVE.story.v3end){playStory(STORY.v3end,()=>{SAVE.story.v3end=1;persist();showLevels('simple')});return}if(bq===2&&!f3&&SAVE.feast2&&!SAVE.story.v2end){playStory(STORY.v2end,()=>{SAVE.story.v2end=1;persist();showLevels('simple')});return}if(bq)showLevels('simple');else showKitchen();return}if(!SV||SV.over)return;
   if(t.closest('#svQuit')){svEnd('quit');return}if(t.closest('#svSpd')){SAVE.spd=SAVE.spd===1.5?2:SAVE.spd===2?1:1.5;persist();SFX.tap();svBars();return}if(t.closest('#svSalt')){if(!(SAVE.fish.salt>0)){toast('月光盐花用完了，去钟乳洞再采一些',2.2);return}SV.salt=!SV.salt;SFX.tap();svBars();return}let b;
   if((b=t.closest('[data-mk]'))){if(!b.disabled)svStart(b.dataset.mk,1)}else if((b=t.closest('[data-pl]')))svGarnish(+b.dataset.pl);else if((b=t.closest('[data-st]')))svTapSt(SV.st[+b.dataset.st]);else if((b=t.closest('[data-seat]')))svSeatTap(+b.dataset.seat);
   if(SV&&!SV.over&&SV.dirty)svRender()});
@@ -2644,15 +2805,148 @@ d84:['干海带（昆布）、清水',['海带用湿布擦掉表面灰尘，不�
 d85:['泡发的海带、蒜、醋、鱼露、香油',['海带切细丝，开水焯一分钟，过冷水。','蒜末、醋、鱼露、香油调成汁。','和海带丝拌匀，冷藏半小时更入味。']]});
 CTIP.push('雾太大的时候，跟着雾里发光的珍珠游。听到“咕咕”声的地方就是大黄鱼。','退潮的时候，头顶的水面会往下压，别被挤在泥滩和水面之间。','看不见礁石就点右下角的钟，回声会照出前面的礁石。','钟响一声走上面，响两声走下面。雾里看不见潮，只能信钟声。');
 /* 雾海的岸：灰天灰海、黑礁石、晒鱼的竹架；退潮时露出泥滩 */
-function mistShore(t,gy,hy,o){const sky=['#9aa4ac','#d4d8da'];for(let i=0;i<6;i++)R(0,Math.floor(hy*i/6),CW,Math.ceil(hy/6)+1,mixc(sky[0],sky[1],i/5));
+function mistShore(t,gy,hy,o){const sky=o.sun?['#8ec4dc','#e8e2c8']:['#9aa4ac','#d4d8da'];for(let i=0;i<6;i++)R(0,Math.floor(hy*i/6),CW,Math.ceil(hy/6)+1,mixc(sky[0],sky[1],i/5));
   for(const[f,w,h]of[[.08,14,9],[.36,22,13],[.7,18,8],[.92,12,6]]){const x=Math.round(CW*f);for(let j=0;j<h;j++)R(x-Math.round(w*(1-j/h)/2),hy-j,Math.max(1,Math.round(w*(1-j/h))),1,mixc('#5a6068','#b8bec2',.15+.08*(f*4%1)))}
   R(0,hy,CW,gy-hy,'#7a868e');R(0,hy+Math.floor((gy-hy)/2),CW,gy-hy,'#66727a');for(let i=0;i<7;i++){const y=hy+1+(i*5)%Math.max(1,gy-hy-1),x=((i*23+t*(3+i%3))%(CW+8))-4;R(x,y,4,1,'#a8b4ba')}
+  if(o.sun){El(Math.round(CW*.2),Math.round(hy*.35),7,7,'#f4e4a0');El(Math.round(CW*.2),Math.round(hy*.35),5,5,'#fff4c8')}
   if(o.ship){const sx=Math.round(CW*.78);R(sx-12,hy-2,24,3,'#2a2a2e');R(sx-1,hy-14,2,12,'#2a2a2e');for(let j=0;j<10;j++)R(sx+1,hy-13+j,Math.round(8*(1-j/12)),1,'#1a1a1e');R(sx-10,hy-4,4,2,'#d8b04a')}
   if(o.flat){R(0,gy-4,CW,CH2-gy+4,'#5a5044');for(let i=0;i<10;i++){const x=(i*31)%CW,y=gy+2+(i*13)%Math.max(4,CH2-gy-6);El(x,y,5+i%3*2,1,'#8a9298')}R(0,gy-4,CW,1,'#7a6e60');return}
   R(0,gy,CW,CH2-gy,'#4a4640');R(0,gy,CW,1,'#6a6660');for(let i=0;i<14;i++)R((i*37)%CW,gy+3+(i*11)%30,2,1,'#5e5a54');
-  for(const f of[.06,.86]){const x=Math.round(CW*f);for(let k=0;k<3;k++){R(x+k*6,gy-16,1,16,'#8a7a4a')}R(x-2,gy-16,17,1,'#a89a6a');R(x-2,gy-11,17,1,'#a89a6a')}}
+  for(const f of[.06,.86]){const x=Math.round(CW*f);for(let k=0;k<3;k++){R(x+k*6,gy-16,1,16,'#8a7a4a')}R(x-2,gy-16,17,1,'#a89a6a');R(x-2,gy-11,17,1,'#a89a6a')}
+  if(o.sun)for(let i=0;i<6;i++)R((i*47+9)%CW,gy+2+(i*7)%10,4,1,'#8a5a9a');
+  if(o.mill){const mx=Math.round(CW*.5);R(mx-22,gy-26,44,26,'#3a3a40');for(let j=0;j<10;j++)R(mx-24+j,gy-36+j,48-j*2,1,'#2a2a30');R(mx+10,gy-44,6,14,'#2e2e34');for(let k=0;k<3;k++){const ph=(t*.6+k/3)%1;El(mx+13+ph*10,gy-46-ph*22,3+ph*5,2+ph*3,`rgba(230,232,235,${.6*(1-ph)})`)}R(mx-6,gy-14,12,14,'#1c1c20');for(const dx of[-16,12])R(mx+dx,gy-20,5,4,'#d8b04a')}
+  if(o.soup){const cx=Math.round(CW*.5);El(cx,gy-6,16,6,'#2a2624');R(cx-16,gy-12,32,7,'#2a2624');El(cx,gy-12,15,3,'#c89a5a');for(let k=0;k<3;k++){const ph=(t*.8+k/3)%1;El(cx-6+k*6,gy-16-ph*14,2+ph*3,2,`rgba(240,240,240,${.5*(1-ph)})`)}
+    for(const f of[.22,.78]){const x=Math.round(CW*f);R(x-10,gy-22,1,22,'#6a5a3a');R(x+10,gy-22,1,22,'#6a5a3a');R(x-11,gy-22,23,1,'#8a7a4a');for(let k=0;k<4;k++){R(x-8+k*5,gy-21,1,3,'#8a7a4a');R(x-9+k*5,gy-18,3,6,'#b0a090')}}}}
 function mistVeil(t,gy,n){for(let i=0;i<(n>1?9:5);i++){const w=40+i%3*20,x=((i*53+t*(4+i%3))%(CW+w*2))-w,y=Math.round(gy*(.15+.12*(i%7)));El(x,y,w/2,3+i%2,`rgba(225,230,233,${n>1?.5:.32})`)}
   if(n>1){px.fillStyle='rgba(220,226,230,.35)';px.fillRect(0,0,CW,CH2)}}
+/* ---------- 第三卷 第二幕、第三幕：人物、过场场景、剧本、新菜、发酵坛、百日汤 ---------- */
+Object.assign(PEOPLE,{alan:{H:'#d8d8d8',T:'#1e1e26',L:'#1e1e26',D:'#b8885a',hat:'#f2f2f2'},cheng:{H:'#2a2a2a',T:'#4a3a5e',L:'#2a2a34',D:'#e0b890',hat:'#3a3048'},agong:{H:'#f1f1f1',T:'#7a5a3a',L:'#4a3a2a',D:'#c89060'}});
+Object.assign(WHO,{'阿岚':['alan'],'秤叔':['cheng'],'阿公':['agong']});
+Object.assign(SCN,{
+ v3Rock:{bg:'shore',mist:1,fog:1,cast:[['kid',.18,'g'],['asuo',.36,'g'],['alan',.74,'g',1]]},
+ v3Alan:{bg:'shore',mist:1,fog:1,cast:[['kid',.2,'g'],['asuo',.38,'g'],['alan',.72,'w',1]]},
+ v3Strait:{bg:'sea',i:28,fog:1,cast:[['fish',.36,.3]]},
+ v3Bells2:{bg:'shore',mist:1,fog:1,cast:[['kid',.16,'g'],['xiaoman',.34,'g'],['asuo',.56,'g',1],['alan',.8,'w',1]]},
+ v3SBay:{bg:'sea',i:29,fog:1,cast:[['fish',.36,.3]]},
+ v3Mill:{bg:'shore',mist:1,mill:1,fog:1,cast:[['kid',.16,'g'],['xiaofan',.32,'g'],['asuo',.5,'g',1]]},
+ v3MillIn:{bg:'shore',mist:1,mill:1,fog:2,cast:[['kid',.14,'g'],['asuo',.3,'g'],['agong',.58,'g',1],['cheng',.8,'g',1]]},
+ v3Isle2:{bg:'shore',mist:1,fog:2,cast:[['kid',.18,'g'],['asuo',.36,'g'],['xiaofan',.52,'g'],['alan',.78,'g',1]]},
+ v3Whist:{bg:'sea',i:31,fog:2,cast:[['fish',.4,.3]]},
+ v3Flat2:{bg:'shore',mist:1,flat:1,ship:1,fog:1,cast:[['kid',.14,'g'],['haisheng',.3,'g'],['asuo',.48,'g',1],['alan',.66,'g',1]]},
+ v3Mud2:{bg:'sea',i:32,fog:1,cast:[['fish',.36,.3]]},
+ v3Chain2:{bg:'shore',mist:1,ship:1,fog:1,cast:[['kid',.16,'g'],['xiaoman',.34,'g'],['asuo',.54,'g',1]]},
+ v3Chain:{bg:'sea',i:33,fog:1,cast:[['fish',.36,.3]]},
+ v3Deck2:{bg:'shore',mist:1,ship:1,fog:1,cast:[['kid',.18,'w'],['asuo',.42,'w'],['cheng',.7,'w',1]]},
+ v3Heart2:{bg:'shore',deck:1,fog:2,cast:[['xiaofan',.16,'g'],['asuo',.34,'g'],['kid',.5,'g'],['haisheng',.68,'g',1],['alan',.86,'g',1]]},
+ v3Heart:{bg:'sea',i:34,fog:2,cast:[['fish',.4,.3]]},
+ v3Sun:{bg:'shore',mist:1,sun:1,cast:[['kid',.12,'g'],['asuo',.27,'g'],['xiaoman',.42,'g'],['alan',.58,'g',1],['cheng',.74,'g',1],['agong',.88,'g',1]]},
+ v3Soup:{bg:'shore',mist:1,sun:1,soup:1,cast:[['kid',.12,'g'],['xiaoman',.26,'g'],['aqiang',.4,'g'],['alan',.62,'g',1],['asuo',.76,'g',1],['agong',.9,'g',1]]},
+ v3North:{bg:'shore',deck:1,dusk:1,cast:[['kid',.16,'g'],['xiaofan',.34,'g'],['asuo',.54,'g',1],['haisheng',.78,'g',1]]}});
+Object.assign(STORY,{
+ pre28:[['旁白','去雾坊要过漩涡海峡。两座岛中间的海水，一刻不停地打着转。','v3Rock'],['阿蓑','漩涡会把人往里吸。被吸住了别慌，拼命往外蹬。','v3Rock'],
+  ['小鱼','礁石底下贴着的那些是什么？','v3Rock',{em:'?'}],['阿蓑','鲍鱼。以前岛上的海女会潜下去采。现在……只剩一个了。','v3Rock',{em:'…'}],['旁白','漩涡在雾里呼呼地响。','v3Strait']],
+ post28:[['旁白','小鱼抱着鲍鱼浮上来，一抬头，礁石上坐着一个老婆婆。','v3Rock'],['旁白','她穿着黑色的潜水衣，头上包着白头巾，腰上别着一把鲍鱼钩。','v3Rock'],
+  ['阿蓑','是阿岚婆婆！雾海的守潮人，最后一个海女。','v3Rock',{em:'!'}],['小鱼','婆婆好！这鲍鱼是您的吗？','v3Rock'],
+  ['阿岚','……','v3Rock',{em:'…'}],['旁白','阿岚不说话。她盯着小鱼脖子上的吊坠，看了很久很久。','v3Rock'],
+  ['阿岚','（一声长哨）','v3Rock',{snd:'whistle'}],['阿蓑','她不开口，只吹哨。……这一声，是“跟我来”。','v3Rock'],['旁白','阿岚翻身下水，一眨眼就不见了。','v3Alan',{cut:1}]],
+ pre29:[['旁白','阿岚把他们带到一片安静的海湾。水底下，隐约有东西在晃。','v3Bells2'],['小鱼','水底下……挂着钟？','v3Bells2',{em:'?'}],
+  ['阿蓑','沉钟湾。以前岛上每家都有一口雾钟，后来全沉在这里了。','v3Bells2'],['阿蓑','钟还挂在老船梁上，潮水一推就来回摆。钟身会撞人，铁链不会。','v3Bells2'],
+  ['阿珍','我算过了！钟边上长的那些牡蛎，一个能卖——','v3Bells2',{em:'!'}],['旁白','小鱼潜下水。一口大钟慢慢荡过来，嗡——','v3SBay',{snd:'bell'}]],
+ post29:[['小鱼','阿蓑，你看这口钟上刻的花纹。','v3Bells2'],['旁白','钟面上刻着一圈浪花，中间一颗星。和小鱼的吊坠一模一样。','v3Bells2',{shake:1}],
+  ['阿蓑','……这是我阿公铸的。每一口都是。','v3Bells2'],['阿蓑','阿公说，吊坠和雾钟是一个模子出来的。吊坠记着潮的味道，雾钟把它藏起来。','v3Bells2'],
+  ['小鱼','那奶奶的吊坠……也是从这里来的？','v3Bells2',{em:'?'}],['阿蓑','你奶奶？……阿岚婆婆好像认得她。','v3Bells2',{cut:1}]],
+ pre30:[['旁白','雾坊到了。一座黑石头砌的大房子，烟囱里一阵一阵往外喷白雾。','v3Mill'],['阿蓑','雾坊本来是铸钟的地方。现在，商会在里面造雾。','v3Mill'],
+  ['小帆','造雾？雾不是你们岛上自己敲出来的吗？','v3Mill',{em:'?'}],['阿蓑','……以前是。','v3Mill',{em:'…'}],
+  ['阿蓑','喷雾的时候什么都看不见。趁雾没来，先记住前面的路。','v3Mill'],['旁白','小鱼从排水口钻了进去。里面的冷水池里，游着成群的大头鳕。','v3Mill']],
+ post30:[['旁白','雾坊最里面，炉火烧得通红。一个白胡子老人被铁链拴在炉边，正把一枚枚吊坠丢进坩埚。','v3MillIn',{shake:1}],['阿蓑','阿公！','v3MillIn',{em:'!'}],
+  ['阿公','……阿蓑？你怎么来了！快走！','v3MillIn',{em:'!'}],['秤叔','别急着走嘛。来了就是客。','v3MillIn',{cut:1}],
+  ['旁白','一个戴圆帽的瘦高个儿从炉后走出来，手里提着一杆铜秤。','v3MillIn'],['秤叔','我是商会在雾海的管事，大家叫我秤叔。小朋友，你脖子上那枚，称一称就知道了。','v3MillIn'],
+  ['小鱼','你们把吊坠熔了，要做什么？','v3MillIn',{em:'?'}],['秤叔','一把大钥匙，能打开去“源海”的路。……阿蓑，你都长这么高了。','v3MillIn'],
+  ['阿蓑','……你认得我？','v3MillIn',{em:'?'}],['旁白','炉子轰的一声，又喷出一大团雾。等雾散开，秤叔已经不见了。','v3MillIn',{flash:1}]],
+ pre31:[['旁白','逃出雾坊以后，阿岚的哨声把他们引到一座小岛上。整座岛泡在最浓的雾里，伸手看不见五指。','v3Isle2'],['阿蓑','这是哨岛。婆婆在考你。','v3Isle2'],
+  ['小鱼','考我什么？','v3Isle2',{em:'?'}],['阿蓑','考你能不能在雾里听路。哨声从哪边来，你就往哪边游。','v3Isle2'],
+  ['阿蓑','小心回声。雾里的声音会弹来弹去，小的那个是假的。','v3Isle2',{cut:1}],['旁白','雾的深处，传来一声长哨。','v3Whist',{snd:'whistle'}]],
+ post31:[['旁白','最后一声哨响完，阿岚从雾里走出来，摘下白头巾，在小鱼面前坐下。','v3Isle2'],['阿岚','……你听得很准。和她一样。','v3Isle2',{cut:1}],
+  ['阿蓑','婆婆……开口说话了？','v3Isle2',{em:'!'}],['阿岚','雾是我敲出来的。那年商会的船第一次开进来，我敲响了雾钟，把整片群岛藏了起来。','v3Isle2'],
+  ['阿岚','我以为藏起来就安全了。可他们还是找来了。雾没拦住商会，倒把礁石上的紫菜闷死了。','v3Isle2',{em:'…'}],
+  ['小鱼','婆婆，您说的“她”是谁？','v3Isle2',{em:'?'}],['阿岚','阿汐。你奶奶。五十年前，她来雾海学做百日汤。那枚吊坠，是我送她的。','v3Isle2',{cut:1}],
+  ['小鱼','……奶奶来过这里？','v3Isle2',{em:'!'}]],
+ pre32:[['旁白','一年里最大的一次退潮来了。海水一直往外退，退出去好几里。','v3Flat2'],['阿蓑','收珠船在滩那头装货！他们要趁大潮把大钥匙运走！','v3Flat2',{em:'!'}],
+  ['阿岚','（两声短哨）','v3Flat2',{snd:'whistle'}],['阿蓑','婆婆说：水只退不涨，要快。','v3Flat2'],
+  ['小鱼','泥里蹦来蹦去的那些是什么？','v3Flat2',{em:'?'}],['阿蓑','弹涂鱼。退潮了就跳出来晒太阳……虽然这里没有太阳。','v3Flat2'],['旁白','小鱼冲进越来越浅的潮沟。','v3Mud2']],
+ post32:[['旁白','小鱼游到滩头，收珠船已经离岸了。船尾吊着一只大木箱，箱缝里透出金光。','v3Flat2',{shake:1}],['小鱼','追不上了……','v3Flat2',{em:'…'}],
+  ['海生','……别急。船吃水那么深，出不了锚链海。','v3Flat2'],['阿蓑','锚链海？那里停满了商会的船，锚链垂下来像一片林子。','v3Flat2'],['海生','那就钻林子。','v3Flat2',{cut:1}]],
+ pre33:[['旁白','锚链海。几十条收珠船停在雾里，一条条锚链从船底垂下来，一上一下地拉动。','v3Chain2'],['阿珍','我算过了！这么多船，一天收的吊坠能堆成山。','v3Chain2',{em:'!'}],
+  ['阿蓑','锚提上去的时候，从底下钻过去。慢一步就会被砸到。','v3Chain2'],['小鱼','海底那些软软的是什么？','v3Chain2',{em:'?'}],
+  ['阿蓑','海参。锚砸下来，它们也不躲。','v3Chain2'],['旁白','小鱼潜进了锚链之间。','v3Chain']],
+ post33:[['旁白','小鱼摸到大船底下，一条小舢板悄悄划了过来。','v3Deck2'],['秤叔','……别喊。是我。','v3Deck2'],['阿蓑','秤叔！','v3Deck2',{em:'!'}],
+  ['秤叔','我也是雾海人。五十年前，我是第一个从雾里走出去的孩子。那时候我以为，外面什么都好。','v3Deck2',{em:'…'}],
+  ['秤叔','后来我替商会称了一辈子吊坠。称得出有多重，称不出它们原本是谁的。','v3Deck2'],
+  ['旁白','秤叔从怀里掏出半截发光的铜钥匙，塞进阿蓑手里。','v3Deck2',{flash:1}],['秤叔','另一半已经装箱了，我只拿得出这一半。去雾心吧，潮心在那儿。','v3Deck2',{cut:1}]],
+ pre34:[['旁白','雾心，雾最浓的地方。传说潮心就藏在这片海底下。','v3Heart2'],['小帆','什么都看不见……没有星星，钟声也乱。','v3Heart2',{em:'…'}],
+  ['阿蓑','那就让小鱼在水下带路。你在船头听，我来敲钟。','v3Heart2'],['海生','远洋号跟着小鱼游过的路走。小鱼，船比你大，给它留够地方。','v3Heart2'],
+  ['小鱼','交给我！顺路把紫菜也带回来。','v3Heart2'],['阿蓑','紫菜？这里的紫菜早就灰了。','v3Heart2'],['旁白','远洋号的船头灯，跟着水下那条小小的影子，一点一点挪进了雾心。','v3Heart']],
+ post34:[['旁白','雾心的海底，立着一圈巨大的雾钟。钟的中间，一团光一明一暗地跳着。','v3Heart',{flash:1}],['小鱼','潮心……它好暗。','v3Heart',{em:'…'}],
+  ['阿岚','雾把它闷了五十年。','v3Heart2'],['阿岚','雾是我敲起来的，也该由我敲散。……小鱼，你来帮我。','v3Heart2',{cut:1}],
+  ['阿蓑','可是……雾散了，商会就看得见这些岛了。','v3Heart2',{em:'…'}],['小帆','你不是一直想看太阳吗？','v3Heart2'],['阿蓑','……想。','v3Heart2']],
+ pre35:[['旁白','雾心的海底，几口老钟挂在沉船的横梁上，慢慢地摇。','v3Heart'],['阿岚','钟摆到正中间的时候敲，声音才传得最远。一口一口来，雾一层一层散。','v3Heart2'],
+  ['旁白','从雾坊逃出来的阿公也跟来了。','v3Heart2'],['阿公','这些钟，是我年轻时一口一口铸的。今天，让它们最后响一次。','v3Heart2',{cut:1}],
+  ['旁白','阿岚吹了一声长哨。小鱼潜了下去。','v3Heart',{snd:'whistle'}]],
+ post35:[['旁白','最后一口钟响了。雾像被风掀开的帘子，一层一层往两边退。','v3Sun',{flash:1}],['旁白','一缕太阳照在礁石上。灰了五十年的礁石上，冒出了一点紫色。','v3Sun'],
+  ['阿蓑','……这就是太阳。','v3Sun',{cut:1,em:'!'}],['小鱼','紫菜！紫色回来了！','v3Sun',{em:'!'}],
+  ['阿岚','雾散一半就够了。另一半留着，守着这些岛。不用全藏起来，也不用全露出来。','v3Sun'],
+  ['秤叔','……我不回商会了。我留在雾海，帮阿公把沉钟一口一口捞上来。','v3Sun'],['阿珍','我算过了！太阳出来，鱼能晒了，紫菜能长了。今晚——','v3Sun',{em:'!'}],['阿岚','百日汤。','v3Sun',{cut:1}]],
+ feast3:[['旁白','雾湾的晒鱼架上，挂满了阿岚家地窖里存了几十年的鱼鲞和海带。','v3Soup'],['阿岚','百日汤要晒一百天的鱼、一季的海带、一年的鱼露。这些，我都留着。','v3Soup'],
+  ['阿珍','全岛的人都来了！今天店员全上，你们只管做！','v3Soup',{em:'!'}],['阿强','我来跑堂。','v3Soup'],['小鱼','十二位客人，一碗都不能落下。','v3Soup',{cut:1}],
+  ['旁白','百日汤开席！和平时营业一样，但不用花自己的食材。最后一位客人，等的就是那锅百日汤。','v3Soup']],
+ v3end:[['旁白','全岛的人围着一口大锅坐下。小鱼尝了一口百日汤。','v3Soup'],['小鱼','……就是这个。等出来的味道。','v3Soup',{em:'!'}],
+  ['旁白','《潮味谱》的第三页，写上了一个字：鲜。','v3Soup',{cut:1}],['阿岚','阿汐当年学会了这锅汤，说要带回去给家里人尝。……她做到了。','v3Soup'],
+  ['阿岚','大钥匙的另一半，被运往北方了。北边的冰底下，封着一艘很老的船。船上有和阿汐一样的记号。','v3North'],
+  ['阿蓑','我跟你们去。那半把钥匙是我阿公的手艺，我要把它找回来。','v3North',{cut:1}],['小帆','北边有星星吗？','v3North',{em:'?'}],
+  ['阿蓑','不知道。不过有我在，听也听得出来。','v3North'],['旁白','远洋号调转船头，往北开去。下一站：北境冰原。','v3North'],['旁白','（第三卷 完）','v3North']]});
+GAL.push(['pre28','第五章 漩涡海峡 · 开场'],['post28','第五章 漩涡海峡 · 结尾'],['pre29','第六章 沉钟湾 · 开场'],['post29','第六章 沉钟湾 · 结尾'],['pre30','第七章 雾坊 · 开场'],['post30','第七章 雾坊 · 结尾'],
+ ['pre31','第八章 哨岛 · 开场'],['post31','第八章 哨岛 · 结尾'],['pre32','第九章 大潮滩 · 开场'],['post32','第九章 大潮滩 · 结尾'],['pre33','第十章 锚链海 · 开场'],['post33','第十章 锚链海 · 结尾'],
+ ['pre34','第十一章 雾心 · 开场'],['post34','第十一章 雾心 · 结尾'],['pre35','第十二章 散雾 · 开场'],['post35','第十二章 散雾 · 结尾'],['feast3','百日汤 · 开席'],['v3end','第三卷 · 尾声']);
+function startFeast3(){G=null;state='menu';hud.hidden=true;$('toast').className='';playStory(SAVE.story.feast3?seenLines('feast3'):STORY.feast3,()=>{SAVE.story.feast3=1;persist();startServe(3)})}
+/* ---------- 第三卷第二幕、第三幕的新菜 ---------- */
+DISH.push({id:'d86',ic:'🥣',n:'鲍鱼粥',need:{abalone:1},p:66},{id:'d87',ic:'🍲',n:'红烧干鲍',need:{abalone:1},p:74},
+ {id:'d88',ic:'🍳',n:'牡蛎煎',need:{oyster:1},p:60},{id:'d89',ic:'🥘',n:'蚝豉焖萝卜',need:{oyster:1},p:64},
+ {id:'d90',ic:'🐟',n:'红烧大头鳕',need:{cod3:1},p:64},{id:'d91',ic:'🐠',n:'风干鳕鱼',need:{cod3:1},p:70},
+ {id:'d92',ic:'🍢',n:'香煎弹涂鱼',need:{mudskip:1},p:58},{id:'d93',ic:'🍲',n:'弹涂鱼炖豆腐',need:{mudskip:1},p:62},
+ {id:'d94',ic:'🥢',n:'葱烧海参',need:{seacuc:1},p:80},{id:'d95',ic:'🥣',n:'海参小米粥',need:{seacuc:1},p:74},
+ {id:'d96',ic:'🍜',n:'紫菜蛋花汤',need:{laver:1},p:52},{id:'d97',ic:'🍙',n:'烤紫菜',need:{laver:1},p:50},
+ {id:'d98',ic:'🍵',n:'百日汤',need:{croaker:1,kelp:1,laver:1},p:150});
+Object.assign(UNL,{d86:[29,5],d87:[29,5],d88:[30,5],d89:[30,5],d90:[31,6],d91:[31,6],d92:[33,6],d93:[33,6],d94:[34,6],d95:[34,6],d96:[35,6],d97:[35,6],d98:[36,6]});
+METHOD.grill.push('d88','d91','d92','d97');METHOD.pot.push('d86','d87','d89','d90','d93','d94','d95','d96','d98');
+Object.assign(RCP,{
+d86:['鲍鱼两只、大米、姜丝、鱼露、葱花',['鲍鱼刷干净，取肉切薄片。','大米加十倍的水，小火熬成粥。','放鲍鱼片和姜丝煮三分钟，滴几滴鱼露，撒葱花。'],'鲍鱼片下锅时间短一点才嫩。'],
+d87:['干鲍鱼、鸡汤、蚝油、冰糖',['干鲍鱼用冷水泡两三天，每天换水，泡到发软。','加鸡汤小火慢炖几个小时，炖到用筷子能扎进去。','加一点蚝油和冰糖收汁。'],'干鲍是把鲜鲍鱼煮过再晒干的，鲜味比鲜鲍浓得多，泡发要耐心。'],
+d88:['牡蛎（海蛎子）、鸡蛋、红薯淀粉、葱、鱼露',['牡蛎用淡盐水洗干净，沥干。','红薯淀粉加水调成糊，放牡蛎和葱花拌匀。','平底锅油烧热，倒进去煎到底面金黄，打一个蛋铺在上面，翻面再煎一会儿。'],'闽南和台湾叫“蚵仔煎”。牡蛎一定要新鲜、煎熟。'],
+d89:['蚝豉（晒干的牡蛎）、白萝卜、姜、鱼露',['蚝豉用温水泡一个小时，洗掉沙子。','萝卜切块，和蚝豉、姜片一起下锅，加水没过。','小火焖四十分钟，滴一点鱼露调味。'],'广东沿海把牡蛎晒干叫“蚝豉”，过年常做这道菜，取“好事”的意思。'],
+d90:['鳕鱼块、姜、葱、酱油、少许糖',['鳕鱼块擦干，煎到两面金黄。','加姜片、葱段，倒酱油和少许糖，加半碗水。','小火烧十分钟，大火收汁。'],'大头鳕就是太平洋鳕鱼，肉白、刺少。'],
+d91:['风干鳕鱼（挪威叫“stockfish”）、土豆、黄油',['风干鳕鱼要先用冷水泡三到五天，每天换水。','泡软后切块，和土豆一起煮二十分钟。','淋上化开的黄油吃。'],'挪威北部和法罗群岛把鳕鱼挂在户外木架上，靠冷风吹干一整个冬天，能放好几年。'],
+d92:['弹涂鱼、盐、姜、油',['弹涂鱼洗净，用少许盐腌十分钟。','平底锅放油，小火把鱼两面煎到焦香。','撒姜丝出锅。'],'弹涂鱼生活在滩涂上，会用胸鳍在泥上爬，还能跳。'],
+d93:['弹涂鱼、豆腐、姜、葱、鱼露',['弹涂鱼洗净，稍微煎一下。','加开水和姜片煮到汤发白。','放豆腐块煮十分钟，滴鱼露，撒葱花。'],'浙江、福建沿海的家常做法，汤很鲜。'],
+d94:['泡发的海参、大葱、酱油、蚝油、糖',['海参切段，开水焯一下。','大葱切段，小火炸到金黄，捞出葱留下葱油。','葱油里放海参、酱油、蚝油、少许糖和水，烧十分钟，勾薄芡。'],'干海参要泡好几天才能发开，是北方的名菜。'],
+d95:['泡发的海参、小米、姜',['小米洗净，加水小火熬成粥。','海参切小丁，和姜丝一起放进粥里。','再煮五分钟就好。']],
+d96:['紫菜、鸡蛋、虾皮、葱花、鱼露',['水烧开，放紫菜和虾皮。','鸡蛋打散，转着圈倒进锅里，别急着搅。','滴几滴鱼露，撒葱花。'],'紫菜本来就是紫色的，泡水后会变绿。'],
+d97:['干紫菜片、香油、盐',['紫菜片刷一层薄薄的香油，撒一点盐。','小火在平底锅上两面各烤几秒，烤到发脆、变绿。','剪成小片吃，或者包饭团。'],'韩国和日本都爱吃烤紫菜。'],
+d98:['晒干的鱼、昆布（海带）、鱼露、清水',['昆布用湿布擦一擦，冷水泡一晚。','小火加热，快开时取出昆布，放晒干的鱼片，煮十分钟后过滤。','最后加一点鱼露调味。'],'“百日汤”是游戏里的名字。真实的做法参考日本用昆布和鲣节熬的高汤，鲜味来自晒干、发酵的食材。',1]});
+CTIP.push('被漩涡卷住了就快速连点屏幕，挣出来。','沉钟的钟身会撞人，吊钟的铁链不会。','雾坊喷雾前会闪警告，趁雾没来先记住前面的路。','哨声从哪边来就点哪边，声音小、波纹淡的是假回声。',
+ '大潮滩的水只退不涨，越往后能游的地方越窄。','锚链提上去的时候从底下钻过去。','雾心里，远洋号跟着你游过的路走，别让它擦到礁石。','雾钟要等摆到正中间再敲。','发酵坛里的食材，下一次营业结束后就酿好了。');
+/* ---------- 发酵坛：营业前把雾海的食材放进坛子，下一次营业结束后酿好；用酿好的食材做晒干、发酵的菜，卖价 ×1.5 ---------- */
+const JARK=['croaker','razor','kelp','abalone','oyster','cod3','mudskip','seacuc','laver'],JARD={d80:'croaker',d83:'razor',d84:'kelp',d87:'abalone',d89:'oyster',d91:'cod3',d94:'seacuc',d97:'laver'};
+const jarOpen=()=>!!SAVE.story.post28;
+function jarRender(){const c=$('jarCard');if(!c)return;if(!jarOpen()){c.hidden=true;return}c.hidden=false;SAVE.jar=SAVE.jar||[null,null,null];SAVE.aged=SAVE.aged||{};const n=SAVE.svN||0;
+  const slot=(s,i)=>!s?`<span class="jS">空</span>`:n>s.s?`<button class="btn sm sun" data-jout="${i}">取出 ${FISH[s.k].n}</button>`:`<span class="jS">${FISH[s.k].n} · 酿着</span>`;
+  const can=SAVE.jar.includes(null)?JARK.filter(k=>(SAVE.fish[k]||0)>0):[],ag=Object.keys(SAVE.aged).filter(k=>SAVE.aged[k]>0);
+  c.innerHTML=`<h4 style="margin:0 0 6px">🏺 发酵坛</h4><p style="color:#8a7a5a;margin:0 0 8px;font-size:14px">放进坛子的食材，下一次营业结束后就酿好了。用酿好的食材做晒干、发酵的菜，卖价 ×1.5</p><div class="jRow">${SAVE.jar.map(slot).join('')}</div>`+
+   (can.length?`<p style="color:#8a7a5a;margin:8px 0 4px;font-size:14px">放进坛子：</p><div class="jRow">${can.map(k=>`<button class="btn sm" data-jin="${k}">${FISH[k].n} ×${SAVE.fish[k]}</button>`).join('')}</div>`:'')+
+   (ag.length?`<p style="color:#8a7a5a;margin:8px 0 0;font-size:14px">${'酿好的：'+ag.map(k=>FISH[k].n+'×'+SAVE.aged[k]).join('、')}</p>`:'')}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-jin],[data-jout]');if(!b||!$('jarCard')||!$('jarCard').contains(b))return;SAVE.jar=SAVE.jar||[null,null,null];SAVE.aged=SAVE.aged||{};
+  if(b.dataset.jin){const k=b.dataset.jin,i=SAVE.jar.indexOf(null);if(i<0||!(SAVE.fish[k]>0))return;SAVE.fish[k]--;SAVE.jar[i]={k,s:SAVE.svN||0};SFX.tap();toast(FISH[k].n+'放进发酵坛了，下一次营业结束后就酿好',2.4)}
+  else{const i=+b.dataset.jout,s=SAVE.jar[i];if(!s)return;SAVE.jar[i]=null;SAVE.fish[s.k]=(SAVE.fish[s.k]||0)+1;SAVE.aged[s.k]=(SAVE.aged[s.k]||0)+1;SFX.win();toast(FISH[s.k].n+'酿好了！做'+DISH.filter(d=>JARD[d.id]===s.k).map(d=>d.n).join('、')+'时会自动用上',3)}
+  persist();refreshMenu();showKitchen()});
 /* ---------- 奇珍书 (collection book) ---------- */
 SAVE.dex=SAVE.dex||{};for(const k in SAVE.fish)if(SAVE.fish[k]>0&&!SAVE.dex[k])SAVE.dex[k]=SAVE.fish[k];
 for(const d of DISH)if(SAVE.dishes[d.id])for(const k in d.need)if(!SAVE.dex[k])SAVE.dex[k]=1;
@@ -2824,6 +3118,32 @@ V3C.push({id:'p_asuo',cat:'who',n:'阿蓑',r:3,tag:'故事里的人物',got:()=>
  .forEach((d,j)=>{const i=VOL2+j;V3C.push({id:'s_'+i,cat:'sea',n:LV[i].name,r:1+Math.floor(j/2),tag:'第三卷第 '+(j+1)+' 章的海域',d,got:()=>cleared(i),clue:'通关这片海域',art:emoPix(['🌫️','🐚','🔔','🌊'][j]),vol:3})});
 for(const c of DEX)if(['d80','d81','d82','d83','d84','d85'].includes(c.id))c.vol=3;
 V3C.forEach(c=>DEX.push(c));
+/* ---------- 第三卷第五到十二章的奇珍书卡片 ---------- */
+Object.assign(PIX,{
+ abalone(x,y){El(x,y,10,6,'#7a8a6a');El(x,y-1,8,4,'#a8b898');for(let i=0;i<4;i++)R(x-6+i*4,y-3,1,1,'#4a5a3a');El(x+2,y,4,2,'#e8f0e0')},
+ oyster(x,y){El(x,y,10,6,'#a8a090');for(let i=0;i<4;i++)R(x-8+i*4,y-4+i%2,4,1,'#6a6458');El(x+1,y+1,5,3,'#f4f0e8')},
+ cod3(x,y){El(x+2,y,11,5,'#a89a7a');El(x-5,y,6,6,'#a89a7a');El(x+3,y+2,8,2,'#f0ece0');R(x-13+21,y-3,3,7,'#5a4e3a');R(x-7,y-2,1,1,'#1b2a41');R(x-9,y+4,1,3,'#5a4e3a')},
+ mudskip(x,y){El(x,y,9,3,'#8a7a5a');El(x-6,y-3,3,3,'#8a7a5a');R(x-7,y-6,2,2,'#1b2a41');R(x-4,y-6,2,2,'#1b2a41');R(x-3,y-4,6,2,'#4a3e2a');R(x+8,y-2,3,5,'#4a3e2a')},
+ seacuc(x,y){El(x,y,11,4,'#5a4a3e');for(let i=0;i<6;i++)R(x-9+i*3,y-4,1,1,'#8a7a6a');R(x-12,y-1,2,2,'#2e2420')},
+ laver(x,y){for(let i=-2;i<=2;i++)for(let j=0;j<10;j++)R(x+i*3+Math.round(Math.sin(j*.7+i)*2),y+5-j,3,1,j%3?'#7a4a9a':'#a87ac8')}});
+const V3C2=[
+ ic('abalone',3,'漩涡海峡',[1,3,1],'只有一边壳的贝，用一只大脚牢牢吸在礁石上，壳边有一排小孔用来呼吸。海女潜下去，用小铁片一撬就下来。',1),
+ ic('oyster',2,'沉钟湾',[1,3,1],'粘在礁石和沉船上一层一层地长，壳像一块粗糙的石头。它整天过滤海水吃小东西，一只一天能滤上百升水。',1),
+ ic('cod3',2,'雾坊',[2,2,2],'头特别大的鳕鱼，喜欢冷水。肉雪白，一片片地散开。北方的渔民把它晒成鱼干，能放上好几年。',1),
+ ic('mudskip',2,'大潮滩',[1,2,3],'能离开水在泥滩上跳的小鱼，用胸鳍撑着走路，眼睛长在头顶上。退潮时满滩都是，一靠近就钻回洞里。',1),
+ ic('seacuc',3,'锚链海',[1,2,1],'趴在海底慢慢爬，吃泥沙里的碎屑。遇到危险会把内脏吐出来吓退敌人，过一阵又能长回来。',1),
+ ic('laver',2,'雾心',[1,1,1],'长在潮间带礁石上的紫红色海藻，薄得像纸。晒干压成一张张，就是包饭团、煮汤用的紫菜。',1)];
+V3C2.forEach(c=>{c.ref=0;c.vol=3});
+Object.assign(V3C2[0],{how:'去漩涡海峡，在漩涡旁边的礁石上找'});Object.assign(V3C2[1],{how:'去沉钟湾，避开摆动的沉钟'});Object.assign(V3C2[2],{cat:'fish',how:'去雾坊，趁喷雾停下时找'});
+Object.assign(V3C2[3],{cat:'fish',how:'去大潮滩，等它跳出泥洞再点'});Object.assign(V3C2[4],{how:'去锚链海，在海底找'});Object.assign(V3C2[5],{how:'去雾心，在上面的礁石边找'});
+V3C2.push({id:'p_alan',cat:'who',n:'阿岚',r:4,tag:'故事里的人物',got:()=>SAVE.story.pre28,d:'守着哨岛的老海女，一口气能潜很久，用哨声和同伴说话。年轻时认识小鱼的奶奶阿汐。',art:manPix('alan'),clue:'随着故事出场',vol:3},
+ {id:'p_cheng',cat:'who',n:'秤叔',r:3,tag:'故事里的人物',got:()=>SAVE.story.pre30,d:'商会派到雾坊的管事，随身带一杆秤，什么都要称一称。嘴上算账，心里一直记着不该熔的东西。',art:manPix('cheng'),clue:'随着故事出场',vol:3},
+ {id:'f_feast3',cat:'feat',n:'百日汤宴',r:4,tag:'事迹',got:()=>SAVE.feast3,clue:'办成百日汤宴',d:'雾散了一半，群岛的人第一次在太阳底下一起喝汤。（办成百日汤宴）',art:emoPix('🍲'),vol:3},
+ {id:'f_feast3_12',cat:'feat',n:'一碗不少',r:5,tag:'事迹',got:()=>SAVE.stat.feast3_12,clue:'百日汤宴十二道全上',d:'十二位客人，十二道菜，最后一碗百日汤也端上了桌。（百日汤宴十二道全上）',art:emoPix('🥣'),vol:3});
+['两股海流在这里打架，水面上一个接一个的漩涡。','海底沉着很多旧钟，涨潮时还会被水推着摆。','岛上的作坊日夜烧火，一阵阵往外喷白雾。','海女住的小岛，四面八方都能听到哨声。','一年最大的退潮，水退下去就不回来了，满滩都是泥。','沉船的锚链还挂在水里，被潮水拉得一上一下。','雾最开始的地方，连船都要跟着鱼走。','雾钟挂在群岛正中间，敲响它，雾就散了。']
+ .forEach((d,j)=>{const i=VOL2+4+j;V3C2.push({id:'s_'+i,cat:'sea',n:LV[i].name,r:2+Math.floor(j/3),tag:'第三卷第 '+(j+5)+' 章的海域',d,got:()=>cleared(i),clue:'通关这片海域',art:emoPix(['🌀','🔔','🏭','📯','🏝️','⚓','🌫️','🛎️'][j]),vol:3})});
+for(const c of DEX)if(+String(c.id).slice(1)>=86&&+String(c.id).slice(1)<=98&&String(c.id)[0]==='d')c.vol=3;
+V3C2.forEach(c=>DEX.push(c));
 /* ---------- developer mode ---------- */
 let devMode='simple',devTap=0,devT=0;
 /* App 版不提供开发者模式 */
@@ -3503,6 +3823,187 @@ for(const k in TLC)delete TLC[k];
 RULES.push([/^第三卷第 (\d+) 章的海域$/,m=>`Volume 3 · sea of chapter ${m[1]}`],[/^(❤*) · 还差 (\d+) 个岔口$/,m=>`${m[1]} · ${m[2]} forks to go`],
  [/^第一卷 · 已收录 (\d+) 张 · 第二卷 (\d+) 张 · 第三卷 (\d+) 张(?: · 隐藏卡 (\d+) 张)?$/,m=>`Volume 1 · ${m[1]} cards · Volume 2 · ${m[2]} cards · Volume 3 · ${m[3]} cards`+(m[4]?` · ${m[4]} hidden`:'')]);
 for(let i=RULES.length-3;i<RULES.length;i++){const r=RULES[i];while(r.length<5)r.push(r[1])}
+for(const k in TLC)delete TLC[k];
+/* ---------- 第三卷第二幕、第三幕：英文（其他语言回落到英文） ---------- */
+{const EN={"漩涡海峡":"Whirlpool Strait","沉钟湾":"Sunken Bell Bay","雾坊":"Mist Mill","哨岛":"Whistle Isle","大潮滩":"Great Ebb Flats","锚链海":"Anchor Chain Sea","雾心":"Mist Heart","散雾":"Clearing the Mist",
+"鲍鱼":"Abalone","牡蛎":"Oyster","大头鳕":"Pacific cod","弹涂鱼":"Mudskipper","海参":"Sea cucumber","紫菜":"Laver",
+"阿岚":"A-Lan","秤叔":"Uncle Cheng","阿公":"Grandpa","阿强":"A-Qiang",
+"听哨声从哪边来，就往哪边游":"Swim toward wherever the whistle comes from","等钟摆到正中间再敲，把雾一层层敲散":"Ring each bell when it swings to the middle and clear the mist layer by layer",
+"等弹涂鱼跳出泥洞再点":"Wait for the mudskipper to hop out of its hole, then tap",
+"阿岚躲在雾里吹哨。哨声从哪边来，就点哪边。后面会有假回声：声音小、波纹淡的那个是假的":"A-Lan is hiding in the mist, whistling. Tap the side the whistle comes from. Later there will be fake echoes: the quieter one with faint ripples is fake",
+"水下几口雾钟在来回摇。等一口钟摆到正中间再点它，敲响一口就散一点雾。一共五层雾":"Mist bells are swinging under the water. Tap a bell when it swings to the middle. Each bell you ring clears a little mist. There are five layers of mist",
+"前面是漩涡！离它远一点。被卷进去就快速连点屏幕挣出来":"Whirlpool ahead! Keep away from it. If it pulls you in, tap the screen fast to break free",
+"沉钟会来回摆。钟身会撞人，吊钟的铁链不会":"The sunken bells swing back and forth. The bell itself hits you, but the chain it hangs from doesn't",
+"锚链一上一下地拉动。等锚提上去，从下面钻过去":"The anchor chains move up and down. Wait for the anchor to lift, then slip underneath",
+"雾坊会一阵阵喷雾，喷雾时什么都看不见。趁雾没来，先记住前面的路":"The Mist Mill puffs out mist now and then, and you can't see anything while it does. Remember the way ahead before the mist comes",
+"一年最大的退潮！水面会一直往下降，不会再涨回来。趁水还没干，游到头":"The biggest ebb of the year! The water keeps dropping and won't come back. Reach the end before it dries up",
+"远洋号跟在你后面，沿着你游过的路走。船比你大，别让它擦到礁石":"The Ocean Star follows behind you along the path you swim. It's bigger than you, so don't let it scrape the rocks",
+"被漩涡卷住了！快速连点屏幕！":"Caught in the whirlpool! Tap the screen fast!","被漩涡卷住了！连点挣出来！":"Caught in the whirlpool! Tap to break free!","漩涡把你甩了出来，下次点快一点！":"The whirlpool spat you out. Tap faster next time!",
+"船擦到礁石了！":"The ship scraped a rock!","水还在退":"The water is still dropping","快到头了！":"Almost there!","雾坊要喷雾了！":"The Mist Mill is about to puff!",
+"阿岚收起了哨子。雾里，她第一次开口说话":"A-Lan put her whistle away. In the mist, she spoke for the first time","钻过了一层雾！":"Through a layer of mist!","那是假回声！":"That was a fake echo!","哨声不是从那边来的":"The whistle didn't come from that way",
+"有回声！点声音大、波纹深的那一边":"An echo! Tap the side with the louder sound and stronger ripples","哨声从哪边来，就点哪边":"Tap the side the whistle comes from","听……":"Listen...",
+"海面白茫茫一片，什么都看不见。":"The sea is all white. You can't see a thing.","雾里传来一声长哨。":"A long whistle sounds in the mist.","哨声从哪边来，就点屏幕的哪一边":"Tap the side of the screen the whistle comes from","后面会有假回声：声音小、波纹淡":"Later come fake echoes: quieter, with faint ripples",
+"雾散开了一半……第一缕太阳照在礁石上":"Half the mist lifted... the first ray of sun lit the rocks","散了一层雾！":"A layer of mist cleared!","还没摆到正中间":"Not in the middle yet","等钟摆到正中间（金色记号）再点":"Tap when a bell swings to the middle (gold mark)",
+"雾心的水底下，挂着几口很老的钟。":"Deep under the Mist Heart hang some very old bells.","阿岚游到你身边，比了一个“敲”的手势。":"A-Lan swims up beside you and mimes ringing a bell.","钟摆到正中间的时候点它":"Tap a bell when it swings to the middle","一层的钟全敲响，雾就散一层":"Ring every bell in a layer to clear that layer of mist",
+"去雾坊要过漩涡海峡。两座岛中间的海水，一刻不停地打着转。":"To reach the Mist Mill they had to cross Whirlpool Strait. Between two islands, the sea never stopped spinning.",
+"漩涡会把人往里吸。被吸住了别慌，拼命往外蹬。":"The whirlpools pull you in. If one grabs you, don't panic. Kick out as hard as you can.",
+"礁石底下贴着的那些是什么？":"What are those things stuck under the rocks?","鲍鱼。以前岛上的海女会潜下去采。现在……只剩一个了。":"Abalone. The island's sea divers used to dive for them. Now... there's only one left.",
+"漩涡在雾里呼呼地响。":"The whirlpools roared in the mist.",
+"小鱼抱着鲍鱼浮上来，一抬头，礁石上坐着一个老婆婆。":"Xiaoyu surfaced holding an abalone, looked up, and saw an old woman sitting on the rocks.",
+"她穿着黑色的潜水衣，头上包着白头巾，腰上别着一把鲍鱼钩。":"She wore a black diving suit and a white headscarf, with an abalone hook at her waist.",
+"是阿岚婆婆！雾海的守潮人，最后一个海女。":"It's Granny A-Lan! Keeper of the tides in the Mist Sea, and the last sea diver.",
+"婆婆好！这鲍鱼是您的吗？":"Hello, Granny! Is this abalone yours?","阿岚不说话。她盯着小鱼脖子上的吊坠，看了很久很久。":"A-Lan said nothing. She stared at the pendant around Xiaoyu's neck for a long, long time.",
+"（一声长哨）":"(one long whistle)","她不开口，只吹哨。……这一声，是“跟我来”。":"She doesn't talk, she only whistles. ...That one means \"follow me.\"","阿岚翻身下水，一眨眼就不见了。":"A-Lan rolled into the water and was gone in a blink.",
+"阿岚把他们带到一片安静的海湾。水底下，隐约有东西在晃。":"A-Lan led them to a quiet bay. Something was swaying faintly under the water.",
+"水底下……挂着钟？":"Are those... bells hanging under the water?","沉钟湾。以前岛上每家都有一口雾钟，后来全沉在这里了。":"Sunken Bell Bay. Every family on the islands used to have a mist bell. Later they all sank here.",
+"钟还挂在老船梁上，潮水一推就来回摆。钟身会撞人，铁链不会。":"The bells still hang from old ship beams and swing whenever the tide pushes them. The bell hits you, the chain doesn't.",
+"我算过了！钟边上长的那些牡蛎，一个能卖——":"I did the math! Those oysters growing by the bells, each one sells for—",
+"小鱼潜下水。一口大钟慢慢荡过来，嗡——":"Xiaoyu dove in. A big bell swung slowly closer. Bwong—",
+"阿蓑，你看这口钟上刻的花纹。":"Asuo, look at the pattern carved on this bell.","钟面上刻着一圈浪花，中间一颗星。和小鱼的吊坠一模一样。":"A ring of waves with a star in the middle was carved on the bell. Exactly like Xiaoyu's pendant.",
+"……这是我阿公铸的。每一口都是。":"...My grandpa cast this. He cast every one of them.","阿公说，吊坠和雾钟是一个模子出来的。吊坠记着潮的味道，雾钟把它藏起来。":"Grandpa says the pendants and the mist bells come from the same mold. The pendants remember the taste of the tide, and the mist bells hide it.",
+"那奶奶的吊坠……也是从这里来的？":"Then Grandma's pendant... came from here too?","你奶奶？……阿岚婆婆好像认得她。":"Your grandma? ...Granny A-Lan seemed to know her.",
+"雾坊到了。一座黑石头砌的大房子，烟囱里一阵一阵往外喷白雾。":"They reached the Mist Mill: a big house of black stone, its chimney puffing out white mist.",
+"雾坊本来是铸钟的地方。现在，商会在里面造雾。":"The Mist Mill used to be where bells were cast. Now the Guild makes mist in there.",
+"造雾？雾不是你们岛上自己敲出来的吗？":"Makes mist? Isn't the mist something your islands ring up yourselves?","……以前是。":"...It used to be.",
+"喷雾的时候什么都看不见。趁雾没来，先记住前面的路。":"You can't see anything when it puffs. Remember the way ahead before the mist comes.",
+"小鱼从排水口钻了进去。里面的冷水池里，游着成群的大头鳕。":"Xiaoyu slipped in through the drain. In the cold pools inside swam schools of Pacific cod.",
+"雾坊最里面，炉火烧得通红。一个白胡子老人被铁链拴在炉边，正把一枚枚吊坠丢进坩埚。":"Deep inside the Mist Mill, the furnace glowed red. An old man with a white beard, chained beside it, was dropping pendants one by one into a crucible.",
+"阿公！":"Grandpa!","……阿蓑？你怎么来了！快走！":"...Asuo? What are you doing here? Run!","别急着走嘛。来了就是客。":"No need to rush off. You're our guest now.",
+"一个戴圆帽的瘦高个儿从炉后走出来，手里提着一杆铜秤。":"A tall, thin man in a round hat stepped out from behind the furnace, holding a brass scale.",
+"我是商会在雾海的管事，大家叫我秤叔。小朋友，你脖子上那枚，称一称就知道了。":"I run the Guild's business in the Mist Sea. Everyone calls me Uncle Cheng. Little one, the one around your neck... I'd know it the moment I weighed it.",
+"你们把吊坠熔了，要做什么？":"What are you melting the pendants down for?","一把大钥匙，能打开去“源海”的路。……阿蓑，你都长这么高了。":"A great key that opens the way to the \"Source Sea\". ...Asuo, look how tall you've grown.",
+"……你认得我？":"...You know me?","炉子轰的一声，又喷出一大团雾。等雾散开，秤叔已经不见了。":"The furnace roared and puffed out another huge cloud of mist. When it cleared, Uncle Cheng was gone.",
+"逃出雾坊以后，阿岚的哨声把他们引到一座小岛上。整座岛泡在最浓的雾里，伸手看不见五指。":"After escaping the Mist Mill, A-Lan's whistle led them to a small island. It was soaked in the thickest mist. You couldn't see your own hand.",
+"这是哨岛。婆婆在考你。":"This is Whistle Isle. Granny is testing you.","考我什么？":"Testing me on what?","考你能不能在雾里听路。哨声从哪边来，你就往哪边游。":"Whether you can hear your way through the mist. Swim toward wherever the whistle comes from.",
+"小心回声。雾里的声音会弹来弹去，小的那个是假的。":"Watch out for echoes. Sounds bounce around in the mist. The quiet one is fake.","雾的深处，传来一声长哨。":"From deep in the mist came a long whistle.",
+"最后一声哨响完，阿岚从雾里走出来，摘下白头巾，在小鱼面前坐下。":"After the last whistle, A-Lan walked out of the mist, took off her white headscarf, and sat down in front of Xiaoyu.",
+"……你听得很准。和她一样。":"...You listen well. Just like her.","婆婆……开口说话了？":"Granny... you're talking?",
+"雾是我敲出来的。那年商会的船第一次开进来，我敲响了雾钟，把整片群岛藏了起来。":"I rang up the mist. The year the Guild's ships first sailed in, I rang the mist bells and hid all the islands.",
+"我以为藏起来就安全了。可他们还是找来了。雾没拦住商会，倒把礁石上的紫菜闷死了。":"I thought hiding would keep us safe. But they found us anyway. The mist didn't stop the Guild. It smothered the laver on the rocks instead.",
+"婆婆，您说的“她”是谁？":"Granny, who's \"her\"?","阿汐。你奶奶。五十年前，她来雾海学做百日汤。那枚吊坠，是我送她的。":"A-Xi. Your grandma. Fifty years ago she came to the Mist Sea to learn Hundred-Day Soup. I gave her that pendant.",
+"……奶奶来过这里？":"...Grandma was here?",
+"一年里最大的一次退潮来了。海水一直往外退，退出去好几里。":"The biggest ebb of the year arrived. The sea kept pulling back, miles out.",
+"收珠船在滩那头装货！他们要趁大潮把大钥匙运走！":"The pearl ship is loading at the far end of the flats! They want to carry off the great key during the big tide!",
+"（两声短哨）":"(two short whistles)","婆婆说：水只退不涨，要快。":"Granny says the water only goes out, it won't come back. Hurry.",
+"泥里蹦来蹦去的那些是什么？":"What are those things hopping around in the mud?","弹涂鱼。退潮了就跳出来晒太阳……虽然这里没有太阳。":"Mudskippers. At low tide they hop out to sunbathe... even though there's no sun here.",
+"小鱼冲进越来越浅的潮沟。":"Xiaoyu dashed into the shrinking tide channel.",
+"小鱼游到滩头，收珠船已经离岸了。船尾吊着一只大木箱，箱缝里透出金光。":"By the time Xiaoyu reached the end of the flats, the pearl ship had already left shore. A big wooden crate hung off the stern, gold light leaking through its cracks.",
+"追不上了……":"We can't catch it...","……别急。船吃水那么深，出不了锚链海。":"...Easy. A ship riding that low can't get out of the Anchor Chain Sea.",
+"锚链海？那里停满了商会的船，锚链垂下来像一片林子。":"The Anchor Chain Sea? It's packed with Guild ships. Their anchor chains hang down like a forest.","那就钻林子。":"Then we go through the forest.",
+"锚链海。几十条收珠船停在雾里，一条条锚链从船底垂下来，一上一下地拉动。":"The Anchor Chain Sea. Dozens of pearl ships sat in the mist, their anchor chains hanging below and moving up and down.",
+"我算过了！这么多船，一天收的吊坠能堆成山。":"I did the math! With this many ships, the pendants they collect in a day would make a mountain.",
+"锚提上去的时候，从底下钻过去。慢一步就会被砸到。":"Slip underneath when the anchor lifts. One beat late and it'll smash you.",
+"海底那些软软的是什么？":"What are those squishy things on the seabed?","海参。锚砸下来，它们也不躲。":"Sea cucumbers. Even when an anchor slams down, they don't move.","小鱼潜进了锚链之间。":"Xiaoyu dove in among the anchor chains.",
+"小鱼摸到大船底下，一条小舢板悄悄划了过来。":"Xiaoyu crept under the big ship. A small rowboat slid quietly over.","……别喊。是我。":"...Don't shout. It's me.","秤叔！":"Uncle Cheng!",
+"我也是雾海人。五十年前，我是第一个从雾里走出去的孩子。那时候我以为，外面什么都好。":"I'm from the Mist Sea too. Fifty years ago I was the first child to walk out of the mist. Back then I thought everything outside was better.",
+"后来我替商会称了一辈子吊坠。称得出有多重，称不出它们原本是谁的。":"Then I spent my whole life weighing pendants for the Guild. I could tell how heavy they were, but never whose they had been.",
+"秤叔从怀里掏出半截发光的铜钥匙，塞进阿蓑手里。":"Uncle Cheng pulled half of a glowing brass key from his coat and pressed it into Asuo's hand.",
+"另一半已经装箱了，我只拿得出这一半。去雾心吧，潮心在那儿。":"The other half is already crated. This half is all I could get. Go to the Mist Heart. The Tide Heart is there.",
+"雾心，雾最浓的地方。传说潮心就藏在这片海底下。":"The Mist Heart, where the mist is thickest. Legend says the Tide Heart is hidden under this sea.",
+"什么都看不见……没有星星，钟声也乱。":"I can't see anything... no stars, and the bells sound all jumbled.","那就让小鱼在水下带路。你在船头听，我来敲钟。":"Then let Xiaoyu lead from under the water. You listen at the bow, and I'll ring the bell.",
+"远洋号跟着小鱼游过的路走。小鱼，船比你大，给它留够地方。":"The Ocean Star will follow Xiaoyu's path. Xiaoyu, the ship's bigger than you, so leave it enough room.",
+"交给我！顺路把紫菜也带回来。":"Leave it to me! I'll bring back some laver on the way.","紫菜？这里的紫菜早就灰了。":"Laver? The laver here went gray long ago.",
+"远洋号的船头灯，跟着水下那条小小的影子，一点一点挪进了雾心。":"The Ocean Star's bow lamp followed the little shadow under the water, inching its way into the Mist Heart.",
+"雾心的海底，立着一圈巨大的雾钟。钟的中间，一团光一明一暗地跳着。":"On the floor of the Mist Heart stood a ring of giant mist bells. In the middle, a ball of light flickered on and off.",
+"潮心……它好暗。":"The Tide Heart... it's so dim.","雾把它闷了五十年。":"The mist has smothered it for fifty years.","雾是我敲起来的，也该由我敲散。……小鱼，你来帮我。":"I rang up the mist, so I should be the one to ring it away. ...Xiaoyu, help me.",
+"可是……雾散了，商会就看得见这些岛了。":"But... if the mist lifts, the Guild will be able to see the islands.","你不是一直想看太阳吗？":"Haven't you always wanted to see the sun?","……想。":"...I have.",
+"雾心的海底，几口老钟挂在沉船的横梁上，慢慢地摇。":"On the floor of the Mist Heart, old bells hung from the beams of sunken ships, slowly swaying.",
+"钟摆到正中间的时候敲，声音才传得最远。一口一口来，雾一层一层散。":"Ring a bell when it swings to the middle and the sound carries farthest. One bell at a time, one layer of mist at a time.",
+"从雾坊逃出来的阿公也跟来了。":"Grandpa, free from the Mist Mill, had come along too.","这些钟，是我年轻时一口一口铸的。今天，让它们最后响一次。":"I cast these bells one by one when I was young. Today, let them ring one last time.",
+"阿岚吹了一声长哨。小鱼潜了下去。":"A-Lan blew a long whistle. Xiaoyu dove down.",
+"最后一口钟响了。雾像被风掀开的帘子，一层一层往两边退。":"The last bell rang. The mist parted like a curtain in the wind, layer after layer.",
+"一缕太阳照在礁石上。灰了五十年的礁石上，冒出了一点紫色。":"A ray of sun fell on the rocks. On rocks that had been gray for fifty years, a little purple appeared.",
+"……这就是太阳。":"...So this is the sun.","紫菜！紫色回来了！":"Laver! The purple is back!",
+"雾散一半就够了。另一半留着，守着这些岛。不用全藏起来，也不用全露出来。":"Half the mist gone is enough. The other half stays to guard the islands. We don't need to hide completely, or show everything either.",
+"……我不回商会了。我留在雾海，帮阿公把沉钟一口一口捞上来。":"...I'm not going back to the Guild. I'll stay in the Mist Sea and help Grandpa raise the sunken bells, one by one.",
+"我算过了！太阳出来，鱼能晒了，紫菜能长了。今晚——":"I did the math! With the sun out, we can dry fish and the laver can grow. Tonight—","百日汤。":"Hundred-Day Soup.",
+"雾湾的晒鱼架上，挂满了阿岚家地窖里存了几十年的鱼鲞和海带。":"The drying racks in Mist Bay were hung full of dried fish and kelp that A-Lan's family had kept in their cellar for decades.",
+"百日汤要晒一百天的鱼、一季的海带、一年的鱼露。这些，我都留着。":"Hundred-Day Soup takes fish dried for a hundred days, kelp from a whole season, and a year's fish sauce. I kept all of it.",
+"全岛的人都来了！今天店员全上，你们只管做！":"The whole island is here! The whole crew is on today. You just cook!","我来跑堂。":"I'll wait the tables.","十二位客人，一碗都不能落下。":"Twelve guests. Not a single bowl can be missed.",
+"百日汤开席！和平时营业一样，但不用花自己的食材。最后一位客人，等的就是那锅百日汤。":"The Hundred-Day Soup feast begins! It works like a normal service, but you don't use your own ingredients. The last guest is waiting for the pot of Hundred-Day Soup.",
+"全岛的人围着一口大锅坐下。小鱼尝了一口百日汤。":"The whole island sat around one big pot. Xiaoyu tasted the Hundred-Day Soup.","……就是这个。等出来的味道。":"...This is it. A flavor you have to wait for.",
+"《潮味谱》的第三页，写上了一个字：鲜。":"On the third page of the Tide Recipe Book, one word was written: savory.",
+"阿汐当年学会了这锅汤，说要带回去给家里人尝。……她做到了。":"A-Xi learned this soup back then and said she'd take it home for her family to taste. ...She did.",
+"大钥匙的另一半，被运往北方了。北边的冰底下，封着一艘很老的船。船上有和阿汐一样的记号。":"The other half of the great key was shipped north. Under the northern ice lies a very old ship, sealed in. It bears the same mark as A-Xi's.",
+"我跟你们去。那半把钥匙是我阿公的手艺，我要把它找回来。":"I'm coming with you. That half key is my grandpa's work. I'm going to get it back.","北边有星星吗？":"Are there stars up north?","不知道。不过有我在，听也听得出来。":"No idea. But with me there, we can hear our way.",
+"远洋号调转船头，往北开去。下一站：北境冰原。":"The Ocean Star turned its bow and sailed north. Next stop: the Northern Ice Fields.","（第三卷 完）":"(End of Volume 3)",
+"第五章 漩涡海峡 · 开场":"Ch. 5 Whirlpool Strait · Opening","第五章 漩涡海峡 · 结尾":"Ch. 5 Whirlpool Strait · Ending","第六章 沉钟湾 · 开场":"Ch. 6 Sunken Bell Bay · Opening","第六章 沉钟湾 · 结尾":"Ch. 6 Sunken Bell Bay · Ending",
+"第七章 雾坊 · 开场":"Ch. 7 Mist Mill · Opening","第七章 雾坊 · 结尾":"Ch. 7 Mist Mill · Ending","第八章 哨岛 · 开场":"Ch. 8 Whistle Isle · Opening","第八章 哨岛 · 结尾":"Ch. 8 Whistle Isle · Ending",
+"第九章 大潮滩 · 开场":"Ch. 9 Great Ebb Flats · Opening","第九章 大潮滩 · 结尾":"Ch. 9 Great Ebb Flats · Ending","第十章 锚链海 · 开场":"Ch. 10 Anchor Chain Sea · Opening","第十章 锚链海 · 结尾":"Ch. 10 Anchor Chain Sea · Ending",
+"第十一章 雾心 · 开场":"Ch. 11 Mist Heart · Opening","第十一章 雾心 · 结尾":"Ch. 11 Mist Heart · Ending","第十二章 散雾 · 开场":"Ch. 12 Clearing the Mist · Opening","第十二章 散雾 · 结尾":"Ch. 12 Clearing the Mist · Ending",
+"百日汤 · 开席":"Hundred-Day Soup · Opening","第三卷 · 尾声":"Volume 3 · Epilogue",
+"鲍鱼粥":"Abalone congee","红烧干鲍":"Braised dried abalone","牡蛎煎":"Oyster omelet","蚝豉焖萝卜":"Dried oysters braised with radish","红烧大头鳕":"Braised Pacific cod","风干鳕鱼":"Stockfish",
+"香煎弹涂鱼":"Pan-fried mudskipper","弹涂鱼炖豆腐":"Mudskipper and tofu stew","葱烧海参":"Scallion-braised sea cucumber","海参小米粥":"Sea cucumber millet porridge","紫菜蛋花汤":"Laver and egg drop soup","烤紫菜":"Toasted laver","百日汤":"Hundred-Day Soup",
+"鲍鱼两只、大米、姜丝、鱼露、葱花":"2 abalone, rice, shredded ginger, fish sauce, chopped scallion","鲍鱼刷干净，取肉切薄片。":"Scrub the abalone clean, take out the meat, and slice it thin.","大米加十倍的水，小火熬成粥。":"Simmer the rice in ten times as much water until it turns to congee.",
+"放鲍鱼片和姜丝煮三分钟，滴几滴鱼露，撒葱花。":"Add the abalone and ginger and cook three minutes. Add a few drops of fish sauce and sprinkle scallion.","鲍鱼片下锅时间短一点才嫩。":"Keep the abalone's cooking time short so it stays tender.",
+"干鲍鱼、鸡汤、蚝油、冰糖":"Dried abalone, chicken stock, oyster sauce, rock sugar","干鲍鱼用冷水泡两三天，每天换水，泡到发软。":"Soak the dried abalone in cold water for two or three days, changing the water daily, until soft.",
+"加鸡汤小火慢炖几个小时，炖到用筷子能扎进去。":"Simmer in chicken stock for a few hours, until a chopstick slides in.","加一点蚝油和冰糖收汁。":"Add a little oyster sauce and rock sugar and reduce the sauce.",
+"干鲍是把鲜鲍鱼煮过再晒干的，鲜味比鲜鲍浓得多，泡发要耐心。":"Dried abalone is fresh abalone that's been cooked and sun-dried. Its flavor is much richer than fresh. Soaking it takes patience.",
+"牡蛎（海蛎子）、鸡蛋、红薯淀粉、葱、鱼露":"Oysters, egg, sweet potato starch, scallion, fish sauce","牡蛎用淡盐水洗干净，沥干。":"Rinse the oysters in light salt water and drain.","红薯淀粉加水调成糊，放牡蛎和葱花拌匀。":"Mix the starch with water into a batter and stir in the oysters and scallion.",
+"平底锅油烧热，倒进去煎到底面金黄，打一个蛋铺在上面，翻面再煎一会儿。":"Heat oil in a pan, pour it in and fry until golden underneath. Crack an egg over the top, flip, and fry a little longer.",
+"闽南和台湾叫“蚵仔煎”。牡蛎一定要新鲜、煎熟。":"In southern Fujian and Taiwan it's called \"o-a-jian\". The oysters must be fresh and fully cooked.",
+"蚝豉（晒干的牡蛎）、白萝卜、姜、鱼露":"Dried oysters, white radish, ginger, fish sauce","蚝豉用温水泡一个小时，洗掉沙子。":"Soak the dried oysters in warm water for an hour and rinse off the sand.","萝卜切块，和蚝豉、姜片一起下锅，加水没过。":"Cut the radish into chunks and put it in a pot with the oysters and ginger. Cover with water.",
+"小火焖四十分钟，滴一点鱼露调味。":"Braise on low heat for forty minutes and season with a little fish sauce.","广东沿海把牡蛎晒干叫“蚝豉”，过年常做这道菜，取“好事”的意思。":"On the Guangdong coast dried oysters are called \"ho si\", which sounds like \"good things\", so this dish is popular at New Year.",
+"鳕鱼块、姜、葱、酱油、少许糖":"Cod pieces, ginger, scallion, soy sauce, a little sugar","鳕鱼块擦干，煎到两面金黄。":"Pat the cod dry and fry until golden on both sides.","加姜片、葱段，倒酱油和少许糖，加半碗水。":"Add ginger and scallion, soy sauce, a little sugar, and half a bowl of water.",
+"小火烧十分钟，大火收汁。":"Simmer ten minutes, then reduce on high heat.","大头鳕就是太平洋鳕鱼，肉白、刺少。":"Pacific cod has white meat and few bones.",
+"风干鳕鱼（挪威叫“stockfish”）、土豆、黄油":"Stockfish (air-dried cod), potatoes, butter","风干鳕鱼要先用冷水泡三到五天，每天换水。":"Soak the stockfish in cold water for three to five days, changing the water daily.","泡软后切块，和土豆一起煮二十分钟。":"Once soft, cut into pieces and boil with potatoes for twenty minutes.",
+"淋上化开的黄油吃。":"Serve with melted butter poured over.","挪威北部和法罗群岛把鳕鱼挂在户外木架上，靠冷风吹干一整个冬天，能放好几年。":"In northern Norway and the Faroe Islands, cod is hung on outdoor racks and dried by cold wind all winter. It keeps for years.",
+"弹涂鱼、盐、姜、油":"Mudskippers, salt, ginger, oil","弹涂鱼洗净，用少许盐腌十分钟。":"Clean the mudskippers and salt them lightly for ten minutes.","平底锅放油，小火把鱼两面煎到焦香。":"Fry them in oil over low heat until crisp on both sides.","撒姜丝出锅。":"Sprinkle with shredded ginger and serve.",
+"弹涂鱼生活在滩涂上，会用胸鳍在泥上爬，还能跳。":"Mudskippers live on mudflats. They crawl on the mud with their fins and can even jump.",
+"弹涂鱼、豆腐、姜、葱、鱼露":"Mudskippers, tofu, ginger, scallion, fish sauce","弹涂鱼洗净，稍微煎一下。":"Clean the mudskippers and fry them briefly.","加开水和姜片煮到汤发白。":"Add boiling water and ginger and cook until the broth turns white.","放豆腐块煮十分钟，滴鱼露，撒葱花。":"Add tofu and cook ten minutes. Add fish sauce and scallion.",
+"浙江、福建沿海的家常做法，汤很鲜。":"A home-style dish from the Zhejiang and Fujian coast. The broth is very savory.",
+"泡发的海参、大葱、酱油、蚝油、糖":"Soaked sea cucumber, leek-style scallion, soy sauce, oyster sauce, sugar","海参切段，开水焯一下。":"Cut the sea cucumber into pieces and blanch in boiling water.","大葱切段，小火炸到金黄，捞出葱留下葱油。":"Fry scallion pieces on low heat until golden, then lift them out and keep the oil.",
+"葱油里放海参、酱油、蚝油、少许糖和水，烧十分钟，勾薄芡。":"Cook the sea cucumber in the scallion oil with soy sauce, oyster sauce, a little sugar and water for ten minutes, then thicken lightly.","干海参要泡好几天才能发开，是北方的名菜。":"Dried sea cucumber takes several days to soak. This is a famous northern Chinese dish.",
+"泡发的海参、小米、姜":"Soaked sea cucumber, millet, ginger","小米洗净，加水小火熬成粥。":"Rinse the millet and simmer it in water into porridge.","海参切小丁，和姜丝一起放进粥里。":"Dice the sea cucumber and add it to the porridge with shredded ginger.","再煮五分钟就好。":"Cook five more minutes and it's done.",
+"紫菜、鸡蛋、虾皮、葱花、鱼露":"Laver, egg, dried baby shrimp, scallion, fish sauce","水烧开，放紫菜和虾皮。":"Bring water to a boil and add the laver and shrimp.","鸡蛋打散，转着圈倒进锅里，别急着搅。":"Beat the egg and pour it in a circle. Don't stir right away.","滴几滴鱼露，撒葱花。":"Add a few drops of fish sauce and sprinkle scallion.",
+"紫菜本来就是紫色的，泡水后会变绿。":"Laver is naturally purple and turns green in water.",
+"干紫菜片、香油、盐":"Dried laver sheets, sesame oil, salt","紫菜片刷一层薄薄的香油，撒一点盐。":"Brush the laver with a thin layer of sesame oil and sprinkle a little salt.","小火在平底锅上两面各烤几秒，烤到发脆、变绿。":"Toast each side for a few seconds in a pan on low heat until crisp and green.",
+"剪成小片吃，或者包饭团。":"Cut into small pieces to snack on, or wrap rice balls.","韩国和日本都爱吃烤紫菜。":"Toasted laver is a favorite in Korea and Japan.",
+"晒干的鱼、昆布（海带）、鱼露、清水":"Dried fish, kombu (kelp), fish sauce, water","昆布用湿布擦一擦，冷水泡一晚。":"Wipe the kombu with a damp cloth and soak it in cold water overnight.","小火加热，快开时取出昆布，放晒干的鱼片，煮十分钟后过滤。":"Heat slowly. Take out the kombu just before it boils, add the dried fish flakes, cook ten minutes, then strain.",
+"最后加一点鱼露调味。":"Season with a little fish sauce at the end.","“百日汤”是游戏里的名字。真实的做法参考日本用昆布和鲣节熬的高汤，鲜味来自晒干、发酵的食材。":"\"Hundred-Day Soup\" is the game's name. The real method is based on Japanese dashi made from kombu and dried bonito. The savory flavor comes from dried and fermented ingredients.",
+"被漩涡卷住了就快速连点屏幕，挣出来。":"If a whirlpool catches you, tap the screen fast to break free.","沉钟的钟身会撞人，吊钟的铁链不会。":"A sunken bell hits you, but its chain doesn't.","雾坊喷雾前会闪警告，趁雾没来先记住前面的路。":"The Mist Mill flashes a warning before it puffs. Remember the way ahead before the mist comes.",
+"哨声从哪边来就点哪边，声音小、波纹淡的是假回声。":"Tap the side the whistle comes from. The quieter one with faint ripples is a fake echo.","大潮滩的水只退不涨，越往后能游的地方越窄。":"On the Great Ebb Flats the water only drops, so the space to swim keeps shrinking.",
+"锚链提上去的时候从底下钻过去。":"Slip under an anchor chain when it lifts.","雾心里，远洋号跟着你游过的路走，别让它擦到礁石。":"In the Mist Heart, the Ocean Star follows your path. Don't let it scrape the rocks.","雾钟要等摆到正中间再敲。":"Ring a mist bell only when it swings to the middle.",
+"发酵坛里的食材，下一次营业结束后就酿好了。":"Ingredients in the fermenting jar are ready after the next service.",
+"发酵坛":"Fermenting jar","🏺 发酵坛":"🏺 Fermenting jar","空":"Empty","放进坛子：":"Put in the jar:",
+"放进坛子的食材，下一次营业结束后就酿好了。用酿好的食材做晒干、发酵的菜，卖价 ×1.5":"Ingredients you put in the jar are ready after the next service. Dried and fermented dishes made with aged ingredients sell for ×1.5",
+"只有一边壳的贝，用一只大脚牢牢吸在礁石上，壳边有一排小孔用来呼吸。海女潜下去，用小铁片一撬就下来。":"A shellfish with only one shell. It clings to rocks with one big foot and breathes through a row of little holes along the edge. Sea divers pry it off with a small iron blade.",
+"粘在礁石和沉船上一层一层地长，壳像一块粗糙的石头。它整天过滤海水吃小东西，一只一天能滤上百升水。":"It grows in layers on rocks and shipwrecks, with a shell like a rough stone. It filters seawater all day for tiny food. One oyster can filter over a hundred liters a day.",
+"头特别大的鳕鱼，喜欢冷水。肉雪白，一片片地散开。北方的渔民把它晒成鱼干，能放上好几年。":"A cod with an extra-big head that loves cold water. Its meat is snow white and flakes apart. Northern fishers dry it, and it keeps for years.",
+"能离开水在泥滩上跳的小鱼，用胸鳍撑着走路，眼睛长在头顶上。退潮时满滩都是，一靠近就钻回洞里。":"A little fish that can leave the water and hop on mudflats. It walks on its fins and has eyes on top of its head. At low tide they cover the flats and dive into their holes when you get close.",
+"趴在海底慢慢爬，吃泥沙里的碎屑。遇到危险会把内脏吐出来吓退敌人，过一阵又能长回来。":"It crawls slowly along the seabed eating scraps in the sand. When in danger it spits out its insides to scare enemies off, and grows them back later.",
+"长在潮间带礁石上的紫红色海藻，薄得像纸。晒干压成一张张，就是包饭团、煮汤用的紫菜。":"A purple-red seaweed that grows on rocks between the tides, thin as paper. Dried and pressed into sheets, it's the laver used for rice balls and soup.",
+"去漩涡海峡，在漩涡旁边的礁石上找":"Look on the rocks beside the whirlpools in Whirlpool Strait","去沉钟湾，避开摆动的沉钟":"Go to Sunken Bell Bay and dodge the swinging bells","去雾坊，趁喷雾停下时找":"Look in the Mist Mill while the mist has stopped",
+"去大潮滩，等它跳出泥洞再点":"Go to Great Ebb Flats and tap once it hops out of its hole","去锚链海，在海底找":"Look on the seabed in the Anchor Chain Sea","去雾心，在上面的礁石边找":"Look by the upper rocks in the Mist Heart",
+"守着哨岛的老海女，一口气能潜很久，用哨声和同伴说话。年轻时认识小鱼的奶奶阿汐。":"An old sea diver who guards Whistle Isle. She can dive for ages on one breath and talks to her friends by whistling. When she was young she knew Xiaoyu's grandma, A-Xi.",
+"商会派到雾坊的管事，随身带一杆秤，什么都要称一称。嘴上算账，心里一直记着不该熔的东西。":"The Guild's manager at the Mist Mill. He carries a scale and weighs everything. He talks about money, but he never forgot the things that shouldn't be melted.",
+"百日汤宴":"Hundred-Day Soup feast","办成百日汤宴":"Hold the Hundred-Day Soup feast","雾散了一半，群岛的人第一次在太阳底下一起喝汤。（办成百日汤宴）":"Half the mist lifted, and the islanders shared soup under the sun for the first time. (Hold the Hundred-Day Soup feast)",
+"一碗不少":"Not a bowl missed","百日汤宴十二道全上":"Serve all twelve at the Hundred-Day Soup feast","十二位客人，十二道菜，最后一碗百日汤也端上了桌。（百日汤宴十二道全上）":"Twelve guests, twelve dishes, and the last bowl of Hundred-Day Soup made it to the table. (Serve all twelve at the Hundred-Day Soup feast)",
+"两股海流在这里打架，水面上一个接一个的漩涡。":"Two currents fight here, spinning up whirlpool after whirlpool.","海底沉着很多旧钟，涨潮时还会被水推着摆。":"Many old bells lie on the seabed, and the rising tide still sets them swinging.",
+"岛上的作坊日夜烧火，一阵阵往外喷白雾。":"The island's mill burns day and night, puffing out white mist.","海女住的小岛，四面八方都能听到哨声。":"The little island where the sea diver lives. Whistles come from every direction.",
+"一年最大的退潮，水退下去就不回来了，满滩都是泥。":"The biggest ebb of the year. Once the water goes out it doesn't come back, leaving nothing but mud.","沉船的锚链还挂在水里，被潮水拉得一上一下。":"Anchor chains from sunken ships still hang in the water, pulled up and down by the tide.",
+"雾最开始的地方，连船都要跟着鱼走。":"Where the mist begins. Even the ship has to follow the fish.","雾钟挂在群岛正中间，敲响它，雾就散了。":"The mist bells hang in the very middle of the islands. Ring them and the mist lifts.",
+"百日汤宴：雾散了，群岛的人都来了！店员忙着招呼客人，后厨主要靠你":"Hundred-Day Soup feast: the mist has lifted and all the islanders are here! The crew is busy with guests, so the kitchen is mostly up to you",
+"百日汤宴成功！":"Hundred-Day Soup feast success!","百日汤宴没办好…":"The Hundred-Day Soup feast didn't go well...","群岛的谢礼":"Thanks from the islands","奇珍书里多了一项事迹：百日汤宴。":"A new feat in the Book of Wonders: Hundred-Day Soup Feast.",
+"选关页最下面的“百日汤宴”可以再开一次。":"Open \"Hundred-Day Soup feast\" at the bottom of the level map to hold it again.","🍲 特别关 百日汤宴":"🍲 Bonus: Hundred-Day Soup Feast","雾散了，群岛的人都在等着开席":"The mist has lifted, and the islanders are waiting for the feast",
+"先通关第三卷普通模式的全部关卡，才能挑战第三卷的困难模式":"Clear every Volume 3 level in Normal mode to unlock Volume 3 Hard mode",
+"阿岚吹哨":"A-Lan whistles","哨声":"Whistle",
+"雾海礁石":"Mist Sea rocks","坐在黑礁石上，雾里有冷水的鱼":"Sit on the black rocks. Cold-water fish swim in the mist","黑鲪":"Black rockfish","六线鱼":"Greenling",
+"躲在雾海的礁石缝里，夜里最爱咬钩，咬住就往石缝钻":"Hides in rock cracks in the Mist Sea. Bites most at night and dives for the cracks once hooked",
+"身上有好几条侧线，清晨在海带丛边慢慢游":"Has several lateral lines along its body. Swims slowly by the kelp in the early morning",
+"清蒸黑鲪":"Steamed black rockfish","六线鱼海带汤":"Greenling and kelp soup","黑鲪一条、姜、葱、蒸鱼豉油":"1 black rockfish, ginger, scallion, seasoned soy sauce for fish",
+"鱼去鳞去内脏，两面划几刀，铺姜片。":"Scale and gut the fish, score both sides, and lay ginger slices on top.","水开后大火蒸八分钟。":"Steam on high heat for eight minutes once the water boils.","倒掉蒸出的水，铺葱丝，淋热油和豉油。":"Pour off the liquid, add shredded scallion, and drizzle with hot oil and soy sauce.",
+"黑鲪又叫许氏平鲉，生活在中国北方、日本和韩国的冷水礁石边，背鳍的硬刺有点扎手。":"The black rockfish lives by cold-water rocks in northern China, Japan and Korea. Watch out for the sharp spines on its back fin.",
+"六线鱼一条、海带、豆腐、姜、盐":"1 greenling, kelp, tofu, ginger, salt","鱼切块，用姜片煎一下。":"Cut the fish into pieces and fry briefly with ginger.","加开水和海带，小火煮二十分钟。":"Add boiling water and kelp and simmer twenty minutes.","放豆腐，加盐调味。":"Add tofu and season with salt.",
+"六线鱼是北方礁石边的常见鱼，日本叫“鮎並”，肉嫩，做汤很鲜。":"Greenling is common around northern rocks. In Japan it's called ainame. Its meat is tender and makes a savory soup."};
+ for(const k in EN)if(!DICT[k]){const v=EN[k];DICT[k]=[v,v,v,v]}}
+{const n0=RULES.length,fl=s=>s.split('、').map(x=>tl(x)).join(', ');
+RULES.push([/^哨声 (\d+) \/ (\d+)$/,m=>`Whistle ${m[1]} / ${m[2]}`],[/^第 (\d+) \/ (\d+) 层雾 · (\d+) 口钟$/,m=>`Mist ${m[1]} / ${m[2]} · ${m[3]} bells`],
+ [/^(.+)放进发酵坛了，下一次营业结束后就酿好$/,m=>`${tl(m[1])} is in the jar. It'll be ready after the next service`],
+ [/^(.+)酿好了！做(.+)时会自动用上$/,m=>`${tl(m[1])} is ready! It'll be used automatically for ${fl(m[2])}`],
+ [/^取出 (.+)$/,m=>`Take out ${tl(m[1])}`],[/^(.+) · 酿着$/,m=>`${tl(m[1])} · aging`],[/^酿好的：(.+)$/,m=>'Aged: '+m[1].split('、').map(x=>{const q=x.match(/^(.+)×(\d+)$/);return q?tl(q[1])+' ×'+q[2]:tl(x)}).join(', ')],
+ [/^([㐀-鿿]+) ×(\d+)$/,m=>`${tl(m[1])} ×${m[2]}`]);
+for(let i=n0;i<RULES.length;i++){const r=RULES[i];while(r.length<5)r.push(r[1])}}
 for(const k in TLC)delete TLC[k];
 /* ---------- music (synthesised) ---------- */
 const TRK={
@@ -4246,8 +4747,8 @@ function wmFishTick(){cancelAnimationFrame(wmFr);const fc=$('lvGrid').querySelec
 function renderMap(mode,vol,hi,sv,base,still){
   cancelAnimationFrame(wmRaf);
   const box=$('lvGrid'),land=matchMedia('(orientation:landscape)').matches,key=mode+vol;
-  const ids=LV.map((L,i)=>i).filter(i=>volOf(i)===vol),feast=vol===2&&!hi&&cleared(VOL1+11),n=ids.length+(feast?1:0);
-  const open=k=>k>=ids.length||ids[k]===0||hi&&ids[k]===VOL1||sv.st[ids[k]-1]>0,done=k=>k<ids.length?sv.st[ids[k]]>0:!!SAVE.feast2,lit=k=>k<ids.length?cleared(ids[k]):done(k);
+  const ids=LV.map((L,i)=>i).filter(i=>volOf(i)===vol),feast=!hi&&(vol===2&&cleared(VOL1+11)||vol===3&&cleared(VOL2+11)),n=ids.length+(feast?1:0);
+  const open=k=>k>=ids.length||ids[k]===0||hi&&(ids[k]===VOL1||ids[k]===VOL2)||sv.st[ids[k]-1]>0,done=k=>k<ids.length?sv.st[ids[k]]>0:!!(vol===3?SAVE.feast3:SAVE.feast2),lit=k=>k<ids.length?cleared(ids[k]):done(k);
   let front=0;for(let k=0;k<ids.length;k++)if(open(k))front=k;
   SAVE.mapAt=SAVE.mapAt||{};const was=SAVE.mapAt[key],walk=!still&&was!==undefined&&was<front?was:-1;
   if(was!==front){SAVE.mapAt[key]=front;persist()}
@@ -4302,7 +4803,7 @@ function renderMap(mode,vol,hi,sv,base,still){
     +`<text x="${f1(Q[0][0])}" y="${f1(Q[0][1])}" font-size="32" text-anchor="middle" dominant-baseline="central">${vol===2?'⛵':'🏠'}</text></svg>`;
   let nodes='';
   for(let k=0;k<n;k++){const [x,y]=Q[k+1],o=open(k),dn=done(k),fz=k<ids.length&&walk>=0&&k>walk&&k<=front;
-    if(k===ids.length){nodes+=`<button class="wmN feast${dn?' done':' open'}" data-k="${k}" style="left:${f1(x)}px;top:${f1(y)}px">🔥<em>石焖宴</em></button>`;continue}
+    if(k===ids.length){nodes+=`<button class="wmN feast${dn?' done':' open'}" data-k="${k}" style="left:${f1(x)}px;top:${f1(y)}px">${vol===3?'🍲<em>百日汤宴</em>':'🔥<em>石焖宴</em>'}</button>`;continue}
     const i=ids[k],L=LV[i];let st='';if(dn){for(let j=0;j<3;j++)st+=`<i class="st ${sv.st[i]>j?'f':''}"></i>`;if(sv.s4[i])st+='<i class="st f"></i>'}
     nodes+=`<button class="wmN ${dn?'done':o?'open':'lock'}${L.boss?' boss':''}${fz?' fresh':''}" data-k="${k}" style="left:${f1(x)}px;top:${f1(y)}px${fz?';animation-delay:'+(.25+(k-walk-1)*.2)+'s':''}">`
       +(o?`<b>${i-base+1}</b>`:'🔒')+(L.boss&&o?'<span class="wmCr">👑</span>':'')+(o?`<em>${L.name}${st?`<span class="wmSt">${st}</span>`:''}</em>`:'')+'</button>'}
@@ -4318,7 +4819,7 @@ function wmPlace(p,snap){const f=$('lvGrid').querySelector('.wmFish');if(!f)retu
 function wmMark(){$('lvGrid').querySelectorAll('.wmN').forEach(b=>b.classList.toggle('sel',+b.dataset.k===WM.sel))}
 function wmInfo(){const {hi,sv,ids,base,sel}=WM;wmInfo0(ids,base,hi,sv,sel)}
 function wmInfo0(ids,base,hi,sv,sel){let h;
-  if(sel===ids.length)h=`<div class="liT"><b>🔥 特别关 石焖宴</b></div><em>${SAVE.feast2?'已办成 · 可以再开一次':'全岛的人都在等着开席'}</em><em>十二位客人，至少上九道</em>`;
+  if(sel===ids.length)h=volOf(ids[0])===3?`<div class="liT"><b>🍲 特别关 百日汤宴</b></div><em>${SAVE.feast3?'已办成 · 可以再开一次':'雾散了，群岛的人都在等着开席'}</em><em>十二位客人，至少上九道</em>`:`<div class="liT"><b>🔥 特别关 石焖宴</b></div><em>${SAVE.feast2?'已办成 · 可以再开一次':'全岛的人都在等着开席'}</em><em>十二位客人，至少上九道</em>`;
   else{const i=ids[sel],L=LV[i];let st='';for(let k=0;k<3;k++)st+=`<i class="st ${sv.st[i]>k?'f':''}"></i>`;if(sv.s4[i])st+='<i class="st f"></i>';
     h=`<div class="liT"><b>第${i-base+1}关 ${L.name}</b><span class="mini">${st}</span></div><em>${goalText(L,hi)}</em><em>${L.tool?TOOLN[L.tool][0]+(SAVE.tools[L.tool]?' 带着':' 需要')+TOOLN[L.tool][1]:cleared(i)?'🌊 海域已恢复':'海域褪色中'}</em>`}
   /* 只换文字，两个按钮一直是同一个，手指按下去时按钮不会被换掉 */
@@ -4335,7 +4836,7 @@ function wmMove(k,then){const w=WM;if(!w||w.moving)return;const a=w.nodeAt[w.sel
     if(fi&&Math.abs(dx)>.6)fi.classList.toggle('left',dx<0);wmPlace(p,0);
     if(u<1)wmRaf=requestAnimationFrame(step);else{w.moving=0;fi&&fi.classList.remove('left');wmRest();then&&then()}};
   wmRaf=requestAnimationFrame(step)}
-function wmGo(){const w=WM;if(!w||w.moving)return;SFX.tap();if(w.sel===w.ids.length){startFeast2();return}launch(w.mode,w.ids[w.sel])}
+function wmGo(){const w=WM;if(!w||w.moving)return;SFX.tap();if(w.sel===w.ids.length){w.vol===3?startFeast3():startFeast2();return}launch(w.mode,w.ids[w.sel])}
 $('lvGrid').onclick=e=>{const b=e.target.closest('.wmN');if(!b||!WM||WM.moving)return;const k=+b.dataset.k;
   if(!WM.open(k)){SFX.tap();b.classList.remove('nope');void b.offsetWidth;b.classList.add('nope');toast('通关上一关后揭晓',2);return}
   if(k===WM.sel){wmGo();return}SFX.tap();wmMove(k)};
@@ -4373,6 +4874,54 @@ Object.assign(TRK,{
   B:'12 - 10 . 8 - 7 . 8 - 10 . 12 - 15 . 14 - 12 . 10 . 8 . 7 - 3 . 2 - - .'}});
 for(const k of ['lv24','lv25','lv26','lv27']){const t=TRK[k],a=t.A.split(' '),b=t.B.split(' ');t.seq=[...a,...a,...b,...a]}
 WM_DECO.push(['🌫️','🐟'],['🐚','🪡'],['🔔','🌿'],['🌊','🔔']);
+/* 第五到十二章的音乐 */
+Object.assign(TRK,{
+ lv28:{bpm:104,root:50,mo:12,pluck:1,arp:1,ch:[[0,3,7],[-2,2,5],[-4,0,3],[-5,-1,2]],
+  A:'0 3 7 3 0 3 7 10 7 3 0 - -2 2 5 2 -2 2 5 8 5 2 -2 - 0 . 3 . 5 . 7 - - .',
+  B:'12 - 10 . 7 3 7 10 12 - 15 . 12 - 10 . 8 - 7 . 5 3 5 7 8 - 7 . 3 . 2 - - .'},
+ lv29:{bpm:72,root:48,mo:12,bell:1,pluck:1,ch:[[0,3,7],[-4,0,3],[-2,2,5],[-5,-1,2]],
+  A:'7 - - . 3 - - . 5 - 7 . 8 - 7 . 3 - - . 0 - - . 2 - 3 . 5 - - .',
+  B:'12 - - . 10 - 8 . 7 - - . 8 - 10 . 12 - - . 15 - 12 . 10 - 8 . 7 - - .'},
+ lv30:{bpm:112,root:45,mo:12,tom:1,kick:1,ch:[[0,3,7],[0,3,8],[-2,2,5],[-5,-1,2]],
+  A:'0 . 0 3 . 0 5 . 3 . 0 . -2 - 0 . 0 . 0 3 . 0 7 . 5 . 3 . 2 - - .',
+  B:'7 . 7 8 . 7 10 . 8 . 7 . 5 - 3 . 7 . 7 8 . 10 12 . 10 . 8 . 7 - - .'},
+ lv31:{bpm:84,root:52,mo:12,bell:1,arp:1,ch:[[0,3,7],[-4,0,3],[-7,-4,0],[-5,-1,2]],
+  A:'12 - - - 7 - - . 12 - - - 15 - - . 14 - 12 . 10 - 8 . 7 - - - - . . .',
+  B:'15 - 14 . 12 - 10 . 12 - - . 7 - - . 8 - 10 . 12 - 14 . 15 - - - - . . .'},
+ lv32:{bpm:118,root:50,mo:12,pluck:1,kick:1,ch:[[0,3,7],[5,8,12],[3,7,10],[-5,-1,2]],
+  A:'0 . 3 5 7 . 5 3 0 . 3 5 7 10 7 5 3 . 5 7 8 . 7 5 3 . 2 . 0 - - .',
+  B:'12 . 10 8 7 . 8 10 12 . 15 12 10 . 8 7 5 . 7 8 10 . 8 7 5 . 3 2 0 - - .'},
+ lv33:{bpm:96,root:43,mo:12,tom:1,kick:1,ch:[[0,3,7],[-4,0,3],[-2,2,5],[-5,-1,2]],
+  A:'0 - - . 0 - 3 . 7 - - . 5 - 3 . 0 - - . 0 - 3 . 5 - 7 . 3 - - .',
+  B:'7 - - . 8 - 10 . 12 - - . 10 - 8 . 7 - - . 5 - 3 . 2 - 3 . 0 - - .'},
+ lv34:{bpm:66,root:47,mo:12,bell:1,pluck:1,ch:[[0,3,7],[-4,0,3],[-2,2,5],[-7,-3,0]],
+  A:'0 - - . - . 3 - - . 7 - - . 5 - - . 3 - - . 2 - - . 0 - - . - . . .',
+  B:'7 - - . 10 - - . 12 - - . 10 - 7 . 8 - - . 7 - 5 . 3 - - . - . . .'},
+ lv35:{bpm:128,root:45,mo:12,bell:1,tom:1,kick:1,ch:[[0,3,7],[-4,0,3],[-2,2,5],[0,4,7]],
+  A:'0 . 3 . 7 . 12 . 10 . 7 . 8 - 7 . 5 . 8 . 12 . 15 . 14 . 12 . 11 - - .',
+  B:'12 - 14 . 15 - 12 . 10 - 8 . 7 - 10 . 12 - 14 . 16 - 14 . 12 . 11 . 12 - - .'}});
+for(const k of ['lv28','lv29','lv30','lv31','lv32','lv33','lv34','lv35']){const t=TRK[k],a=t.A.split(' '),b=t.B.split(' ');t.seq=[...a,...a,...b,...a]}
+WM_DECO.push(['🌀','🐚'],['🔔','🦪'],['🏭','💨'],['📯','🌫️'],['🏝️','🐟'],['⚓','⛓️'],['🌫️','🚢'],['🛎️','☀️']);
+/* 雾海礁石钓点：通关第三卷第四章（潮门）后开放 */
+SPOTS.push({id:'fogsea',n:'雾海礁石',ic:'🌫️',d:'坐在黑礁石上，雾里有冷水的鱼',li:VOL2+3});
+Object.assign(FISH,{rockfish:{n:'黑鲪',c:['#c8c0b8','#4a4a50','#22222a'],s:1,x:1},greenling:{n:'六线鱼',c:['#e8dcc0','#8a6a3a','#4a3a20'],s:1,x:1}});
+FSP.push({id:'rockfish',n:'黑鲪',k:'sink',len:[20,55],kg:14,sh:'grouper',zone:[.6,.97],w:[1,1.5,3,1],tip:'躲在雾海的礁石缝里，夜里最爱咬钩，咬住就往石缝钻',zw:.22,sp:{fogsea:3}},
+ {id:'greenling',n:'六线鱼',k:'calm',len:[20,50],kg:10,sh:'slim',zone:[.45,.9],w:[3,2,.5,2],tip:'身上有好几条侧线，清晨在海带丛边慢慢游',zw:.26,sp:{fogsea:2.5}});
+for(const s of FSP)if(['grouper','milkfish'].includes(s.id))s.sp.fogsea=.5;
+DISH.push({id:'d99',ic:'🐟',n:'清蒸黑鲪',need:{rockfish:1},p:60},{id:'d100',ic:'🍲',n:'六线鱼海带汤',need:{greenling:1,kelp:1},p:64});
+Object.assign(UNL,{d99:[28,3],d100:[28,3]});METHOD.pot.push('d99','d100');
+Object.assign(RCP,{
+d99:['黑鲪一条、姜、葱、蒸鱼豉油',['鱼去鳞去内脏，两面划几刀，铺姜片。','水开后大火蒸八分钟。','倒掉蒸出的水，铺葱丝，淋热油和豉油。'],'黑鲪又叫许氏平鲉，生活在中国北方、日本和韩国的冷水礁石边，背鳍的硬刺有点扎手。'],
+d100:['六线鱼一条、海带、豆腐、姜、盐',['鱼切块，用姜片煎一下。','加开水和海带，小火煮二十分钟。','放豆腐，加盐调味。'],'六线鱼是北方礁石边的常见鱼，日本叫“鮎並”，肉嫩，做汤很鲜。']});
+{const _hz=fsHorizon,_sea=fsSea,_fo=fsFore;
+ fsHorizon=(sp,hy,night,se1,t)=>{if(sp!=='fogsea')return _hz(sp,hy,night,se1,t);const c=night>.5?'#1a2028':'#5a646c';
+  for(let i=0;i<CW;i++){const h=Math.max(0,Math.round(3+Math.sin(i*.06)*3+Math.sin(i*.19)*1.5-1));if(h>0)R(i,hy-h,1,h,c)}
+  for(let i=0;i<5;i++){const w=30+i%3*14,x=((i*61+t*(3+i%2))%(CW+w*2))-w;El(x,hy-2-i%2*3,w/2,2,'rgba(220,226,230,.45)')}};
+ fsSea=(sp,se0,se1,day)=>sp==='fogsea'?[mixc(se0,'#8a96a0',.5),mixc(se1,'#3a4650',.5)]:_sea(sp,se0,se1,day);
+ fsFore=(sp,gy,night,t)=>{if(sp!=='fogsea')return _fo(sp,gy,night,t);const dk=c=>night>0?mixc(c,'#1a1830',.55*night):c;
+  R(0,gy,CW,CH2-gy,dk('#2e2e34'));for(let i=0;i<CW;i++){const h=Math.round(Math.sin(i*.37)*1.5+Math.sin(i*.13)*2);if(h>0)R(i,gy-h,1,h,dk('#2e2e34'))}
+  for(let i=0;i<10;i++)R((i*29+7)%CW,gy+3+(i*11)%Math.max(4,CH2-gy-6),2,1,dk(i%2?'#4a5a3a':'#3a3a42'));
+  for(let i=0;i<6;i++){const w=40+i%3*20,x=((i*53+t*(4+i%3))%(CW+w*2))-w,y=Math.round(gy*(.35+.1*(i%5)));El(x,y,w/2,3,'rgba(225,230,233,.28)')}}}
 /* ---------- cutscene sound ---------- */
 const AMB={buf:null,ch:{},on:0};
 function ambInit(){if(!AC||AMB.buf)return;try{const n=AC.sampleRate*2,b=AC.createBuffer(1,n,AC.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;AMB.buf=b;
@@ -4380,7 +4929,7 @@ function ambInit(){if(!AC||AMB.buf)return;try{const n=AC.sampleRate*2,b=AC.creat
 function ambSet(lv,t){if(!AC||AC.state!=='running')return;ambInit();if(!AMB.buf)return;AMB.on=1;const now=AC.currentTime;for(const k in AMB.ch){let v=SAVE.mute?0:lv[k]||0;if(k==='wave')v*=.6+.4*Math.sin(t*.9);AMB.ch[k].g.gain.setTargetAtTime(v,now,.25)}AMB.ch.wind.fl.frequency.setTargetAtTime(380+220*Math.sin(t*.6),now,.3)}
 function ambOff(){if(!AMB.on||!AC)return;AMB.on=0;for(const k in AMB.ch)AMB.ch[k].g.gain.setTargetAtTime(0,AC.currentTime,.3)}
 function nz(dur,type,f0,f1,vol){if(SAVE.mute||!AC)return;ambInit();if(!AMB.buf)return;try{const s=AC.createBufferSource(),fl=AC.createBiquadFilter(),g=AC.createGain(),t=AC.currentTime;s.buffer=AMB.buf;fl.type=type;fl.frequency.setValueAtTime(f0,t);if(f1)fl.frequency.exponentialRampToValueAtTime(f1,t+dur);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);s.connect(fl);fl.connect(g);g.connect(AC.destination);s.start(t,Math.random()*1.5);s.stop(t+dur+.05)}catch(e){}}
-const CSND={bell(){bellSnd()},thunder(){nz(.12,'highpass',1800,0,.3);nz(2.2,'lowpass',260,60,.55);snd(70,1.4,'sine',.22,35)},splash(){nz(.5,'bandpass',900,300,.3);nz(.9,'highpass',2500,0,.08)},
+const CSND={bell(){bellSnd()},whistle(){whSnd(0,1)},thunder(){nz(.12,'highpass',1800,0,.3);nz(2.2,'lowpass',260,60,.55);snd(70,1.4,'sine',.22,35)},splash(){nz(.5,'bandpass',900,300,.3);nz(.9,'highpass',2500,0,.08)},
  chime(){[880,1320,1760].forEach((f,i)=>setTimeout(()=>snd(f,.5,'sine',.08),i*90))},bubble(){for(let i=0;i<6;i++)setTimeout(()=>snd(300+i*90+Math.random()*60,.09,'sine',.09,700+i*120),i*80)},
  growl(){snd(75,.9,'sawtooth',.13,48);setTimeout(()=>snd(62,.5,'sawtooth',.1,45),350)},crash(){nz(.6,'lowpass',900,120,.5);snd(90,.5,'square',.12,40)},whoosh(){nz(.22,'bandpass',500,2600,.16)},
  em(c){c==='!'?snd(880,.09,'square',.06,1320):c==='?'?(snd(520,.08,'triangle',.08),setTimeout(()=>snd(780,.1,'triangle',.08),90)):snd(260,.18,'sine',.06,200)}};
@@ -4425,7 +4974,7 @@ const _rm=refreshMenu;refreshMenu=()=>{_rm();$('bBook').classList.toggle('hasNew
   hb.classList.toggle('locked',!h);eb.classList.toggle('locked',!e);$('hardSub').textContent=h?'挑战极限，成为海底高手！':'🔒 通关普通模式全部关卡后解锁';if(!e)$('bestTxt').textContent='🔒 通关第 1 关后解锁'};
 resize();refreshMenu();applyLang();requestAnimationFrame(frame);
 if(!SAVE.story.pro){show('sStart');$('sStart').onclick=()=>{initAudio();playStory(STORY.pro,()=>{SAVE.story.pro=1;persist();show('sMenu')})}}
-window.__M=MUS;window.__tap=(x,y)=>{const ev={clientX:x,clientY:y},B=G&&G.boss;if(G&&G.tcap){a3PotTap(x,y);return}if(!(B&&B.carry>0?bossTap(ev)||tryCatch(ev):tryCatch(ev)||bossTap(ev)))press()};window.__K={get SV(){return SV},startServe,svTick,svStart,svTapSt,svServe,svGarnish,svSeatTap,svSigNeed,svPending,methodOf,canMake,DISH,get SAVE(){return SAVE}};window.__cut=k=>{const who={shore:'旁白',dAchao:'阿潮',s3whale:'鲸婆婆',ice:'旁白',s4dish:'旁白',shEnd:'海生'}[k];playStory([[who,'这是一句用来检查过场画面的测试对白。',k]],()=>show('sMenu'))};window.__T={startGame,update,press,release:()=>{hold=false},get G(){return G},get state(){return state},dims:()=>({yMin,yMax,fishSX,VW,S}),entY,LV,tap:(ux,uy)=>{const r=cv.getBoundingClientRect();window.__tap(r.left+ux*S,r.top+uy*S)},tideH,gci:gCi,a2v:a2Vent,hd:HD,fork:FORK,lane:a2Lane,a3:{LT,ltNext,lightTry,a3Pd,a3SlY,LAVA},capgo:i=>a2CapGo(G,i),potgo:i=>a3PotGo(G,i),slit:a2Slit};
+window.__M=MUS;window.__tap=(x,y)=>{const ev={clientX:x,clientY:y},B=G&&G.boss;if(G&&G.tcap){a3PotTap(x,y);return}if(!(B&&B.carry>0?bossTap(ev)||tryCatch(ev):tryCatch(ev)||bossTap(ev)))press()};window.__K={get SV(){return SV},startServe,svTick,svStart,svTapSt,svServe,svGarnish,svSeatTap,svSigNeed,svPending,methodOf,canMake,DISH,get SAVE(){return SAVE}};window.__cut=k=>{const who={shore:'旁白',dAchao:'阿潮',s3whale:'鲸婆婆',ice:'旁白',s4dish:'旁白',shEnd:'海生'}[k];playStory([[who,'这是一句用来检查过场画面的测试对白。',k]],()=>show('sMenu'))};window.__tl=z=>tl(z);window.__T={startGame,update,press,release:()=>{hold=false},get G(){return G},get state(){return state},dims:()=>({yMin,yMax,fishSX,VW,S}),entY,LV,tap:(ux,uy)=>{const r=cv.getBoundingClientRect();window.__tap(r.left+ux*S,r.top+uy*S)},tideH,gci:gCi,a2v:a2Vent,hd:HD,fork:FORK,lane:a2Lane,a3:{LT,ltNext,lightTry,a3Pd,a3SlY,LAVA},capgo:i=>a2CapGo(G,i),potgo:i=>a3PotGo(G,i),slit:a2Slit,v3:{ring:v3Ring,ebbY,V3B,BORE},v3b:{whistleTry,fogbellTry,FB,WH,SB,CHN,startFeast3,jarRender,hard3Open,PILOT}};
 })();
 </script>
 <script>
