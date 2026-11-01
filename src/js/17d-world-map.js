@@ -42,7 +42,7 @@ function renderMap(mode,vol,hi,sv,base,still){
   let defs=`<linearGradient id="wmSea" x1="0" y1="${land?0:1}" x2="${land?1:0}" y2="0"><stop offset="0" stop-color="${sea1}"/><stop offset="1" stop-color="${sea2}"/></linearGradient>`
     +'<filter id="wmF1" color-interpolation-filters="sRGB"><feColorMatrix type="saturate" values=".4"/></filter><filter id="wmF0" color-interpolation-filters="sRGB"><feColorMatrix type="saturate" values=".15"/><feComponentTransfer><feFuncR type="linear" slope=".62" intercept=".2"/><feFuncG type="linear" slope=".62" intercept=".24"/><feFuncB type="linear" slope=".62" intercept=".3"/></feComponentTransfer></filter>'
     +'<filter id="wmBl" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14"/></filter>';
-  let ground='',deco='',amb='';
+  let ground='',deco='',amb='',veil='';
   /* 远处的光柱和气泡，让空着的海面不显得秃 */
   for(let j=0;j<Math.ceil((land?W:H)/260);j++){const m=j*260+hash(j+300)*120,c=(hash(j+310)-.5)*(land?bh:bw);
     amb+=land?`<path d="M${f1(m)} 0l90 0l-160 ${bh}l-60 0Z" fill="#fff" opacity=".045"/>`:`<path d="M0 ${f1(m)}l${bw} -140l0 50l-${bw} 140Z" fill="#fff" opacity=".04"/>`;
@@ -61,9 +61,16 @@ function renderMap(mode,vol,hi,sv,base,still){
     for(let j=0;j<4;j++){const [wx,wy]=px(R*(.4+.35*hash(sd+50+j))*(j%2?1:-1),R*(hash(sd+60+j)-.5)*1.2),h=16+hash(sd+70+j)*14;if(busy(wx,wy-h/2,h/2))continue;g+=`<path d="M${f1(wx)} ${f1(wy)}c-9 ${f1(-h/3)} 9 ${f1(-h*2/3)} 0 ${f1(-h)}M${f1(wx+7)} ${f1(wy)}c8 ${f1(-h/4)} -6 ${f1(-h/2)} 2 ${f1(-h*.7)}" stroke="${T.weed}" stroke-width="4.5" stroke-linecap="round" fill="none"/>`}
     const em=k<ids.length?WM_DECO[ids[k]]||[]:['🔥','🍲'];
     em.forEach((e,j)=>{const sz=j?22:28;for(const [u,v] of [[.62,j?.42:-.42],[.5,j?.7:-.7],[-.6,j?.45:-.45],[.8,0]]){const [ex,ey]=px(R*u,R*v);if(busy(ex,ey,sz*.55))continue;g+=`<text x="${f1(ex)}" y="${f1(ey)}" font-size="${sz}" text-anchor="middle" dominant-baseline="central">${e}</text>`;break}});
-    deco+=`<g${fl}>${g}</g>`}
+    deco+=`<g${fl}>${g}</g>`;
+    /* 没解锁的海域盖起来：第一卷是深海的暗影，第二卷是暴风云，第三卷是浓雾 */
+    if(!open(k)){const VC=vol===3?['#e4e8ea','#c4ccd2']:vol===2?['#5a6280','#8a90aa']:['#082a4e','#0e3c6a'];let pf='',tx='';
+      for(let j=0;j<8;j++){const a=j/8*TAU+hash(sd+80+j),r=R*(.25+.3*hash(sd+90+j)),[ux,uy]=[cx+Math.cos(a)*r*(land?.8:1.1),cy+Math.sin(a)*r*(land?1.1:.75)];pf+=`<ellipse cx="${f1(ux)}" cy="${f1(uy)}" rx="${f1(R*(.45+.15*hash(sd+100+j)))}" ry="${f1(R*(.32+.1*hash(sd+110+j)))}" fill="${VC[j%2]}"/>`}
+      if(vol===3)for(let j=0;j<4;j++){const yy=cy+(j-1.5)*R*.28,xx=cx+(hash(sd+120+j)-.5)*R*.4;tx+=`<path d="M${f1(xx-R*.5)} ${f1(yy)}q${f1(R*.25)} ${f1(-R*.12)} ${f1(R*.5)} 0t${f1(R*.5)} 0" stroke="#fff" stroke-opacity=".7" stroke-width="5" stroke-linecap="round" fill="none"/>`}
+      else if(vol===2)for(let j=0;j<3;j++){const xx=cx+(j-1)*R*.42,yy=cy-R*.12+hash(sd+130+j)*R*.2;tx+=`<circle cx="${f1(xx)}" cy="${f1(yy)}" r="${f1(R*.2)}" fill="#9aa0b8"/><circle cx="${f1(xx-R*.06)}" cy="${f1(yy-R*.07)}" r="${f1(R*.1)}" fill="#c0c4d4"/>`}
+      else for(let j=0;j<6;j++){const xx=cx+(hash(sd+140+j)-.5)*R*1.1,yy=cy+(hash(sd+150+j)-.5)*R*.9;tx+=`<circle cx="${f1(xx)}" cy="${f1(yy)}" r="${f1(3+hash(sd+160+j)*5)}" fill="none" stroke="#6ab0e0" stroke-opacity=".55" stroke-width="1.5"/>`}
+      veil+=`<g class="wmVeil" opacity="${vol===3?.96:.94}"><g filter="url(#wmBl)">${pf}</g>${tx}</g>`}}
   const full=dpath(0,poly.length-1),gone=dpath(0,nodeAt[(walk>=0?walk:front)+1]);
-  const svg=`<svg class="wmBg" width="${W}" height="${H}" aria-hidden="true"><defs>${defs}</defs><rect width="${W}" height="${H}" fill="url(#wmSea)"/>${amb}${ground}${deco}`
+  const svg=`<svg class="wmBg" width="${W}" height="${H}" aria-hidden="true"><defs>${defs}</defs><rect width="${W}" height="${H}" fill="url(#wmSea)"/>${amb}${ground}${deco}${veil}`
     +`<path d="${full}" fill="none" stroke="#06284a" stroke-opacity=".18" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 4)"/>`
     +`<path d="${full}" fill="none" stroke="#fff3d0" stroke-opacity=".3" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>`
     +`<path d="${full}" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="7" stroke-dasharray="0 16" stroke-linecap="round"/>`

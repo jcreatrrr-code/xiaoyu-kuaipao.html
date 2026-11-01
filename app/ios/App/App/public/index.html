@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>小鱼快跑</title>
-<meta name="version" content="3.1.0">
+<meta name="version" content="3.1.1">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
 :root{
@@ -43,7 +43,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 #prog{flex-basis:100%;height:6px;border-radius:9px;background:rgba(255,255,255,.25);overflow:hidden}
 #prog i{display:block;height:100%;width:0;background:var(--mint);border-radius:9px}
 #toast{position:absolute;left:50%;top:110px;transform:translate(-50%,-8px);max-width:88%;background:var(--card);color:var(--ink);padding:9px 18px;border-radius:20px;font-size:19px;text-align:center;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;box-shadow:0 5px 0 rgba(6,40,70,.3)}
-#toast{z-index:5}
+#toast{z-index:12}
 .bask{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:min(100%,440px)}
 .bask span{background:var(--card);border-radius:99px;padding:4px 11px 4px 6px;font-size:16px;display:flex;align-items:center;gap:6px}
 .bask i,.need i{display:inline-block;width:16px;height:16px;border-radius:50%;vertical-align:-2px}
@@ -312,6 +312,8 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
 }
 
 .jRow{display:flex;flex-wrap:wrap;gap:8px}.jS{display:inline-block;padding:8px 12px;border:2px dashed #d8c89a;border-radius:12px;font-size:15px;color:#8a7a5a}
+#toTop{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:11;width:48px;height:48px;border-radius:50%;border:3px solid #fff;background:var(--sun);color:#6a4500;font-size:22px;font-weight:700;box-shadow:0 4px 0 rgba(6,40,70,.35),0 8px 18px rgba(0,20,40,.35);opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .2s,transform .2s;padding:0;cursor:pointer}
+#toTop.on{opacity:1;pointer-events:auto;transform:none}
 </style>
 </head>
 <body>
@@ -339,6 +341,7 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
     <div class="card" id="fhPanel" hidden></div>
   </div>
   <div id="toast" role="status"></div>
+  <button id="toTop" type="button" aria-label="回到顶部" title="回到顶部">⬆</button>
 
   <section class="scr on" id="sMenu">
     <div class="mtop"><span class="wal">⚪ <span id="menuWal">0</span></span><span class="sp"></span><button class="rnd" id="bDev" hidden aria-label="开发者模式">🛠</button><button class="rnd" id="bBook" hidden aria-label="奇珍书">📖</button><button class="rnd" id="bConch" hidden aria-label="潮音螺">🐚</button><button class="rnd" id="bMore" aria-label="更多">☰</button></div>
@@ -383,7 +386,7 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
       <button class="btn" id="bHelp">玩法说明</button>
       <button class="btn" id="bSet">设置</button>
     </div>
-    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v3.1.0</p>
+    <p class="sub" id="verTxt" style="text-align:center;opacity:.8">版本 v3.1.1</p>
     <button class="btn sm float" data-go="sMenu">返回主菜单</button>
   </section>
 
@@ -691,7 +694,7 @@ let G=null,state='menu',hold=false,menuT=0,lastArgs=null;
 const TIPS={mimic:'发绿、会眨眼的“珍珠”是拟珠蟹，离它远一点！',cur:'水里有洋流！朝箭头的反方向用力',beam:'躲开来回移动的光圈！',btn:'先碰亮贝壳按钮，前面的石门才会打开！',node:'发光的是洞穴食材，用手指点它来采集！',octo:'章鱼触手发光时，离它远一点！',net:'渔网来了！绕开它游过去',wall:'黄色墙不能撞！跟着箭头走',shield:'吃掉金鱼泡泡，获得结界保护！',
   jelly:'水母会电人，别碰它！',vortex:'旋涡会把小鱼吸过去！',ice:'小心漂动的冰块！',friend:'碰一碰泡泡，救出小伙伴！',rock:'绕开礁石，跟着珍珠游！',cp:'贝壳旗是检查点'};
 let toastTimer=0;
-function toast(msg,dur,warn){const el=$('toast');el.textContent=msg;el.className='on'+(warn?' warn':'');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.className=''},(dur||2.4)*1000)}
+function toast(msg,dur,warn){const el=$('toast');el.textContent=msg;{/* 选关地图上，提示放在顶部标签栏下面，不被挡住 */const lh=document.querySelector('#sLevels.map.on #lvHead');el.style.top=lh&&el.offsetParent?Math.round(lh.getBoundingClientRect().bottom-el.offsetParent.getBoundingClientRect().top+10)+'px':''}el.className='on'+(warn?' warn':'');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.className=''},(dur||2.4)*1000)}
 
 function startGame(mode,li){
   lastArgs=[mode,li];const endless=mode==='endless',L=endless?null:LV[li],gen=endless?buildEndless():buildLevel(li,mode);
@@ -2061,6 +2064,11 @@ window.addEventListener('resize',resize);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 
+/* 回到顶部：奇珍书、杂货铺、小馆这类长页面往下翻得多了，右下角出现一个按钮 */
+{let tt=null;const btn=$('toTop'),sync=()=>{const on=!!tt&&tt.isConnected&&tt.offsetParent!==null&&tt.scrollTop>Math.min(400,tt.clientHeight*.4)&&!!tt.closest('.scr.on')&&!tt.closest('#sLevels.map');btn.classList.toggle('on',on)};
+ document.addEventListener('scroll',e=>{const t=e.target;if(t&&t.nodeType===1&&t.closest&&t.closest('.scr')){tt=t;sync()}},true);
+ btn.addEventListener('click',()=>{if(!tt)return;SFX.tap();try{tt.scrollTo({top:0,behavior:'smooth'})}catch(e){tt.scrollTop=0}});
+ setInterval(sync,500)}
 /* ---------- story & restaurant ---------- */
 SAVE=Object.assign({story:{},rep:0,orders:{day:'',list:[]}},SAVE);SAVE.inv=SAVE.inv||{};
 const cleared=li=>SAVE.simple.st[li]>0||SAVE.hard.st[li]>0;
@@ -3987,7 +3995,7 @@ for(const k in TLC)delete TLC[k];
 "百日汤宴成功！":"Hundred-Day Soup feast success!","百日汤宴没办好…":"The Hundred-Day Soup feast didn't go well...","群岛的谢礼":"Thanks from the islands","奇珍书里多了一项事迹：百日汤宴。":"A new feat in the Book of Wonders: Hundred-Day Soup Feast.",
 "选关页最下面的“百日汤宴”可以再开一次。":"Open \"Hundred-Day Soup feast\" at the bottom of the level map to hold it again.","🍲 特别关 百日汤宴":"🍲 Bonus: Hundred-Day Soup Feast","雾散了，群岛的人都在等着开席":"The mist has lifted, and the islanders are waiting for the feast",
 "先通关第三卷普通模式的全部关卡，才能挑战第三卷的困难模式":"Clear every Volume 3 level in Normal mode to unlock Volume 3 Hard mode",
-"阿岚吹哨":"A-Lan whistles","哨声":"Whistle",
+"阿岚吹哨":"A-Lan whistles","回到顶部":"Back to top","哨声":"Whistle",
 "雾海礁石":"Mist Sea rocks","坐在黑礁石上，雾里有冷水的鱼":"Sit on the black rocks. Cold-water fish swim in the mist","黑鲪":"Black rockfish","六线鱼":"Greenling",
 "躲在雾海的礁石缝里，夜里最爱咬钩，咬住就往石缝钻":"Hides in rock cracks in the Mist Sea. Bites most at night and dives for the cracks once hooked",
 "身上有好几条侧线，清晨在海带丛边慢慢游":"Has several lateral lines along its body. Swims slowly by the kelp in the early morning",
@@ -4774,7 +4782,7 @@ function renderMap(mode,vol,hi,sv,base,still){
   let defs=`<linearGradient id="wmSea" x1="0" y1="${land?0:1}" x2="${land?1:0}" y2="0"><stop offset="0" stop-color="${sea1}"/><stop offset="1" stop-color="${sea2}"/></linearGradient>`
     +'<filter id="wmF1" color-interpolation-filters="sRGB"><feColorMatrix type="saturate" values=".4"/></filter><filter id="wmF0" color-interpolation-filters="sRGB"><feColorMatrix type="saturate" values=".15"/><feComponentTransfer><feFuncR type="linear" slope=".62" intercept=".2"/><feFuncG type="linear" slope=".62" intercept=".24"/><feFuncB type="linear" slope=".62" intercept=".3"/></feComponentTransfer></filter>'
     +'<filter id="wmBl" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="14"/></filter>';
-  let ground='',deco='',amb='';
+  let ground='',deco='',amb='',veil='';
   /* 远处的光柱和气泡，让空着的海面不显得秃 */
   for(let j=0;j<Math.ceil((land?W:H)/260);j++){const m=j*260+hash(j+300)*120,c=(hash(j+310)-.5)*(land?bh:bw);
     amb+=land?`<path d="M${f1(m)} 0l90 0l-160 ${bh}l-60 0Z" fill="#fff" opacity=".045"/>`:`<path d="M0 ${f1(m)}l${bw} -140l0 50l-${bw} 140Z" fill="#fff" opacity=".04"/>`;
@@ -4793,9 +4801,16 @@ function renderMap(mode,vol,hi,sv,base,still){
     for(let j=0;j<4;j++){const [wx,wy]=px(R*(.4+.35*hash(sd+50+j))*(j%2?1:-1),R*(hash(sd+60+j)-.5)*1.2),h=16+hash(sd+70+j)*14;if(busy(wx,wy-h/2,h/2))continue;g+=`<path d="M${f1(wx)} ${f1(wy)}c-9 ${f1(-h/3)} 9 ${f1(-h*2/3)} 0 ${f1(-h)}M${f1(wx+7)} ${f1(wy)}c8 ${f1(-h/4)} -6 ${f1(-h/2)} 2 ${f1(-h*.7)}" stroke="${T.weed}" stroke-width="4.5" stroke-linecap="round" fill="none"/>`}
     const em=k<ids.length?WM_DECO[ids[k]]||[]:['🔥','🍲'];
     em.forEach((e,j)=>{const sz=j?22:28;for(const [u,v] of [[.62,j?.42:-.42],[.5,j?.7:-.7],[-.6,j?.45:-.45],[.8,0]]){const [ex,ey]=px(R*u,R*v);if(busy(ex,ey,sz*.55))continue;g+=`<text x="${f1(ex)}" y="${f1(ey)}" font-size="${sz}" text-anchor="middle" dominant-baseline="central">${e}</text>`;break}});
-    deco+=`<g${fl}>${g}</g>`}
+    deco+=`<g${fl}>${g}</g>`;
+    /* 没解锁的海域盖起来：第一卷是深海的暗影，第二卷是暴风云，第三卷是浓雾 */
+    if(!open(k)){const VC=vol===3?['#e4e8ea','#c4ccd2']:vol===2?['#5a6280','#8a90aa']:['#082a4e','#0e3c6a'];let pf='',tx='';
+      for(let j=0;j<8;j++){const a=j/8*TAU+hash(sd+80+j),r=R*(.25+.3*hash(sd+90+j)),[ux,uy]=[cx+Math.cos(a)*r*(land?.8:1.1),cy+Math.sin(a)*r*(land?1.1:.75)];pf+=`<ellipse cx="${f1(ux)}" cy="${f1(uy)}" rx="${f1(R*(.45+.15*hash(sd+100+j)))}" ry="${f1(R*(.32+.1*hash(sd+110+j)))}" fill="${VC[j%2]}"/>`}
+      if(vol===3)for(let j=0;j<4;j++){const yy=cy+(j-1.5)*R*.28,xx=cx+(hash(sd+120+j)-.5)*R*.4;tx+=`<path d="M${f1(xx-R*.5)} ${f1(yy)}q${f1(R*.25)} ${f1(-R*.12)} ${f1(R*.5)} 0t${f1(R*.5)} 0" stroke="#fff" stroke-opacity=".7" stroke-width="5" stroke-linecap="round" fill="none"/>`}
+      else if(vol===2)for(let j=0;j<3;j++){const xx=cx+(j-1)*R*.42,yy=cy-R*.12+hash(sd+130+j)*R*.2;tx+=`<circle cx="${f1(xx)}" cy="${f1(yy)}" r="${f1(R*.2)}" fill="#9aa0b8"/><circle cx="${f1(xx-R*.06)}" cy="${f1(yy-R*.07)}" r="${f1(R*.1)}" fill="#c0c4d4"/>`}
+      else for(let j=0;j<6;j++){const xx=cx+(hash(sd+140+j)-.5)*R*1.1,yy=cy+(hash(sd+150+j)-.5)*R*.9;tx+=`<circle cx="${f1(xx)}" cy="${f1(yy)}" r="${f1(3+hash(sd+160+j)*5)}" fill="none" stroke="#6ab0e0" stroke-opacity=".55" stroke-width="1.5"/>`}
+      veil+=`<g class="wmVeil" opacity="${vol===3?.96:.94}"><g filter="url(#wmBl)">${pf}</g>${tx}</g>`}}
   const full=dpath(0,poly.length-1),gone=dpath(0,nodeAt[(walk>=0?walk:front)+1]);
-  const svg=`<svg class="wmBg" width="${W}" height="${H}" aria-hidden="true"><defs>${defs}</defs><rect width="${W}" height="${H}" fill="url(#wmSea)"/>${amb}${ground}${deco}`
+  const svg=`<svg class="wmBg" width="${W}" height="${H}" aria-hidden="true"><defs>${defs}</defs><rect width="${W}" height="${H}" fill="url(#wmSea)"/>${amb}${ground}${deco}${veil}`
     +`<path d="${full}" fill="none" stroke="#06284a" stroke-opacity=".18" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" transform="translate(0 4)"/>`
     +`<path d="${full}" fill="none" stroke="#fff3d0" stroke-opacity=".3" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>`
     +`<path d="${full}" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width="7" stroke-dasharray="0 16" stroke-linecap="round"/>`

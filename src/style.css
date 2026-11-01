@@ -34,7 +34,7 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-acti
 #prog{flex-basis:100%;height:6px;border-radius:9px;background:rgba(255,255,255,.25);overflow:hidden}
 #prog i{display:block;height:100%;width:0;background:var(--mint);border-radius:9px}
 #toast{position:absolute;left:50%;top:110px;transform:translate(-50%,-8px);max-width:88%;background:var(--card);color:var(--ink);padding:9px 18px;border-radius:20px;font-size:19px;text-align:center;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;box-shadow:0 5px 0 rgba(6,40,70,.3)}
-#toast{z-index:5}
+#toast{z-index:12}
 .bask{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:min(100%,440px)}
 .bask span{background:var(--card);border-radius:99px;padding:4px 11px 4px 6px;font-size:16px;display:flex;align-items:center;gap:6px}
 .bask i,.need i{display:inline-block;width:16px;height:16px;border-radius:50%;vertical-align:-2px}
@@ -303,3 +303,5 @@ html:is([lang=de],[lang=fr],[lang=it],[lang=es],[lang=th]) .pst em{width:96px}
 }
 
 .jRow{display:flex;flex-wrap:wrap;gap:8px}.jS{display:inline-block;padding:8px 12px;border:2px dashed #d8c89a;border-radius:12px;font-size:15px;color:#8a7a5a}
+#toTop{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:11;width:48px;height:48px;border-radius:50%;border:3px solid #fff;background:var(--sun);color:#6a4500;font-size:22px;font-weight:700;box-shadow:0 4px 0 rgba(6,40,70,.35),0 8px 18px rgba(0,20,40,.35);opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .2s,transform .2s;padding:0;cursor:pointer}
+#toTop.on{opacity:1;pointer-events:auto;transform:none}

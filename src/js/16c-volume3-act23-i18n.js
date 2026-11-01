@@ -161,7 +161,7 @@
 "百日汤宴成功！":"Hundred-Day Soup feast success!","百日汤宴没办好…":"The Hundred-Day Soup feast didn't go well...","群岛的谢礼":"Thanks from the islands","奇珍书里多了一项事迹：百日汤宴。":"A new feat in the Book of Wonders: Hundred-Day Soup Feast.",
 "选关页最下面的“百日汤宴”可以再开一次。":"Open \"Hundred-Day Soup feast\" at the bottom of the level map to hold it again.","🍲 特别关 百日汤宴":"🍲 Bonus: Hundred-Day Soup Feast","雾散了，群岛的人都在等着开席":"The mist has lifted, and the islanders are waiting for the feast",
 "先通关第三卷普通模式的全部关卡，才能挑战第三卷的困难模式":"Clear every Volume 3 level in Normal mode to unlock Volume 3 Hard mode",
-"阿岚吹哨":"A-Lan whistles","哨声":"Whistle",
+"阿岚吹哨":"A-Lan whistles","回到顶部":"Back to top","哨声":"Whistle",
 "雾海礁石":"Mist Sea rocks","坐在黑礁石上，雾里有冷水的鱼":"Sit on the black rocks. Cold-water fish swim in the mist","黑鲪":"Black rockfish","六线鱼":"Greenling",
 "躲在雾海的礁石缝里，夜里最爱咬钩，咬住就往石缝钻":"Hides in rock cracks in the Mist Sea. Bites most at night and dives for the cracks once hooked",
 "身上有好几条侧线，清晨在海带丛边慢慢游":"Has several lateral lines along its body. Swims slowly by the kelp in the early morning",

@@ -3,7 +3,7 @@ let G=null,state='menu',hold=false,menuT=0,lastArgs=null;
 const TIPS={mimic:'发绿、会眨眼的“珍珠”是拟珠蟹，离它远一点！',cur:'水里有洋流！朝箭头的反方向用力',beam:'躲开来回移动的光圈！',btn:'先碰亮贝壳按钮，前面的石门才会打开！',node:'发光的是洞穴食材，用手指点它来采集！',octo:'章鱼触手发光时，离它远一点！',net:'渔网来了！绕开它游过去',wall:'黄色墙不能撞！跟着箭头走',shield:'吃掉金鱼泡泡，获得结界保护！',
   jelly:'水母会电人，别碰它！',vortex:'旋涡会把小鱼吸过去！',ice:'小心漂动的冰块！',friend:'碰一碰泡泡，救出小伙伴！',rock:'绕开礁石，跟着珍珠游！',cp:'贝壳旗是检查点'};
 let toastTimer=0;
-function toast(msg,dur,warn){const el=$('toast');el.textContent=msg;el.className='on'+(warn?' warn':'');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.className=''},(dur||2.4)*1000)}
+function toast(msg,dur,warn){const el=$('toast');el.textContent=msg;{/* 选关地图上，提示放在顶部标签栏下面，不被挡住 */const lh=document.querySelector('#sLevels.map.on #lvHead');el.style.top=lh&&el.offsetParent?Math.round(lh.getBoundingClientRect().bottom-el.offsetParent.getBoundingClientRect().top+10)+'px':''}el.className='on'+(warn?' warn':'');clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.className=''},(dur||2.4)*1000)}
 
 function startGame(mode,li){
   lastArgs=[mode,li];const endless=mode==='endless',L=endless?null:LV[li],gen=endless?buildEndless():buildLevel(li,mode);

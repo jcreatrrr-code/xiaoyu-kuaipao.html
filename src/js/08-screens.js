@@ -122,3 +122,8 @@ window.addEventListener('resize',resize);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()});
 cv.addEventListener('contextmenu',e=>e.preventDefault());
 
+/* 回到顶部：奇珍书、杂货铺、小馆这类长页面往下翻得多了，右下角出现一个按钮 */
+{let tt=null;const btn=$('toTop'),sync=()=>{const on=!!tt&&tt.isConnected&&tt.offsetParent!==null&&tt.scrollTop>Math.min(400,tt.clientHeight*.4)&&!!tt.closest('.scr.on')&&!tt.closest('#sLevels.map');btn.classList.toggle('on',on)};
+ document.addEventListener('scroll',e=>{const t=e.target;if(t&&t.nodeType===1&&t.closest&&t.closest('.scr')){tt=t;sync()}},true);
+ btn.addEventListener('click',()=>{if(!tt)return;SFX.tap();try{tt.scrollTo({top:0,behavior:'smooth'})}catch(e){tt.scrollTop=0}});
+ setInterval(sync,500)}
